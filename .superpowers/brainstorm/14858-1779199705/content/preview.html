@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cortex — UI Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg-base: #0D0F10;
+    --bg-card: #1A1D1E;
+    --bg-hover: #222527;
+    --border: #2A2D2E;
+    --text-primary: #F5F5F5;
+    --text-secondary: #9CA3AF;
+    --text-muted: #6B7280;
+    --accent: #6366F1;
+    --accent-hover: #818CF8;
+    --status-green: #22C55E;
+    --status-yellow: #EAB308;
+    --status-red: #EF4444;
+    --status-gray: #6B7280;
+  }
+  body { background: var(--bg-base); color: var(--text-primary); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; }
+
+  /* Tab nav */
+  .tab-bar { display: flex; gap: 8px; padding: 16px 24px; background: #111315; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  .tab { padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; border: 1px solid var(--border); color: var(--text-muted); background: transparent; transition: all 0.15s; }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tab:hover:not(.active) { color: var(--text-primary); border-color: var(--text-muted); }
+
+  /* Screen wrapper */
+  .screen { display: none; }
+  .screen.active { display: flex; }
+
+  /* ── LAYOUT ── */
+  .sidebar {
+    width: 240px; min-height: calc(100vh - 53px); background: var(--bg-card);
+    border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .sidebar-logo { padding: 18px 20px; border-bottom: 1px solid var(--border); font-size: 17px; font-weight: 600; }
+  .sidebar-project { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-project .label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .sidebar-project .name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .sidebar-nav { flex: 1; padding: 12px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; color: var(--text-secondary); cursor: pointer; margin-bottom: 2px; transition: all 0.15s; }
+  .nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .nav-item.active { background: var(--accent); color: #fff; }
+  .sidebar-footer { padding: 12px; border-top: 1px solid var(--border); }
+  .sidebar-footer .nav-item { color: var(--text-muted); font-size: 13px; }
+  .main { flex: 1; overflow: auto; }
+
+  /* ── PROJECT LIST ── */
+  .page-header { padding: 20px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .page-header h1 { font-size: 18px; font-weight: 600; }
+  .page-header p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .btn-primary { background: var(--accent); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .project-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 24px 32px; }
+  .project-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; cursor: pointer; transition: border-color 0.15s; }
+  .project-card:hover { border-color: var(--accent); }
+  .project-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .project-card .repo { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .project-card .meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; align-items: center; }
+  .platform-badge { background: var(--bg-hover); color: var(--text-muted); font-size: 11px; padding: 2px 8px; border-radius: 5px; float: right; }
+
+  /* ── JOB HISTORY ── */
+  .content { padding: 32px; }
+  .page-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .page-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+  .job-list { display: flex; flex-direction: column; gap: 12px; }
+  .job-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .job-info .commit { font-family: monospace; font-size: 11px; background: var(--bg-hover); color: var(--text-muted); padding: 2px 8px; border-radius: 5px; display: inline-block; margin-right: 8px; }
+  .job-info .msg { font-size: 13px; color: var(--text-secondary); margin-top: 5px; }
+  .job-info .time { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+  .badge.queued  { background: var(--bg-hover); color: var(--text-muted); }
+  .badge.running { background: rgba(234,179,8,0.15); color: var(--status-yellow); }
+  .badge.done    { background: rgba(34,197,94,0.15); color: var(--status-green); }
+  .badge.failed  { background: rgba(239,68,68,0.15); color: var(--status-red); }
+  .badge.pending-review { background: rgba(234,179,8,0.15); color: var(--status-yellow); }
+  .badge.approved { background: rgba(34,197,94,0.15); color: var(--status-green); }
+  .btn-review { background: var(--accent); color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; }
+
+  /* ── REVIEW SCREEN ── */
+  .review-header { padding: 24px 32px 0; }
+  .review-commit { font-family: monospace; font-size: 11px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); padding: 3px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px; }
+  .review-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .review-msg { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+  .diff-stats { display: flex; gap: 16px; font-size: 13px; margin-bottom: 20px; }
+  .diff-stats .added { color: var(--status-green); }
+  .diff-stats .modified { color: var(--status-yellow); }
+  .diff-stats .removed { color: var(--status-red); }
+  .diff-stats .missing { color: var(--status-red); }
+  .review-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 0 32px 100px; }
+  .col-title { font-size: 13px; color: var(--text-secondary); font-weight: 500; margin-bottom: 12px; }
+  .feature-row { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .feature-row.dimmed { opacity: 0.4; }
+  .feature-row .cat { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+  .feature-row .ftitle { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .feature-row .fdesc { font-size: 11px; color: var(--text-secondary); margin-top: 2px; line-height: 1.5; }
+  .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+  .status-badge.matched { background: rgba(34,197,94,0.15); color: var(--status-green); }
+  .status-badge.extra   { background: rgba(234,179,8,0.15); color: var(--status-yellow); }
+  .status-badge.missing { background: rgba(239,68,68,0.15); color: var(--status-red); }
+  .approve-bar { position: fixed; bottom: 0; left: 240px; right: 0; background: var(--bg-card); border-top: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; z-index: 10; }
+  .approve-bar p { font-size: 13px; color: var(--text-muted); }
+  .approve-bar .actions { display: flex; gap: 10px; }
+  .btn-reject { background: var(--bg-hover); color: var(--text-secondary); border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .btn-approve { background: var(--status-green); color: #fff; border: none; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .empty-col { border: 2px dashed var(--border); border-radius: 12px; padding: 32px; text-align: center; }
+  .empty-col p { color: var(--text-muted); font-size: 13px; }
+
+  /* ── KNOWLEDGE DOC ── */
+  .version-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .ver-tab { padding: 5px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; background: var(--bg-card); }
+  .ver-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .doc-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; display: flex; gap: 10px; }
+  .doc-cat { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-bottom: 10px; margin-top: 20px; }
+
+  /* ── REQUIREMENTS ── */
+  .upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 48px; text-align: center; cursor: pointer; }
+  .upload-area:hover { border-color: rgba(99,102,241,0.5); background: rgba(99,102,241,0.03); }
+  .upload-icon { font-size: 36px; margin-bottom: 12px; }
+  .upload-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+  .upload-subtitle { font-size: 13px; color: var(--text-muted); }
+  .upload-types { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+  .req-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<!-- Tab bar -->
+<div class="tab-bar">
+  <button class="tab active" onclick="showScreen('projects')">📋 Project List</button>
+  <button class="tab" onclick="showScreen('jobs')">⚡ Job History</button>
+  <button class="tab" onclick="showScreen('review')">🔍 Review Screen</button>
+  <button class="tab" onclick="showScreen('knowledge')">📚 Knowledge Doc</button>
+  <button class="tab" onclick="showScreen('requirements')">📁 Requirements Upload</button>
+</div>
+
+<!-- ═══════════════════════════════════
+     SCREEN 1: PROJECT LIST
+════════════════════════════════════ -->
+<div id="screen-projects" class="screen active" style="min-height:calc(100vh - 53px); flex-direction:column;">
+  <div class="page-header">
+    <div>
+      <h1>Cortex</h1>
+      <p>ระบบบริหารความรู้จากโค้ด</p>
+    </div>
+    <button class="btn-primary">+ เพิ่มโปรเจกต์</button>
+  </div>
+  <div class="project-grid">
+    <div class="project-card">
+      <span class="platform-badge">GitHub</span>
+      <h3>Payment Service</h3>
+      <p class="repo">https://github.com/org/payment-service</p>
+      <div class="meta"><span>12 งานวิเคราะห์</span><span>•</span><span>สร้าง 19 พ.ค. 2569</span></div>
+    </div>
+    <div class="project-card">
+      <span class="platform-badge">GitLab</span>
+      <h3>User Auth API</h3>
+      <p class="repo">https://gitlab.com/org/user-auth</p>
+      <div class="meta"><span>7 งานวิเคราะห์</span><span>•</span><span>สร้าง 18 พ.ค. 2569</span></div>
+    </div>
+    <div class="project-card">
+      <span class="platform-badge">GitHub</span>
+      <h3>Notification Worker</h3>
+      <p class="repo">https://github.com/org/notif-worker</p>
+      <div class="meta"><span>3 งานวิเคราะห์</span><span>•</span><span>สร้าง 17 พ.ค. 2569</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SCREEN 2: JOB HISTORY (with sidebar)
+════════════════════════════════════ -->
+<div id="screen-jobs" class="screen" style="min-height:calc(100vh - 53px);">
+  <div class="sidebar">
+    <div class="sidebar-logo">Cortex</div>
+    <div class="sidebar-project">
+      <div class="label">โปรเจกต์</div>
+      <div class="name">Payment Service</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item active"><span>⚡</span> งานวิเคราะห์</div>
+      <div class="nav-item"><span>📚</span> Knowledge Doc</div>
+      <div class="nav-item"><span>📋</span> Document Requirement</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="nav-item"><span>←</span> โปรเจกต์ทั้งหมด</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="content">
+      <div class="page-title">งานวิเคราะห์ล่าสุด</div>
+      <div class="page-subtitle">ประวัติการ push โค้ดและผลการวิเคราะห์</div>
+      <div class="job-list">
+        <div class="job-card">
+          <div class="job-info">
+            <div><span class="commit">a3f7c21</span><span class="badge done">เสร็จแล้ว</span>&nbsp;<span class="badge pending-review">รอ Review</span></div>
+            <div class="msg">feat: add refund flow and webhook retry logic</div>
+            <div class="time">19 พ.ค. 2569 14:32</div>
+          </div>
+          <button class="btn-review">Review →</button>
+        </div>
+        <div class="job-card">
+          <div class="job-info">
+            <div><span class="commit">b1e9d04</span><span class="badge done">เสร็จแล้ว</span>&nbsp;<span class="badge approved">Approved</span></div>
+            <div class="msg">fix: payment timeout handling</div>
+            <div class="time">18 พ.ค. 2569 09:15</div>
+          </div>
+        </div>
+        <div class="job-card">
+          <div class="job-info">
+            <div><span class="commit">9cd2a77</span><span class="badge running">กำลังวิเคราะห์</span></div>
+            <div class="msg">refactor: split payment gateway into strategy pattern</div>
+            <div class="time">19 พ.ค. 2569 15:01</div>
+          </div>
+        </div>
+        <div class="job-card">
+          <div class="job-info">
+            <div><span class="commit">f52b309</span><span class="badge failed">ล้มเหลว</span></div>
+            <div class="msg">chore: update dependencies</div>
+            <div class="time">17 พ.ค. 2569 11:44</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SCREEN 3: REVIEW SCREEN
+════════════════════════════════════ -->
+<div id="screen-review" class="screen" style="min-height:calc(100vh - 53px);">
+  <div class="sidebar">
+    <div class="sidebar-logo">Cortex</div>
+    <div class="sidebar-project">
+      <div class="label">โปรเจกต์</div>
+      <div class="name">Payment Service</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item active"><span>⚡</span> งานวิเคราะห์</div>
+      <div class="nav-item"><span>📚</span> Knowledge Doc</div>
+      <div class="nav-item"><span>📋</span> Document Requirement</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="nav-item"><span>←</span> โปรเจกต์ทั้งหมด</div>
+    </div>
+  </div>
+  <div class="main" style="padding-bottom:80px;">
+    <div class="review-header">
+      <div class="review-commit">a3f7c21</div>
+      <div class="review-title">Review การเปลี่ยนแปลง</div>
+      <div class="review-msg">feat: add refund flow and webhook retry logic</div>
+      <div class="diff-stats">
+        <span class="added">+2 เพิ่ม</span>
+        <span class="modified">~1 แก้ไข</span>
+        <span class="missing">⚠ 1 ขาดจาก Requirement</span>
+      </div>
+    </div>
+    <div class="review-cols">
+      <!-- LEFT: Knowledge Doc เดิม -->
+      <div>
+        <div class="col-title">Knowledge Doc เดิม <span style="color:var(--text-muted)">(3 features)</span></div>
+        <div class="feature-row">
+          <div>
+            <div class="cat">Payment</div>
+            <div class="ftitle">ชำระเงินผ่านบัตรเครดิต</div>
+            <div class="fdesc">รองรับ Visa, Mastercard, AMEX พร้อม 3D Secure</div>
+          </div>
+        </div>
+        <div class="feature-row">
+          <div>
+            <div class="cat">Payment</div>
+            <div class="ftitle">ชำระเงินผ่าน QR Code</div>
+            <div class="fdesc">สร้าง QR Code สำหรับชำระเงินผ่านแอปธนาคาร</div>
+          </div>
+        </div>
+        <div class="feature-row dimmed">
+          <div>
+            <div class="cat">Webhook</div>
+            <div class="ftitle">Webhook แจ้งสถานะ</div>
+            <div class="fdesc">ส่ง POST request เมื่อสถานะการชำระเงินเปลี่ยน</div>
+          </div>
+        </div>
+      </div>
+      <!-- RIGHT: Project Update Doc ใหม่ -->
+      <div>
+        <div class="col-title">Project Update Doc ใหม่ <span style="color:var(--text-muted)">(4 features)</span></div>
+        <div class="feature-row">
+          <div style="flex:1">
+            <div class="cat">Payment</div>
+            <div class="ftitle">ชำระเงินผ่านบัตรเครดิต</div>
+            <div class="fdesc">รองรับ Visa, Mastercard, AMEX พร้อม 3D Secure</div>
+          </div>
+          <span class="status-badge matched">🟢 ตรง Req</span>
+        </div>
+        <div class="feature-row">
+          <div style="flex:1">
+            <div class="cat">Payment</div>
+            <div class="ftitle">ชำระเงินผ่าน QR Code</div>
+            <div class="fdesc">สร้าง QR Code สำหรับชำระเงินผ่านแอปธนาคาร</div>
+          </div>
+          <span class="status-badge matched">🟢 ตรง Req</span>
+        </div>
+        <div class="feature-row">
+          <div style="flex:1">
+            <div class="cat">Refund</div>
+            <div class="ftitle">คืนเงิน (Refund)</div>
+            <div class="fdesc">รองรับการคืนเงินบางส่วนและเต็มจำนวน</div>
+          </div>
+          <span class="status-badge matched">🟢 ตรง Req</span>
+        </div>
+        <div class="feature-row">
+          <div style="flex:1">
+            <div class="cat">Webhook</div>
+            <div class="ftitle">Webhook Retry อัตโนมัติ</div>
+            <div class="fdesc">retry ถ้า endpoint ไม่ตอบสนอง (exponential backoff)</div>
+          </div>
+          <span class="status-badge extra">🟡 ไม่อยู่ใน Req</span>
+        </div>
+        <div class="feature-row dimmed">
+          <div style="flex:1">
+            <div class="cat">Webhook</div>
+            <div class="ftitle">รายงานการชำระเงินรายวัน</div>
+            <div class="fdesc">Export รายงาน CSV ประจำวัน</div>
+          </div>
+          <span class="status-badge missing">🔴 ขาดหายไป</span>
+        </div>
+      </div>
+    </div>
+    <div class="approve-bar">
+      <p>ตรวจสอบการเปลี่ยนแปลงแล้ว กด Approve เพื่อสร้าง Knowledge Doc version ใหม่</p>
+      <div class="actions">
+        <button class="btn-reject">ส่งกลับให้ Dev แก้ไข</button>
+        <button class="btn-approve">Approve → สร้าง Knowledge Doc</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SCREEN 4: KNOWLEDGE DOC
+════════════════════════════════════ -->
+<div id="screen-knowledge" class="screen" style="min-height:calc(100vh - 53px);">
+  <div class="sidebar">
+    <div class="sidebar-logo">Cortex</div>
+    <div class="sidebar-project">
+      <div class="label">โปรเจกต์</div>
+      <div class="name">Payment Service</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item"><span>⚡</span> งานวิเคราะห์</div>
+      <div class="nav-item active"><span>📚</span> Knowledge Doc</div>
+      <div class="nav-item"><span>📋</span> Document Requirement</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="nav-item"><span>←</span> โปรเจกต์ทั้งหมด</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="content">
+      <div class="page-title">Knowledge Doc</div>
+      <div class="page-subtitle" style="margin-bottom:20px;">เอกสารความรู้ official ของโปรเจกต์</div>
+      <div class="version-tabs">
+        <button class="ver-tab active">V.2</button>
+        <button class="ver-tab">V.1</button>
+      </div>
+      <div class="doc-meta">
+        <span>4 features</span><span>•</span><span>สร้าง 19 พ.ค. 2569</span><span>•</span><span>Approved โดย pm@company.com</span>
+      </div>
+      <div class="doc-cat">Payment</div>
+      <div class="feature-row"><div>
+        <div class="ftitle">ชำระเงินผ่านบัตรเครดิต</div>
+        <div class="fdesc">รองรับ Visa, Mastercard, AMEX พร้อม 3D Secure</div>
+      </div></div>
+      <div class="feature-row"><div>
+        <div class="ftitle">ชำระเงินผ่าน QR Code</div>
+        <div class="fdesc">สร้าง QR Code สำหรับชำระเงินผ่านแอปธนาคาร</div>
+      </div></div>
+      <div class="feature-row"><div>
+        <div class="ftitle">คืนเงิน (Refund)</div>
+        <div class="fdesc">รองรับการคืนเงินบางส่วนและเต็มจำนวน</div>
+      </div></div>
+      <div class="doc-cat">Webhook</div>
+      <div class="feature-row"><div>
+        <div class="ftitle">Webhook Retry อัตโนมัติ</div>
+        <div class="fdesc">retry ถ้า endpoint ไม่ตอบสนอง (exponential backoff)</div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SCREEN 5: REQUIREMENTS UPLOAD
+════════════════════════════════════ -->
+<div id="screen-requirements" class="screen" style="min-height:calc(100vh - 53px);">
+  <div class="sidebar">
+    <div class="sidebar-logo">Cortex</div>
+    <div class="sidebar-project">
+      <div class="label">โปรเจกต์</div>
+      <div class="name">Payment Service</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item"><span>⚡</span> งานวิเคราะห์</div>
+      <div class="nav-item"><span>📚</span> Knowledge Doc</div>
+      <div class="nav-item active"><span>📋</span> Document Requirement</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="nav-item"><span>←</span> โปรเจกต์ทั้งหมด</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="content">
+      <div class="req-header">
+        <div>
+          <div class="page-title">Document Requirement</div>
+          <div class="page-subtitle" style="margin-bottom:4px;">Feature list ที่เป็น source of truth ของโปรเจกต์</div>
+          <div style="font-size:12px;color:var(--text-muted)">Version 1 • อัปโหลด 18 พ.ค. 2569</div>
+        </div>
+        <button class="btn-primary">อัปโหลด version ใหม่</button>
+      </div>
+      <div class="upload-area" style="margin-bottom:24px;">
+        <div class="upload-icon">📂</div>
+        <div class="upload-title">อัปโหลดไฟล์ Document Requirement</div>
+        <div class="upload-subtitle">ลากไฟล์มาวางหรือคลิกเพื่อเลือก</div>
+        <div class="upload-types">รองรับ: xlsx, docx, pdf, csv</div>
+      </div>
+      <div class="doc-cat">Feature ปัจจุบัน (Version 1)</div>
+      <div class="feature-row"><div>
+        <div class="cat">Payment</div>
+        <div class="ftitle">ชำระเงินผ่านบัตรเครดิต</div>
+        <div class="fdesc">รองรับ Visa, Mastercard, AMEX</div>
+      </div></div>
+      <div class="feature-row"><div>
+        <div class="cat">Payment</div>
+        <div class="ftitle">ชำระเงินผ่าน QR Code</div>
+        <div class="fdesc">สร้าง QR Code ผ่านแอปธนาคาร</div>
+      </div></div>
+      <div class="feature-row"><div>
+        <div class="cat">Refund</div>
+        <div class="ftitle">คืนเงิน (Refund)</div>
+        <div class="fdesc">คืนเงินบางส่วนและเต็มจำนวน</div>
+      </div></div>
+      <div class="feature-row"><div>
+        <div class="cat">Report</div>
+        <div class="ftitle">รายงานการชำระเงินรายวัน</div>
+        <div class="fdesc">Export รายงาน CSV ประจำวัน</div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('screen-' + name).classList.add('active')
+  event.target.classList.add('active')
+}
+</script>
+</body>
+</html>

@@ -80,7 +80,7 @@ model ProjectUpdateDoc {
   status      DocStatus @default(PENDING)
   createdAt   DateTime  @default(now())
 
-  job AnalysisJob @relation(fields: [jobId], references: [id])
+  job AnalysisJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
 }
 
 enum DocStatus {

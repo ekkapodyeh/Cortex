@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Project {
+  id            String   @id @default(cuid())
+  name          String
+  repoUrl       String
+  platform      Platform
+  webhookSecret String
+  createdAt     DateTime @default(now())
+
+  requirements  DocumentRequirement[]
+  knowledgeDocs KnowledgeDoc[]
+  jobs          AnalysisJob[]
+}
+
+enum Platform {
+  GITHUB
+  GITLAB
+  BITBUCKET
+}
+
+model DocumentRequirement {
+  id        String   @id @default(cuid())
+  projectId String
+  version   Int
+  features  Json
+  createdBy String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model KnowledgeDoc {
+  id          String   @id @default(cuid())
+  projectId   String
+  version     Int
+  features    Json
+  approvedBy  String
+  sourceJobId String
+  createdAt   DateTime @default(now())
+
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sourceJob AnalysisJob @relation(fields: [sourceJobId], references: [id])
+}
+
+model AnalysisJob {
+  id          String    @id @default(cuid())
+  projectId   String
+  commitSha   String
+  commitMsg   String
+  author      String
+  status      JobStatus @default(QUEUED)
+  triggeredAt DateTime  @default(now())
+
+  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  updateDoc     ProjectUpdateDoc?
+  knowledgeDocs KnowledgeDoc[]
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  DONE
+  FAILED
+}
+
+model ProjectUpdateDoc {
+  id          String    @id @default(cuid())
+  jobId       String    @unique
+  projectId   String
+  featuresNew Json
+  diff        Json
+  validation  Json
+  status      DocStatus @default(PENDING)
+  createdAt   DateTime  @default(now())
+
+  job AnalysisJob @relation(fields: [jobId], references: [id])
+}
+
+enum DocStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

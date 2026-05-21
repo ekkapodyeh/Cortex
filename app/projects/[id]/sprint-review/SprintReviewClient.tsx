@@ -363,7 +363,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
               {doneItems.length > 0 && (
                 <section>
                   <div className="flex items-center gap-3 mb-4">
-                    <p className="text-sm font-semibold text-[var(--status-green)]">เสร็จแล้ว</p>
+                    <p className="text-[34px] font-semibold text-[var(--status-green)]">เสร็จแล้ว</p>
                     <span className="text-xs text-[var(--status-green)] bg-green-900/15 px-2 py-0.5 rounded-full">{doneItems.length} รายการ</span>
                   </div>
                   <div className="flex flex-col gap-4">
@@ -378,7 +378,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
               {partialItems.length > 0 && (
                 <section>
                   <div className="flex items-center gap-3 mb-4">
-                    <p className="text-sm font-semibold text-[var(--status-yellow)]">ไม่ถูกต้อง</p>
+                    <p className="text-[34px] font-semibold text-[var(--status-yellow)]">ไม่ถูกต้อง</p>
                     <span className="text-xs text-[var(--status-yellow)] bg-yellow-900/15 px-2 py-0.5 rounded-full">{partialItems.length} รายการ</span>
                   </div>
                   <div className="flex flex-col gap-4">
@@ -393,7 +393,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
               {noReqItems.length > 0 && (
                 <section>
                   <div className="flex items-center gap-3 mb-4">
-                    <p className="text-sm font-semibold text-[var(--text-muted)]">ไม่มีใน Requirement</p>
+                    <p className="text-[34px] font-semibold text-[var(--text-muted)]">ไม่มีใน Requirement</p>
                     <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded-full">{noReqItems.length} รายการ</span>
                     <p className="text-xs text-[var(--text-muted)]">— มีการเปลี่ยนแปลงในโค้ดแต่ไม่ได้ระบุใน Req</p>
                   </div>
@@ -409,7 +409,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
               {notDoneItems.length > 0 && (
                 <section>
                   <div className="flex items-center gap-3 mb-4">
-                    <p className="text-sm font-semibold text-[var(--status-red)]">ยังไม่ครบ</p>
+                    <p className="text-[34px] font-semibold text-[var(--status-red)]">ยังไม่ครบ</p>
                     <span className="text-xs text-[var(--status-red)] bg-red-900/15 px-2 py-0.5 rounded-full">{notDoneItems.length} รายการ</span>
                     <p className="text-xs text-[var(--text-muted)]">— อยู่ใน Requirement แต่ยังไม่พบในโค้ด</p>
                   </div>

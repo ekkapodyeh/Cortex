@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { SquaresFourIcon, LightningIcon, MagnifyingGlassIcon, BookOpenIcon, ClipboardTextIcon } from '@phosphor-icons/react'
 
 interface SidebarProps {
   projectId: string
@@ -11,18 +12,18 @@ interface SidebarProps {
 interface NavItem {
   label: string
   href: string
-  icon: string
+  icon: React.ReactNode
 }
 
 export function Sidebar({ projectId, projectName }: SidebarProps) {
   const pathname = usePathname()
 
   const navItems: NavItem[] = [
-    { label: 'Dashboard',            href: `/projects/${projectId}`,               icon: '◈' },
-    { label: 'งานวิเคราะห์',         href: `/projects/${projectId}/monitor`,        icon: '⚡' },
-    { label: 'Sprint Review',        href: `/projects/${projectId}/sprint-review`,  icon: '🔍' },
-    { label: 'Knowledge Doc',        href: `/projects/${projectId}/knowledge`,      icon: '📖' },
-    { label: 'Document Requirement', href: `/projects/${projectId}/requirements`,   icon: '📋' },
+    { label: 'Dashboard',            href: `/projects/${projectId}`,               icon: <SquaresFourIcon size={18} /> },
+    { label: 'งานวิเคราะห์',         href: `/projects/${projectId}/monitor`,        icon: <LightningIcon size={18} /> },
+    { label: 'Sprint Review',        href: `/projects/${projectId}/sprint-review`,  icon: <MagnifyingGlassIcon size={18} /> },
+    { label: 'Knowledge Doc',        href: `/projects/${projectId}/knowledge`,      icon: <BookOpenIcon size={18} /> },
+    { label: 'Document Requirement', href: `/projects/${projectId}/requirements`,   icon: <ClipboardTextIcon size={18} /> },
   ]
 
   const isActive = (href: string) => {
@@ -54,7 +55,7 @@ export function Sidebar({ projectId, projectName }: SidebarProps) {
                 : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
             }`}
           >
-            <span className="text-base">{item.icon}</span>
+            <span className="shrink-0">{item.icon}</span>
             {item.label}
           </Link>
         ))}

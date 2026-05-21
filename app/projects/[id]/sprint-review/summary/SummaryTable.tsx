@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { CaretRightIcon } from '@phosphor-icons/react'
 
 type Status = 'done' | 'partial' | 'not-done'
 type DiffChangeType = 'added' | 'modified' | 'removed'
@@ -124,7 +125,7 @@ export function SummaryTable({ rows }: { rows: ReqRow[] }) {
                     <div className="flex items-center gap-3">
                       <StatusBadge status={status} />
                       {hasImpact && (
-                        <span className={`text-[var(--text-muted)] text-sm transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-90' : ''}`}>›</span>
+                        <CaretRightIcon size={14} className={`text-[var(--text-muted)] transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-90' : ''}`} />
                       )}
                     </div>
                   </td>

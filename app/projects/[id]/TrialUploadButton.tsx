@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { PlayIcon } from '@phosphor-icons/react'
 
 const MOCK_ITEMS = [
   { id: 'SR001', featureId: 'P001', title: 'เพิ่มรองรับ Multi-Currency', description: 'ระบบต้องรองรับ THB, USD, SGD, MYR พร้อมอัตราแลกเปลี่ยน Real-time', priority: 'high', changeType: 'add' },
@@ -52,7 +53,7 @@ export function TrialUploadButton({ projectId, jobId }: Props) {
         </>
       ) : (
         <>
-          <span className="text-base">▶</span>
+          <PlayIcon size={14} weight="fill" />
           ทดลอง Sprint Review
         </>
       )}

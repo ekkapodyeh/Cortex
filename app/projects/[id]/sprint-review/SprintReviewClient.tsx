@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { Feature, DiffResult } from '@/lib/types'
 import { IMPACT } from '@/lib/impact-data'
+import { CaretRightIcon, FileIcon, PlayIcon, PresentationChartIcon, PlusIcon, XIcon } from '@phosphor-icons/react'
 
 interface SprintReqItem {
   id: string
@@ -67,7 +68,7 @@ function CategoryCard({ cat, items }: { cat: string; items: FeatureItem[] }) {
           <p className="text-sm font-semibold text-[var(--text-primary)]">{cat}</p>
           <p className="text-xs text-[var(--text-muted)] mt-0.5">{items.length} รายการ</p>
         </div>
-        <span className={`text-[var(--text-muted)] text-sm transition-transform duration-200 shrink-0 ${open ? 'rotate-90' : ''}`}>›</span>
+        <CaretRightIcon size={14} className={`text-[var(--text-muted)] transition-transform duration-200 shrink-0 ${open ? 'rotate-90' : ''}`} />
       </button>
       {open && (
         <>
@@ -173,7 +174,7 @@ function AddDocButton({ projectId, jobId }: { projectId: string; jobId: string }
         dragging ? 'border-[var(--accent)] bg-[var(--accent)]/5' : 'border-[var(--border)] hover:border-[var(--accent)]/50 hover:bg-[var(--bg-hover)]'
       }`}
     >
-      <span className="text-base">+</span>
+      <PlusIcon size={16} />
       <div>
         <p className="text-xs font-medium text-[var(--text-primary)]">เพิ่มเอกสาร Requirement</p>
         <p className="text-[10px] text-[var(--text-muted)]">.pdf, .docx, .txt</p>
@@ -252,7 +253,7 @@ function UploadZone({ projectId, jobId }: { projectId: string; jobId: string }) 
           dragging ? 'border-[var(--accent)] bg-[var(--accent)]/5' : 'border-[var(--border)] hover:border-[var(--accent)]/50 hover:bg-[var(--bg-hover)]'
         }`}
       >
-        <p className="text-2xl mb-2">📄</p>
+        <FileIcon size={28} className="text-[var(--text-muted)] mx-auto mb-2" />
         <p className="text-sm font-medium text-[var(--text-primary)] mb-1">อัปโหลด Requirement</p>
         <p className="text-xs text-[var(--text-muted)] leading-relaxed">วางไฟล์ที่นี่ หรือคลิกเพื่อเลือก<br />.pdf, .docx, .txt</p>
         <input ref={inputRef} type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
@@ -261,7 +262,7 @@ function UploadZone({ projectId, jobId }: { projectId: string; jobId: string }) 
         onClick={handleTrial}
         className="w-full py-2.5 rounded-xl border border-[var(--border)] text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--accent)]/40 hover:bg-[var(--bg-hover)] transition-colors"
       >
-        ▶ ทดลองด้วย Mock Data
+        <PlayIcon size={12} weight="fill" className="inline mr-1" />ทดลองด้วย Mock Data
       </button>
     </div>
   )
@@ -280,7 +281,7 @@ function DocCard({ doc, projectId }: { doc: SprintDoc; projectId: string }) {
 
   return (
     <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 flex items-start gap-2">
-      <span className="text-base shrink-0 mt-0.5">📄</span>
+      <FileIcon size={16} className="text-[var(--text-muted)] shrink-0 mt-0.5" />
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium text-[var(--text-primary)] truncate">{doc.fileName ?? 'requirement.pdf'}</p>
         <p className="text-[10px] text-[var(--text-muted)] mt-0.5">โดย {doc.createdBy}</p>
@@ -293,9 +294,7 @@ function DocCard({ doc, projectId }: { doc: SprintDoc; projectId: string }) {
         {deleting ? (
           <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin block" />
         ) : (
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M9 3L3 9M3 3l6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
+          <XIcon size={12} />
         )}
       </button>
     </div>
@@ -348,13 +347,13 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
   const groups = Array.from(categoryMap.entries()).map(([cat, features]) => ({ cat, features }))
 
   return (
-    <div className="p-8 pb-24 pr-[320px]">
+    <div className="p-6 pb-24 pr-[320px]">
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-[var(--text-primary)]">Sprint Review</h2>
         <p className="text-sm text-[var(--text-muted)] mt-1">ติดตามการเปลี่ยนแปลงจากโค้ดปัจจุบัน</p>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-4">
           {hasReq ? (
             <>
               {/* เสร็จแล้ว */}
@@ -436,7 +435,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
         </div>
 
       {/* ─── Right panel (fixed) ─── */}
-      <div className="fixed top-0 right-0 h-screen w-72 overflow-y-auto py-8 px-6 bg-[var(--bg-base)] z-10 space-y-3">
+      <div className="fixed top-0 right-0 h-screen w-72 overflow-y-auto py-8 px-6 bg-[var(--bg-base)] z-10 space-y-4">
           {/* Commit info */}
           <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 flex flex-col gap-1.5">
             <code className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded self-start">{commitSha.slice(0, 7)}</code>
@@ -465,6 +464,15 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
               </div>
             )}
           </div>
+
+          {/* Doc cards + upload — max 1 file */}
+          {sprintDocs.length === 0 ? (
+            <UploadZone projectId={projectId} jobId={jobId} />
+          ) : (
+            sprintDocs.map(doc => (
+              <DocCard key={doc.id} doc={doc} projectId={projectId} />
+            ))
+          )}
 
           {/* Req stats */}
           {hasReq && (() => {
@@ -502,21 +510,12 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
             )
           })()}
 
-          {/* Doc cards + upload — max 1 file */}
-          {sprintDocs.length === 0 ? (
-            <UploadZone projectId={projectId} jobId={jobId} />
-          ) : (
-            sprintDocs.map(doc => (
-              <DocCard key={doc.id} doc={doc} projectId={projectId} />
-            ))
-          )}
-
           {/* Summary button — primary, always at bottom */}
           <Link
             href={`/projects/${projectId}/sprint-review/summary`}
             className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
           >
-            <span>📊</span>
+            <PresentationChartIcon size={16} />
             สรุปการแก้ไข
           </Link>
         </div>

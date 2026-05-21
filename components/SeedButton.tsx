@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { LightningIcon } from '@phosphor-icons/react'
 
 export function SeedButton() {
   const [loading, setLoading] = useState(false)
@@ -24,7 +25,7 @@ export function SeedButton() {
       disabled={loading}
       className="text-sm text-[var(--text-muted)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
     >
-      {loading ? 'กำลัง gen...' : '⚡ Gen ข้อมูลทดสอบ'}
+      {loading ? 'กำลัง gen...' : <><LightningIcon size={14} className="inline mr-1.5" />Gen ข้อมูลทดสอบ</>}
     </button>
   )
 }

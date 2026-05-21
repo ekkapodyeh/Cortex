@@ -14,7 +14,7 @@ export default async function ProjectLayout({
   if (!project) notFound()
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar projectId={id} projectName={project.name} />
       <main className="flex-1 overflow-auto">{children}</main>
     </div>

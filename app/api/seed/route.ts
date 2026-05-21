@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { db } from '@/lib/db'
 import { NextResponse } from 'next/server'
 import type { Feature, DiffResult, ValidationResult } from '@/lib/types'

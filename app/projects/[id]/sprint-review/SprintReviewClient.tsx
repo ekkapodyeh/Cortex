@@ -32,10 +32,14 @@ interface FeatureItem {
   req: SprintReqItem | null
 }
 
-type ReqStatus = 'done' | 'partial'
+type ItemStatus = 'done' | 'partial' | 'no-req'
 
-function getStatus(item: FeatureItem): ReqStatus {
-  if (!item.req) return 'partial'
+type CardItem =
+  | { kind: 'diff'; item: FeatureItem; status: ItemStatus }
+  | { kind: 'missing'; req: SprintReqItem }
+
+function getDiffStatus(item: FeatureItem): ItemStatus {
+  if (!item.req) return 'no-req'
   if (item.req.changeType === 'add' && item.changeType === 'added') return 'done'
   if (item.req.changeType === 'modify' && item.changeType === 'modified') return 'done'
   if (item.req.changeType === 'remove' && item.changeType === 'removed') return 'done'
@@ -48,39 +52,83 @@ function ChangeBadge({ type }: { type: ChangeType }) {
   return <span className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded shrink-0 ${styles[type]}`}>{labels[type]}</span>
 }
 
-
-function groupByCategory(items: FeatureItem[]) {
-  const map = new Map<string, FeatureItem[]>()
-  for (const item of items) {
-    if (!map.has(item.category)) map.set(item.category, [])
-    map.get(item.category)!.push(item)
+function StatusPip({ status }: { status: ItemStatus }) {
+  const map = {
+    done:     { cls: 'text-[var(--status-green)]',  label: '✓' },
+    partial:  { cls: 'text-[var(--status-yellow)]', label: '!' },
+    'no-req': { cls: 'text-[var(--text-muted)]',    label: '·' },
   }
-  return Array.from(map.entries()).map(([cat, features]) => ({ cat, features }))
+  const { cls, label } = map[status]
+  return <span className={`text-sm font-bold shrink-0 ${cls}`}>{label}</span>
 }
 
-function CategoryCard({ cat, items }: { cat: string; items: FeatureItem[] }) {
+function CategoryCard({ cat, cardItems, plainItems }: {
+  cat: string
+  cardItems?: CardItem[]   // req mode — mixed items
+  plainItems?: FeatureItem[] // no-req mode — plain diff
+}) {
   const [open, setOpen] = useState(false)
+  const items = cardItems ?? plainItems?.map(i => ({ kind: 'diff' as const, item: i, status: 'no-req' as ItemStatus })) ?? []
+  const missingCount = items.filter(i => i.kind === 'missing').length
+  const doneCount    = items.filter(i => i.kind === 'diff' && i.status === 'done').length
+  const partialCount = items.filter(i => i.kind === 'diff' && i.status === 'partial').length
+  const showStatus   = !!cardItems
+
   return (
     <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl overflow-hidden">
       <button onClick={() => setOpen(o => !o)} className="w-full px-5 py-4 flex items-center gap-3 text-left hover:bg-[var(--bg-hover)] transition-colors">
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-[var(--text-primary)]">{cat}</p>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">{items.length} รายการ</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-xs text-[var(--text-muted)]">{items.length} รายการ</p>
+            {showStatus && (doneCount > 0 || partialCount > 0 || missingCount > 0) && (
+              <div className="flex items-center gap-1.5 text-[10px]">
+                {doneCount > 0    && <span className="text-[var(--status-green)]">✓ {doneCount}</span>}
+                {partialCount > 0 && <span className="text-[var(--status-yellow)]">! {partialCount}</span>}
+                {missingCount > 0 && <span className="text-[var(--status-red)]">✗ {missingCount}</span>}
+              </div>
+            )}
+          </div>
         </div>
         <span className={`text-[var(--text-muted)] text-sm transition-transform duration-200 shrink-0 ${open ? 'rotate-90' : ''}`}>›</span>
       </button>
       {open && (
         <>
-          <div className="grid grid-cols-[120px_1fr_1fr] border-t border-b border-[var(--border)]">
+          <div className={`grid border-t border-b border-[var(--border)] ${showStatus ? 'grid-cols-[120px_1fr_1fr_24px]' : 'grid-cols-[120px_1fr_1fr]'}`}>
             <div />
             <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider px-4 py-2">ของเดิม</p>
             <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider px-4 py-2 border-l border-[var(--border)]">ของใหม่</p>
+            {showStatus && <div />}
           </div>
-          {items.map((item, i) => {
+          {items.map((ci, i) => {
+            if (ci.kind === 'missing') {
+              const req = ci.req
+              return (
+                <div key={req.id} className={`${i > 0 ? 'border-t border-[var(--border)]' : ''} bg-red-900/5`}>
+                  <div className={`grid ${showStatus ? 'grid-cols-[120px_1fr_1fr_24px]' : 'grid-cols-[120px_1fr_1fr]'}`}>
+                    <div className="px-4 py-3 flex items-start">
+                      <span className="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded shrink-0 text-[var(--status-red)] bg-red-900/10">
+                        {req.changeType === 'add' ? '+ ต้องเพิ่ม' : req.changeType === 'modify' ? '~ ต้องแก้' : '− ต้องลบ'}
+                      </span>
+                    </div>
+                    <div className="px-4 py-3">
+                      <p className="text-sm font-medium text-[var(--text-primary)]">{req.title}</p>
+                      {req.description && <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{req.description}</p>}
+                    </div>
+                    <div className="px-4 py-3 border-l border-[var(--border)]">
+                      <p className="text-xs text-[var(--status-red)] italic">ยังไม่พบในโค้ด</p>
+                    </div>
+                    {showStatus && <div className="flex items-start justify-center pt-3.5"><span className="text-sm font-bold text-[var(--status-red)]">✗</span></div>}
+                  </div>
+                </div>
+              )
+            }
+
+            const { item, status } = ci
             const impact = IMPACT[item.feature.id]
             return (
               <div key={item.feature.id} className={i > 0 ? 'border-t border-[var(--border)]' : ''}>
-                <div className="grid grid-cols-[120px_1fr_1fr]">
+                <div className={`grid ${showStatus ? 'grid-cols-[120px_1fr_1fr_24px]' : 'grid-cols-[120px_1fr_1fr]'}`}>
                   <div className="px-4 py-3 flex items-start">
                     <ChangeBadge type={item.changeType} />
                   </div>
@@ -109,6 +157,7 @@ function CategoryCard({ cat, items }: { cat: string; items: FeatureItem[] }) {
                       </>
                     )}
                   </div>
+                  {showStatus && <div className="flex items-start justify-center pt-3.5"><StatusPip status={status} /></div>}
                 </div>
                 {impact && (
                   <div className="mx-4 mb-3 flex items-start gap-2 bg-[var(--bg-hover)] border border-[var(--border)] rounded-lg px-3 py-2">
@@ -330,22 +379,28 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
     ...(diffResult.removed ?? []).map(f => f.id),
   ])
 
-  // Req-centric groupings
-  const doneItems = items.filter(i => i.req !== null && getStatus(i) === 'done')
-  const partialItems = items.filter(i => i.req !== null && getStatus(i) === 'partial')
+  // Req stats for sidebar
+  const doneCount    = items.filter(i => i.req && getDiffStatus(i) === 'done').length
+  const partialCount = items.filter(i => i.req && getDiffStatus(i) === 'partial').length
   const notDoneItems = allReqItems.filter((r, idx) =>
     !diffFeatureIds.has(r.featureId) && allReqItems.findIndex(x => x.featureId === r.featureId) === idx
   )
-  // feature ที่เปลี่ยนในโค้ดแต่ไม่มีใน Requirement
-  const noReqItems = items.filter(i => i.req === null)
 
-  // Category groupings (no-req mode)
-  const categoryMap = new Map<string, FeatureItem[]>()
+  // Build category groups (req mode — diff items only, notDoneItems shown separately)
+  const catCardMap = new Map<string, CardItem[]>()
   for (const item of items) {
-    if (!categoryMap.has(item.category)) categoryMap.set(item.category, [])
-    categoryMap.get(item.category)!.push(item)
+    if (!catCardMap.has(item.category)) catCardMap.set(item.category, [])
+    catCardMap.get(item.category)!.push({ kind: 'diff', item, status: getDiffStatus(item) })
   }
-  const groups = Array.from(categoryMap.entries()).map(([cat, features]) => ({ cat, features }))
+  const unifiedGroups = Array.from(catCardMap.entries()).map(([cat, cardItems]) => ({ cat, cardItems }))
+
+  // Plain groups (no-req mode)
+  const plainCatMap = new Map<string, FeatureItem[]>()
+  for (const item of items) {
+    if (!plainCatMap.has(item.category)) plainCatMap.set(item.category, [])
+    plainCatMap.get(item.category)!.push(item)
+  }
+  const plainGroups = Array.from(plainCatMap.entries()).map(([cat, features]) => ({ cat, features }))
 
   return (
     <div className="p-8 pb-24">
@@ -356,83 +411,42 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
 
       <div className="flex gap-6 items-start">
         {/* ─── Main content ─── */}
-        <div className="flex-1 min-w-0 space-y-8">
+        <div className="flex-1 min-w-0 space-y-4">
           {hasReq ? (
             <>
-              {/* เสร็จแล้ว */}
-              {doneItems.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
-                    <p className="text-sm font-semibold text-[var(--status-green)]">เสร็จแล้ว</p>
-                    <span className="text-xs text-[var(--status-green)] bg-green-900/15 px-2 py-0.5 rounded-full">{doneItems.length} รายการ</span>
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    {groupByCategory(doneItems).map(({ cat, features }) => (
-                      <CategoryCard key={cat} cat={cat} items={features} />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* ไม่ถูกต้อง */}
-              {partialItems.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
-                    <p className="text-sm font-semibold text-[var(--status-yellow)]">ไม่ถูกต้อง</p>
-                    <span className="text-xs text-[var(--status-yellow)] bg-yellow-900/15 px-2 py-0.5 rounded-full">{partialItems.length} รายการ</span>
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    {groupByCategory(partialItems).map(({ cat, features }) => (
-                      <CategoryCard key={cat} cat={cat} items={features} />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* ไม่มีใน Requirement */}
-              {noReqItems.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
-                    <p className="text-sm font-semibold text-[var(--text-muted)]">ไม่มีใน Requirement</p>
-                    <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded-full">{noReqItems.length} รายการ</span>
-                    <p className="text-xs text-[var(--text-muted)]">— มีการเปลี่ยนแปลงในโค้ดแต่ไม่ได้ระบุใน Req</p>
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    {groupByCategory(noReqItems).map(({ cat, features }) => (
-                      <CategoryCard key={cat} cat={cat} items={features} />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* ยังไม่ครบ */}
+              {unifiedGroups.map(({ cat, cardItems }) => (
+                <CategoryCard key={cat} cat={cat} cardItems={cardItems} />
+              ))}
               {notDoneItems.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
                     <p className="text-sm font-semibold text-[var(--status-red)]">ยังไม่ครบ</p>
-                    <span className="text-xs text-[var(--status-red)] bg-red-900/15 px-2 py-0.5 rounded-full">{notDoneItems.length} รายการ</span>
-                    <p className="text-xs text-[var(--text-muted)]">— อยู่ใน Requirement แต่ยังไม่พบในโค้ด</p>
+                    <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded-full">{notDoneItems.length} รายการ</span>
                   </div>
-                  <div className="bg-[var(--bg-card)] border border-red-800/25 rounded-xl overflow-hidden divide-y divide-[var(--border)]">
+                  <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl overflow-hidden divide-y divide-[var(--border)]">
                     {notDoneItems.map(req => (
                       <div key={req.id} className="px-5 py-4 flex items-start gap-3">
-                        <span className="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded shrink-0 text-[var(--status-red)] bg-red-900/10 mt-0.5">
+                        <span className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded shrink-0 mt-0.5 ${
+                          req.changeType === 'add' ? 'text-[var(--status-green)] bg-green-900/10' :
+                          req.changeType === 'modify' ? 'text-[var(--status-yellow)] bg-yellow-900/10' :
+                          'text-[var(--status-red)] bg-red-900/10'
+                        }`}>
                           {req.changeType === 'add' ? '+ ต้องเพิ่ม' : req.changeType === 'modify' ? '~ ต้องแก้' : '− ต้องลบ'}
                         </span>
-                        <div className="flex-1 min-w-0">
+                        <div className="min-w-0">
                           <p className="text-sm font-medium text-[var(--text-primary)]">{req.title}</p>
-                          {req.description && <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{req.description}</p>}
+                          {req.description && <p className="text-xs text-[var(--text-secondary)] mt-0.5 leading-relaxed">{req.description}</p>}
+                          <p className="text-[10px] text-[var(--text-muted)] mt-1 font-mono">{req.featureId}</p>
                         </div>
                       </div>
                     ))}
                   </div>
-                </section>
+                </div>
               )}
             </>
           ) : (
-            // No req — category view
-            groups.map(({ cat, features }) => (
-              <CategoryCard key={cat} cat={cat} items={features} />
+            plainGroups.map(({ cat, features }) => (
+              <CategoryCard key={cat} cat={cat} plainItems={features} />
             ))
           )}
         </div>
@@ -472,10 +486,10 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
 
           {/* Req stats */}
           {hasReq && (() => {
-            const total = doneItems.length + partialItems.length + notDoneItems.length
-            const pct = total > 0 ? Math.round((doneItems.length / total) * 100) : 0
-            const donePct = total > 0 ? (doneItems.length / total) * 100 : 0
-            const partialPct = total > 0 ? (partialItems.length / total) * 100 : 0
+            const total = doneCount + partialCount + notDoneItems.length
+            const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0
+            const donePct = total > 0 ? (doneCount / total) * 100 : 0
+            const partialPct = total > 0 ? (partialCount / total) * 100 : 0
             return (
               <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl overflow-hidden">
                 <div className="px-4 pt-3 pb-2">
@@ -490,11 +504,11 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
                 </div>
                 <div className="grid grid-cols-3 divide-x divide-[var(--border)] border-t border-[var(--border)]">
                   <div className="py-3 text-center">
-                    <p className="text-lg font-bold text-[var(--status-green)]">{doneItems.length}</p>
+                    <p className="text-lg font-bold text-[var(--status-green)]">{doneCount}</p>
                     <p className="text-[10px] text-[var(--text-muted)]">เสร็จแล้ว</p>
                   </div>
                   <div className="py-3 text-center">
-                    <p className="text-lg font-bold text-[var(--status-yellow)]">{partialItems.length}</p>
+                    <p className="text-lg font-bold text-[var(--status-yellow)]">{partialCount}</p>
                     <p className="text-[10px] text-[var(--text-muted)]">ไม่ถูกต้อง</p>
                   </div>
                   <div className="py-3 text-center">

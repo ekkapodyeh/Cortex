@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { DiffResult, Feature } from '@/lib/types'
 import { SummaryTable } from './SummaryTable'
+import { UpdateKnowledgeButton } from './UpdateKnowledgeButton'
 
 interface SprintReqItem {
   id: string
@@ -47,6 +48,14 @@ export default async function SprintSummaryPage({
   })
 
   if (!latestJob?.updateDoc) notFound()
+
+  const lastKnowledge = await db.knowledgeDoc.findFirst({
+    where: { projectId: id },
+    orderBy: { version: 'desc' },
+    select: { version: true },
+  })
+  const nextVersion = (lastKnowledge?.version ?? 0) + 1
+  const alreadyApproved = latestJob.updateDoc.status === 'APPROVED'
 
   const diff = latestJob.updateDoc.diff as unknown as DiffResult
 
@@ -116,13 +125,21 @@ export default async function SprintSummaryPage({
             <h2 className="text-lg font-semibold text-[var(--text-primary)]">สรุปการแก้ไข</h2>
             <p className="text-sm text-[var(--text-muted)] mt-0.5">เปรียบเทียบ Requirement กับโค้ดจริง</p>
           </div>
-          {allReqItems.length > 0 && (
-            <div className="flex items-center gap-3 text-xs">
-              <span className="text-[var(--status-green)]">✓ {doneCount} เสร็จ</span>
-              <span className="text-[var(--status-yellow)]">! {partialCount} ไม่ถูก</span>
-              <span className="text-[var(--status-red)]">✗ {notDoneCount} ยังไม่ครบ</span>
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            {allReqItems.length > 0 && (
+              <div className="flex items-center gap-3 text-xs">
+                <span className="text-[var(--status-green)]">✓ {doneCount} เสร็จ</span>
+                <span className="text-[var(--status-yellow)]">! {partialCount} ไม่ถูก</span>
+                <span className="text-[var(--status-red)]">✗ {notDoneCount} ยังไม่ครบ</span>
+              </div>
+            )}
+            <UpdateKnowledgeButton
+              projectId={id}
+              jobId={latestJob.id}
+              nextVersion={nextVersion}
+              alreadyApproved={alreadyApproved}
+            />
+          </div>
         </div>
       </div>
 

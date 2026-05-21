@@ -94,7 +94,6 @@ export function SummaryTable({ rows }: { rows: ReqRow[] }) {
             <th className={`${thCls} w-[22%]`}>ก่อนแก้</th>
             <th className={`${thCls} w-[22%]`}>หลังแก้</th>
             <th className={thCls}>สถานะ</th>
-            <th className={`${thCls} w-6`} />
           </tr>
         </thead>
         <tbody className="divide-y divide-[var(--border)]">
@@ -106,7 +105,7 @@ export function SummaryTable({ rows }: { rows: ReqRow[] }) {
                 <tr
                   key={req.id}
                   onClick={() => hasImpact && toggle(req.id)}
-                  className={`transition-colors ${hasImpact ? 'cursor-pointer hover:bg-[var(--bg-hover)]' : 'hover:bg-[var(--bg-hover)]'}`}
+                  className={`transition-colors ${hasImpact ? 'cursor-pointer hover:bg-[var(--bg-hover)]' : ''}`}
                 >
                   <td className="px-4 py-4">
                     <p className="text-sm font-medium text-[var(--text-primary)] leading-snug">{req.title}</p>
@@ -122,16 +121,16 @@ export function SummaryTable({ rows }: { rows: ReqRow[] }) {
                     <FeatureCell title={afterTitle} desc={afterDesc} id={afterId} muted="ถูกลบออกแล้ว" />
                   </td>
                   <td className="px-4 py-4">
-                    <StatusBadge status={status} />
-                  </td>
-                  <td className="px-3 py-4">
-                    {hasImpact && (
-                      <span className={`text-[var(--text-muted)] text-sm transition-transform duration-200 block ${isOpen ? 'rotate-90' : ''}`}>›</span>
-                    )}
+                    <div className="flex items-center gap-3">
+                      <StatusBadge status={status} />
+                      {hasImpact && (
+                        <span className={`text-[var(--text-muted)] text-sm transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-90' : ''}`}>›</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
                 {isOpen && hasImpact && (
-                  <ImpactRow key={`${req.id}-impact`} featureId={req.featureId} colSpan={6} />
+                  <ImpactRow key={`${req.id}-impact`} featureId={req.featureId} colSpan={5} />
                 )}
               </>
             )

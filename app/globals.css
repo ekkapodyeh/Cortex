@@ -4,10 +4,6 @@
   font-family: 'Google Sans', sans-serif;
 }
 
-code, pre, .font-mono {
-  font-family: 'Google Sans Mono', 'Google Sans', monospace;
-}
-
 :root {
   --bg-base: #0D0F10;
   --bg-card: #1A1D1E;

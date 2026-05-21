@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-* {
-  font-family: 'Google Sans', sans-serif;
-}
-
 :root {
   --bg-base: #0D0F10;
   --bg-card: #1A1D1E;
@@ -34,8 +30,8 @@
   --color-status-yellow: var(--status-yellow);
   --color-status-red: var(--status-red);
   --color-status-gray: var(--status-gray);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Google Sans', sans-serif;
+  --font-mono: 'Google Sans', monospace;
 }
 
 * {
@@ -45,7 +41,7 @@
 body {
   background: var(--bg-base);
   color: var(--text-primary);
-  font-family: var(--font-geist-sans, Arial, sans-serif);
+  font-family: 'Google Sans', sans-serif;
 }
 
 /* Scrollbar */

@@ -438,7 +438,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
         </div>
 
         {/* ─── Right panel (sticky) ─── */}
-        <div className="w-72 shrink-0 sticky top-8 space-y-3">
+        <div className="w-72 shrink-0 sticky top-0 h-screen overflow-y-auto py-8 space-y-3">
           {/* Commit info */}
           <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 flex items-start gap-3">
             <code className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded shrink-0 mt-0.5">{commitSha.slice(0, 7)}</code>

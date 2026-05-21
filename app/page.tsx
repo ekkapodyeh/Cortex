@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { db } from '@/lib/db'
 import { redirect } from 'next/navigation'
+import { SeedButton } from '@/components/SeedButton'
 
 export default async function RootPage() {
   const project = await db.project.findFirst({
@@ -13,5 +14,14 @@ export default async function RootPage() {
   const fallback = await db.project.findFirst({ orderBy: { createdAt: 'asc' } })
   if (fallback) redirect(`/projects/${fallback.id}`)
 
-  redirect('/projects')
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)]">
+      <div className="text-center">
+        <p className="text-2xl mb-2">🧠</p>
+        <h1 className="text-lg font-semibold text-[var(--text-primary)] mb-1">Cortex</h1>
+        <p className="text-sm text-[var(--text-muted)] mb-6">ยังไม่มีข้อมูลในระบบ</p>
+        <SeedButton />
+      </div>
+    </div>
+  )
 }

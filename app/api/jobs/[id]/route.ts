@@ -13,7 +13,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { status, comment } = await req.json()
+  const body = await req.json()
 
   const job = await db.analysisJob.findUnique({
     where: { id },
@@ -21,10 +21,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   })
   if (!job?.updateDoc) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
+  const data: Record<string, unknown> = {}
+  if (body.status !== undefined) data.status = body.status
+  if (body.markReviewed === true) data.reviewedAt = new Date()
+
   await db.projectUpdateDoc.update({
     where: { jobId: id },
-    data: { status },
+    data,
   })
 
-  return NextResponse.json({ ok: true, comment })
+  return NextResponse.json({ ok: true })
 }

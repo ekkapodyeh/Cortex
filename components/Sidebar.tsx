@@ -18,13 +18,15 @@ export function Sidebar({ projectId, projectName }: SidebarProps) {
   const pathname = usePathname()
 
   const navItems: NavItem[] = [
-    { label: 'งานวิเคราะห์', href: `/projects/${projectId}`, icon: '⚡' },
-    { label: 'Knowledge Doc', href: `/projects/${projectId}/knowledge`, icon: '📚' },
-    { label: 'Document Requirement', href: `/projects/${projectId}/requirements`, icon: '📋' },
+    { label: 'Dashboard',            href: `/projects/${projectId}`,               icon: '◈' },
+    { label: 'งานวิเคราะห์',         href: `/projects/${projectId}/monitor`,        icon: '⚡' },
+    { label: 'Sprint Review',        href: `/projects/${projectId}/sprint-review`,  icon: '🔍' },
+    { label: 'Knowledge Doc',        href: `/projects/${projectId}/knowledge`,      icon: '📖' },
+    { label: 'Document Requirement', href: `/projects/${projectId}/requirements`,   icon: '📋' },
   ]
 
   const isActive = (href: string) => {
-    if (href === `/projects/${projectId}`) return pathname === href
+    if (href === `/projects/${projectId}`) return pathname === `/projects/${projectId}`
     return pathname.startsWith(href)
   }
 
@@ -58,14 +60,6 @@ export function Sidebar({ projectId, projectName }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="px-3 py-4 border-t border-[var(--border)]">
-        <Link
-          href="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
-        >
-          <span>←</span> โปรเจกต์ทั้งหมด
-        </Link>
-      </div>
     </aside>
   )
 }

@@ -1,0 +1,161 @@
+================================================================================
+SPRINT REQUIREMENT DOCUMENT
+Project: Payment Service
+Sprint: Sprint 14 (2026-05-01 – 2026-05-14)
+จัดทำโดย: BA Team
+วันที่: 2026-05-01
+================================================================================
+
+1. OVERVIEW
+-----------
+Sprint นี้มุ่งเน้นการปรับปรุงระบบชำระเงินให้รองรับ Multi-Currency และเพิ่มความปลอดภัย
+ของ Webhook รวมถึงการ Refactor โมดูล Payment Gateway เพื่อรองรับ Provider ใหม่ในอนาคต
+
+================================================================================
+2. REQUIREMENTS
+================================================================================
+
+[SR001] เพิ่มรองรับ Multi-Currency (P001)
+  ประเภทการเปลี่ยนแปลง: เพิ่มใหม่
+  Priority: High
+  รายละเอียด:
+    - ระบบต้องรองรับสกุลเงิน THB, USD, SGD, MYR
+    - แสดงอัตราแลกเปลี่ยนแบบ Real-time จาก Exchange Rate API
+    - บันทึก Original Currency และ Converted Amount ลงฐานข้อมูล
+    - ตัวเลขทศนิยมต้องแม่นยำ 2 ตำแหน่ง (ใช้ Decimal ไม่ใช่ Float)
+  Acceptance Criteria:
+    ✓ เลือกสกุลเงินได้จาก Dropdown
+    ✓ อัตราแลกเปลี่ยนอัพเดททุก 5 นาที
+    ✓ Transaction History แสดงทั้ง Original และ THB Amount
+
+--------------------------------------------------------------------------------
+
+[SR002] ปรับปรุง Payment Gateway Integration (P002)
+  ประเภทการเปลี่ยนแปลง: แก้ไข
+  Priority: High
+  รายละเอียด:
+    - Refactor PaymentGatewayService ให้รองรับ Strategy Pattern
+    - Provider ที่ต้องรองรับ: Omise, 2C2P, Stripe
+    - เพิ่ม Retry Logic สำหรับกรณี Timeout (max 3 retries)
+    - Centralize Error Handling และ Logging
+  Acceptance Criteria:
+    ✓ Switch provider ได้โดยไม่ต้องแก้ Business Logic
+    ✓ Retry ทำงานถูกต้องเมื่อ Provider ตอบช้า
+    ✓ Error Log มี correlation ID ทุก Request
+
+--------------------------------------------------------------------------------
+
+[SR003] เพิ่มระบบ Webhook Security (SEC001)
+  ประเภทการเปลี่ยนแปลง: เพิ่มใหม่
+  Priority: Critical
+  รายละเอียด:
+    - Validate HMAC-SHA256 Signature ทุก Incoming Webhook
+    - Implement Replay Attack Prevention (Timestamp ± 5 นาที)
+    - Rate Limit Webhook Endpoint: 100 req/min ต่อ Source IP
+    - เพิ่ม Webhook Audit Log
+  Acceptance Criteria:
+    ✓ Request ที่ Signature ไม่ถูกต้องต้องได้รับ 401
+    ✓ Request เก่ากว่า 5 นาทีต้องถูก Reject
+    ✓ Audit Log บันทึก IP, Timestamp, Result ทุก Request
+
+--------------------------------------------------------------------------------
+
+[SR004] Refactor Notification Service (REF001)
+  ประเภทการเปลี่ยนแปลง: แก้ไข
+  Priority: Medium
+  รายละเอียด:
+    - แยก Email / SMS / Push Notification ออกเป็น Provider แยก
+    - เพิ่ม Queue-based Delivery (Bull MQ)
+    - Retry Failed Notification อัตโนมัติ (max 5 ครั้ง, Exponential Backoff)
+    - Dashboard แสดง Delivery Rate และ Failure Reason
+  Acceptance Criteria:
+    ✓ Notification ไม่ Block Main Thread
+    ✓ Failed Notification มี Reason บันทึกใน DB
+    ✓ ส่ง Email ได้ถูกต้องผ่าน SendGrid
+
+--------------------------------------------------------------------------------
+
+[SR005] เพิ่ม Fraud Detection Rule Engine (FR001)
+  ประเภทการเปลี่ยนแปลง: เพิ่มใหม่
+  Priority: High
+  รายละเอียด:
+    - ตรวจจับ Transaction ที่ผิดปกติตาม Rule-based System
+    - Rule เริ่มต้น:
+        * วงเงินเกิน 500,000 บาทใน 24 ชั่วโมง
+        * Transaction จากต่างประเทศเกิน 3 ครั้งต่อวัน
+        * ใช้บัตรหลายใบจาก IP เดียวกัน
+    - Suspicious Transaction ต้องรอ Manual Approve
+    - แจ้งเตือน Compliance Team ทันที
+  Acceptance Criteria:
+    ✓ Rule ใหม่เพิ่มได้โดยไม่ต้อง Deploy
+    ✓ Flagged Transaction ขึ้นสถานะ PENDING_REVIEW
+    ✓ Email แจ้ง Compliance ภายใน 1 นาที
+
+--------------------------------------------------------------------------------
+
+[SR006] เพิ่มระบบ Installment Payment (P003)
+  ประเภทการเปลี่ยนแปลง: เพิ่มใหม่
+  Priority: Medium
+  รายละเอียด:
+    - รองรับผ่อนชำระ 3 / 6 / 12 เดือน
+    - คำนวณดอกเบี้ยแบบ Flat Rate และ Effective Rate
+    - แสดง Schedule การตัดเงินล่วงหน้า
+    - Integration กับ Bank Installment API (KBank, SCB)
+  Acceptance Criteria:
+    ✓ เลือกจำนวนงวดได้ใน Checkout Flow
+    ✓ Summary แสดงยอดรวมดอกเบี้ยก่อนยืนยัน
+    ✓ ส่ง Schedule Email หลัง Transaction สำเร็จ
+
+--------------------------------------------------------------------------------
+
+[SR007] ปรับปรุง Audit Log System (AUD001)
+  ประเภทการเปลี่ยนแปลง: แก้ไข
+  Priority: Low
+  รายละเอียด:
+    - เพิ่ม Structured Logging (JSON format)
+    - Export Audit Log เป็น CSV / Excel
+    - Retention Policy: เก็บ 90 วัน จากนั้น Archive ไปยัง Cold Storage
+  Acceptance Criteria:
+    ✓ Export ทำงานได้สำหรับ Range สูงสุด 31 วัน
+    ✓ Log ครบ: User, Action, Resource, Before, After, Timestamp
+
+--------------------------------------------------------------------------------
+
+[SR008] ยกเลิก Legacy Payment Endpoint (DEP001)
+  ประเภทการเปลี่ยนแปลง: ลบออก
+  Priority: Low
+  รายละเอียด:
+    - ลบ /api/v1/pay endpoint (Deprecated มา 2 Sprint แล้ว)
+    - ลบ LegacyPaymentController และ Service ที่เกี่ยวข้อง
+    - อัพเดท API Documentation ให้สะท้อน v2 เท่านั้น
+  Acceptance Criteria:
+    ✓ /api/v1/pay ต้องตอบ 410 Gone
+    ✓ ไม่มี Reference ถึง LegacyPaymentController ใน Codebase
+
+================================================================================
+3. OUT OF SCOPE
+================================================================================
+
+- การเปลี่ยน Database Schema สำหรับ Archive System (Sprint ถัดไป)
+- Mobile SDK Integration (รอ Design เสร็จ)
+- PDPA Consent Flow (อยู่ใน Sprint 15)
+
+================================================================================
+4. DEPENDENCIES
+================================================================================
+
+- Exchange Rate API Key (ขอจาก DevOps ก่อน Sprint Start)
+- SendGrid API Key (มีแล้ว ใช้ Staging Key)
+- KBank Installment Sandbox Access (ติดต่อ Partnership Team)
+
+================================================================================
+5. NOTES
+================================================================================
+
+- Feature ทุกตัวต้องมี Unit Test Coverage > 80%
+- ห้าม Merge โดยไม่ผ่าน Code Review อย่างน้อย 1 คน
+- หากพบ Blocker ให้แจ้ง BA ทันทีอย่ารอถึง Daily Standup
+
+================================================================================
+END OF DOCUMENT
+================================================================================

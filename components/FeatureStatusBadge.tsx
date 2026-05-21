@@ -1,4 +1,6 @@
-type FeatureStatus = 'MATCHED' | 'EXTRA' | 'MISSING' | 'REMOVED'
+type FeatureStatus = 'MATCHED' | 'EXTRA' | 'MISSING' | 'REMOVED' | 'ADDED'
+
+export type { FeatureStatus }
 
 interface FeatureStatusBadgeProps {
   status: FeatureStatus
@@ -6,6 +8,7 @@ interface FeatureStatusBadgeProps {
 
 const config: Record<FeatureStatus, { label: string; dot: string; textColor: string; bgColor: string }> = {
   MATCHED: { label: 'ตรง Req',        dot: '🟢', textColor: 'text-[var(--status-green)]',  bgColor: 'bg-green-900/20' },
+  ADDED:   { label: 'เพิ่มใหม่',      dot: '🟢', textColor: 'text-[var(--status-green)]',  bgColor: 'bg-green-900/20' },
   EXTRA:   { label: 'ไม่อยู่ใน Req',  dot: '🟡', textColor: 'text-[var(--status-yellow)]', bgColor: 'bg-yellow-900/20' },
   MISSING: { label: 'ขาดหายไป',       dot: '🔴', textColor: 'text-[var(--status-red)]',    bgColor: 'bg-red-900/20' },
   REMOVED: { label: 'ลบแล้ว',         dot: '⚫', textColor: 'text-[var(--text-muted)]',    bgColor: 'bg-[var(--bg-hover)]' },

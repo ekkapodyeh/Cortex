@@ -58,9 +58,22 @@ model AnalysisJob {
   status      JobStatus @default(QUEUED)
   triggeredAt DateTime  @default(now())
 
-  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  updateDoc     ProjectUpdateDoc?
-  knowledgeDocs KnowledgeDoc[]
+  project          Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  updateDoc          ProjectUpdateDoc?
+  knowledgeDocs      KnowledgeDoc[]
+  sprintRequirements SprintRequirement[]
+}
+
+model SprintRequirement {
+  id        String   @id @default(cuid())
+  jobId     String
+  projectId String
+  items     Json
+  fileName  String?
+  createdBy String
+  createdAt DateTime @default(now())
+
+  job AnalysisJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
 }
 
 enum JobStatus {
@@ -78,6 +91,7 @@ model ProjectUpdateDoc {
   diff        Json
   validation  Json
   status      DocStatus @default(PENDING)
+  reviewedAt  DateTime?
   createdAt   DateTime  @default(now())
 
   job AnalysisJob @relation(fields: [jobId], references: [id], onDelete: Cascade)

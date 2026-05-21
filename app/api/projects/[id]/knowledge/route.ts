@@ -12,7 +12,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { jobId, approvedBy } = await req.json()
+  const { jobId, approvedBy = 'PM' } = await req.json()
 
   const updateDoc = await db.projectUpdateDoc.findUnique({ where: { jobId } })
   if (!updateDoc) return NextResponse.json({ error: 'Update doc not found' }, { status: 404 })

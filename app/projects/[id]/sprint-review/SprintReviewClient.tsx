@@ -348,15 +348,13 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
   const groups = Array.from(categoryMap.entries()).map(([cat, features]) => ({ cat, features }))
 
   return (
-    <div className="p-8 pb-24">
+    <div className="p-8 pb-24 pr-[320px]">
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-[var(--text-primary)]">Sprint Review</h2>
         <p className="text-sm text-[var(--text-muted)] mt-1">ติดตามการเปลี่ยนแปลงจากโค้ดปัจจุบัน</p>
       </div>
 
-      <div className="flex gap-6 items-start">
-        {/* ─── Main content ─── */}
-        <div className="flex-1 min-w-0 space-y-8">
+      <div className="space-y-8">
           {hasReq ? (
             <>
               {/* เสร็จแล้ว */}
@@ -437,8 +435,8 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
           )}
         </div>
 
-        {/* ─── Right panel (sticky) ─── */}
-        <div className="w-72 shrink-0 sticky top-0 h-screen overflow-y-auto py-8 space-y-3">
+      {/* ─── Right panel (fixed) ─── */}
+      <div className="fixed top-0 right-0 h-screen w-72 overflow-y-auto py-8 px-6 bg-[var(--bg-base)] border-l border-[var(--border)] z-10 space-y-3">
           {/* Commit info */}
           <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 flex items-start gap-3">
             <code className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded shrink-0 mt-0.5">{commitSha.slice(0, 7)}</code>
@@ -524,7 +522,6 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
             สรุปการแก้ไข
           </Link>
         </div>
-      </div>
     </div>
   )
 }

@@ -31,7 +31,7 @@ export function Sidebar({ projectId, projectName }: SidebarProps) {
   }
 
   return (
-    <aside className="w-60 min-h-screen bg-[var(--bg-card)] border-r border-[var(--border)] flex flex-col shrink-0">
+    <aside className="w-60 h-screen sticky top-0 bg-[var(--bg-card)] border-r border-[var(--border)] flex flex-col shrink-0 overflow-y-auto">
       <div className="px-5 py-5 border-b border-[var(--border)]">
         <Link href="/" className="text-[var(--text-primary)] font-semibold text-lg tracking-tight hover:text-[var(--accent)] transition-colors">
           Cortex

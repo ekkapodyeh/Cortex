@@ -25,7 +25,7 @@ export function UpdateKnowledgeButton({ projectId, jobId, nextVersion, alreadyAp
       })
       if (!res.ok) throw new Error('failed')
       setDone(true)
-      router.refresh()
+      router.push(`/projects/${projectId}/sprint-review`)
     } catch {
       setLoading(false)
       alert('เกิดข้อผิดพลาด กรุณาลองใหม่')

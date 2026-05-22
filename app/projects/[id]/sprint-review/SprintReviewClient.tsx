@@ -310,9 +310,13 @@ interface Props {
   commitMsg: string
   author: string
   triggeredAt: string
+  mockButton?: React.ReactNode
+  resetButton?: React.ReactNode
+  historyHref?: string
+  noDiff?: boolean
 }
 
-export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, commitSha, commitMsg, author, triggeredAt }: Props) {
+export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, commitSha, commitMsg, author, triggeredAt, mockButton, resetButton, historyHref, noDiff }: Props) {
   const allReqItems = sprintDocs.flatMap(d => d.items)
   const reqMap = new Map(allReqItems.map(r => [r.featureId, r]))
   const hasReq = sprintDocs.length > 0
@@ -348,10 +352,28 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
 
   return (
     <div className="p-6 pb-24 pr-[320px]">
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Sprint Review</h2>
-        <p className="text-sm text-[var(--text-muted)] mt-1">ติดตามการเปลี่ยนแปลงจากโค้ดปัจจุบัน</p>
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Sprint Review</h2>
+          <p className="text-sm text-[var(--text-muted)] mt-1">ติดตามการเปลี่ยนแปลงจากโค้ดปัจจุบัน</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {historyHref && (
+            <Link href={historyHref} className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-[var(--accent)]/40 hover:bg-[var(--bg-hover)]">
+              ประวัติการอัปเดต
+            </Link>
+          )}
+          {mockButton}
+          {resetButton}
+        </div>
       </div>
+
+      {noDiff && (
+        <div className="flex items-center gap-3 px-4 py-3 mb-6 rounded-xl bg-[var(--bg-card)] border border-[var(--border)]">
+          <div className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-pulse shrink-0" />
+          <p className="text-sm text-[var(--text-muted)]">รอการวิเคราะห์โค้ด — ยังไม่มี Code Push ใหม่ รายการด้านล่างจึงแสดงเป็น <span className="text-[var(--status-red)]">ยังไม่ครบ</span> ทั้งหมด</p>
+        </div>
+      )}
 
       <div className="space-y-4">
           {hasReq ? (
@@ -437,33 +459,37 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
       {/* ─── Right panel (fixed) ─── */}
       <div className="fixed top-0 right-0 h-screen w-72 overflow-y-auto py-8 px-6 bg-[var(--bg-base)] z-10 space-y-4">
           {/* Commit info */}
-          <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 flex flex-col gap-1.5">
-            <code className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded self-start">{commitSha.slice(0, 7)}</code>
-            <p className="text-xs font-medium text-[var(--text-primary)] leading-snug">{commitMsg || 'ไม่มี commit message'}</p>
-            <p className="text-[10px] text-[var(--text-muted)]">{author} · {new Date(triggeredAt).toLocaleString('th-TH')}</p>
-          </div>
+          {!noDiff && (
+            <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 flex flex-col gap-1.5">
+              <code className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded self-start">{commitSha.slice(0, 7)}</code>
+              <p className="text-xs font-medium text-[var(--text-primary)] leading-snug">{commitMsg || 'ไม่มี commit message'}</p>
+              <p className="text-[10px] text-[var(--text-muted)]">{author} · {new Date(triggeredAt).toLocaleString('th-TH')}</p>
+            </div>
+          )}
 
           {/* Diff summary chips */}
-          <div className="grid grid-cols-2 gap-2">
-            {(diffResult.added ?? []).length > 0 && (
-              <div className="flex items-center gap-2 bg-green-900/15 border border-green-800/30 rounded-xl px-3 py-2.5">
-                <span className="text-base font-bold text-[var(--status-green)]">{(diffResult.added ?? []).length}</span>
-                <span className="text-xs text-[var(--status-green)]">เพิ่มใหม่</span>
-              </div>
-            )}
-            {(diffResult.modified ?? []).length > 0 && (
-              <div className="flex items-center gap-2 bg-yellow-900/15 border border-yellow-800/30 rounded-xl px-3 py-2.5">
-                <span className="text-base font-bold text-[var(--status-yellow)]">{(diffResult.modified ?? []).length}</span>
-                <span className="text-xs text-[var(--status-yellow)]">แก้ไข</span>
-              </div>
-            )}
-            {(diffResult.removed ?? []).length > 0 && (
-              <div className="flex items-center gap-2 bg-red-900/15 border border-red-800/30 rounded-xl px-3 py-2.5">
-                <span className="text-base font-bold text-[var(--status-red)]">{(diffResult.removed ?? []).length}</span>
-                <span className="text-xs text-[var(--status-red)]">ลบออก</span>
-              </div>
-            )}
-          </div>
+          {!noDiff && (
+            <div className="grid grid-cols-2 gap-2">
+              {(diffResult.added ?? []).length > 0 && (
+                <div className="flex items-center gap-2 bg-green-900/15 border border-green-800/30 rounded-xl px-3 py-2.5">
+                  <span className="text-base font-bold text-[var(--status-green)]">{(diffResult.added ?? []).length}</span>
+                  <span className="text-xs text-[var(--status-green)]">เพิ่มใหม่</span>
+                </div>
+              )}
+              {(diffResult.modified ?? []).length > 0 && (
+                <div className="flex items-center gap-2 bg-yellow-900/15 border border-yellow-800/30 rounded-xl px-3 py-2.5">
+                  <span className="text-base font-bold text-[var(--status-yellow)]">{(diffResult.modified ?? []).length}</span>
+                  <span className="text-xs text-[var(--status-yellow)]">แก้ไข</span>
+                </div>
+              )}
+              {(diffResult.removed ?? []).length > 0 && (
+                <div className="flex items-center gap-2 bg-red-900/15 border border-red-800/30 rounded-xl px-3 py-2.5">
+                  <span className="text-base font-bold text-[var(--status-red)]">{(diffResult.removed ?? []).length}</span>
+                  <span className="text-xs text-[var(--status-red)]">ลบออก</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Doc cards + upload — max 1 file */}
           {sprintDocs.length === 0 ? (
@@ -511,13 +537,20 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
           })()}
 
           {/* Summary button — primary, always at bottom */}
-          <Link
-            href={`/projects/${projectId}/sprint-review/summary`}
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            <PresentationChartIcon size={16} />
-            สรุปการแก้ไข
-          </Link>
+          {noDiff ? (
+            <div className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--bg-hover)] border border-[var(--border)] text-sm font-medium text-[var(--text-muted)] cursor-not-allowed select-none">
+              <PresentationChartIcon size={16} />
+              สรุปการแก้ไข
+            </div>
+          ) : (
+            <Link
+              href={`/projects/${projectId}/sprint-review/summary`}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              <PresentationChartIcon size={16} />
+              สรุปการแก้ไข
+            </Link>
+          )}
         </div>
     </div>
   )

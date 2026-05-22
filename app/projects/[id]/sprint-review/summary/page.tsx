@@ -6,6 +6,8 @@ import Link from 'next/link'
 import type { DiffResult, Feature } from '@/lib/types'
 import { SummaryTable } from './SummaryTable'
 import { UpdateKnowledgeButton } from './UpdateKnowledgeButton'
+import { MockJobButton } from '@/components/MockJobButton'
+import { ResetJobsButton } from '@/components/ResetJobsButton'
 
 interface SprintReqItem {
   id: string
@@ -125,7 +127,7 @@ export default async function SprintSummaryPage({
             <h2 className="text-lg font-semibold text-[var(--text-primary)]">สรุปการแก้ไข</h2>
             <p className="text-sm text-[var(--text-muted)] mt-0.5">เปรียบเทียบ Requirement กับโค้ดจริง</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {allReqItems.length > 0 && (
               <div className="flex items-center gap-3 text-xs">
                 <span className="text-[var(--status-green)]">✓ {doneCount} เสร็จ</span>
@@ -133,6 +135,8 @@ export default async function SprintSummaryPage({
                 <span className="text-[var(--status-red)]">✗ {notDoneCount} ยังไม่ครบ</span>
               </div>
             )}
+            <MockJobButton projectId={id} label="จำลอง Code Push" />
+            <ResetJobsButton projectId={id} />
             <UpdateKnowledgeButton
               projectId={id}
               jobId={latestJob.id}

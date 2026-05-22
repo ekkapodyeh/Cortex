@@ -4,6 +4,8 @@ import { db } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { DiffResult } from '@/lib/types'
+import { MockJobButton } from '@/components/MockJobButton'
+import { ResetJobsButton } from '@/components/ResetJobsButton'
 
 interface SprintReqItem {
   featureId: string
@@ -82,9 +84,13 @@ export default async function ProjectDashboardPage({
 
   return (
     <div className="p-8 pb-24 max-w-2xl">
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold text-[var(--text-primary)]">Dashboard</h2>
-        <p className="text-sm text-[var(--text-muted)] mt-1">ภาพรวมโปรเจกต์</p>
+      <div className="flex items-start justify-between mb-8">
+        <div>
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Dashboard</h2>
+          <p className="text-sm text-[var(--text-muted)] mt-1">ภาพรวมโปรเจกต์</p>
+        </div>
+        <MockJobButton projectId={id} label="จำลอง Code Push" />
+        <ResetJobsButton projectId={id} />
       </div>
 
       {/* ── Code diff vs Knowledge Doc v1 ── */}

@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic'
 import { db } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import { SprintReviewClient } from './SprintReviewClient'
+import { MockJobButton } from '@/components/MockJobButton'
+import { ResetJobsButton } from '@/components/ResetJobsButton'
 import type { DiffResult } from '@/lib/types'
 
 export default async function SprintReviewPage({
@@ -14,37 +16,52 @@ export default async function SprintReviewPage({
   const project = await db.project.findUnique({ where: { id } })
   if (!project) notFound()
 
+  // ดึง job ล่าสุด (อาจไม่มี updateDoc ถ้าเพิ่ง reset)
   const latestJob = await db.analysisJob.findFirst({
     where: { projectId: id, status: 'DONE' },
     orderBy: { triggeredAt: 'desc' },
-    include: {
-      updateDoc: true,
-      sprintRequirements: { orderBy: { createdAt: 'asc' } },
-    },
+    include: { updateDoc: true },
   })
 
-  if (!latestJob?.updateDoc) {
-    return (
-      <div className="p-8">
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Sprint Review</h2>
-          <p className="text-sm text-[var(--text-muted)] mt-1">เทียบโค้ดกับ Sprint Requirement</p>
-        </div>
-        <div className="text-center py-20 border border-dashed border-[var(--border)] rounded-xl">
-          <p className="text-[var(--text-muted)] text-lg">ยังไม่มีการวิเคราะห์</p>
-        </div>
-      </div>
-    )
-  }
+  // ดึง SprintRequirement จากทุก job ของ project เพื่อให้ persist ข้าม reset
+  const allSprintRequirements = await db.sprintRequirement.findMany({
+    where: { job: { projectId: id } },
+    orderBy: { createdAt: 'asc' },
+  })
 
-  const diffResult = latestJob.updateDoc.diff as unknown as DiffResult
-
-  const sprintDocs = latestJob.sprintRequirements.map(r => ({
+  const sprintDocs = allSprintRequirements.map(r => ({
     id: r.id,
     fileName: r.fileName ?? null,
     createdBy: r.createdBy,
     items: r.items as unknown as any[],
   }))
+
+  // ถ้าไม่มี job เลย → empty state
+  if (!latestJob) {
+    return (
+      <SprintReviewClient
+        projectId={id}
+        jobId=""
+        sprintDocs={sprintDocs}
+        diffResult={{ added: [], modified: [], removed: [] }}
+        commitSha=""
+        commitMsg=""
+        author=""
+        triggeredAt={new Date().toISOString()}
+        mockButton={<MockJobButton projectId={id} />}
+        resetButton={<ResetJobsButton projectId={id} />}
+        historyHref={`/projects/${id}/sprint-review/history`}
+        noDiff
+      />
+    )
+  }
+
+  // ถือว่า "มี diff" เฉพาะเมื่อ updateDoc ยังเป็น PENDING เท่านั้น
+  // APPROVED = ถูกบันทึกเป็น Knowledge Doc แล้ว → กลับไปรอ push ใหม่
+  const hasPendingDiff = !!latestJob.updateDoc && latestJob.updateDoc.status === 'PENDING'
+  const diffResult: DiffResult = hasPendingDiff
+    ? latestJob.updateDoc!.diff as unknown as DiffResult
+    : { added: [], modified: [], removed: [] }
 
   return (
     <SprintReviewClient
@@ -56,6 +73,10 @@ export default async function SprintReviewPage({
       commitMsg={latestJob.commitMsg ?? ''}
       author={latestJob.author}
       triggeredAt={latestJob.triggeredAt.toISOString()}
+      mockButton={<MockJobButton projectId={id} />}
+      resetButton={<ResetJobsButton projectId={id} />}
+      historyHref={`/projects/${id}/sprint-review/history`}
+      noDiff={!hasPendingDiff}
     />
   )
 }

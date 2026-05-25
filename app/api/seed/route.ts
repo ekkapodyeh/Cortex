@@ -48,45 +48,45 @@ export async function POST() {
 
   // ---- Features ----
   // F001 เดิม (ใน KnowledgeDoc v2 — เป็น email/password)
-  const F001_OLD: Feature = { id: 'F001', title: 'เข้าสู่ระบบผ่านอีเมลและรหัสผ่าน', description: 'ผู้ใช้ล็อกอินด้วยอีเมลและรหัสผ่าน', category: CAT_AUTH }
+  const F001_OLD: Feature = { id: 'F001', title: 'เข้าสู่ระบบผ่านอีเมลและรหัสผ่าน', description: 'ผู้ใช้ล็อกอินด้วยอีเมลและรหัสผ่าน', category: CAT_AUTH, subcategory: 'เข้าสู่ระบบด้วยอีเมล' }
   // F001 ใหม่ (modified — เปลี่ยนเป็น username)
-  const F001_NEW: Feature = { id: 'F001', title: 'เข้าสู่ระบบผ่าน Username และรหัสผ่าน', description: 'ผู้ใช้ล็อกอินด้วย username และรหัสผ่าน (เปลี่ยนจากอีเมล)', category: CAT_AUTH }
+  const F001_NEW: Feature = { id: 'F001', title: 'เข้าสู่ระบบผ่าน Username และรหัสผ่าน', description: 'ผู้ใช้ล็อกอินด้วย username และรหัสผ่าน (เปลี่ยนจากอีเมล)', category: CAT_AUTH, subcategory: 'เข้าสู่ระบบด้วยอีเมล' }
 
   const authFeatures: Feature[] = [
     F001_OLD,
-    { id: 'F002', title: 'เข้าสู่ระบบผ่าน Google', description: 'รองรับ Sign in with Google OAuth 2.0', category: CAT_AUTH },
-    { id: 'F003', title: 'ระบบ JWT Access Token', description: 'ออก JWT token อายุ 15 นาที', category: CAT_AUTH },
-    { id: 'F004', title: 'Refresh Token Rotation', description: 'หมุนเวียน refresh token ทุกครั้งที่ใช้', category: CAT_AUTH },
+    { id: 'F002', title: 'เข้าสู่ระบบผ่าน Google', description: 'รองรับ Sign in with Google OAuth 2.0', category: CAT_AUTH, subcategory: 'เข้าสู่ระบบด้วย Google' },
+    { id: 'F003', title: 'ระบบ JWT Access Token', description: 'ออก JWT token อายุ 15 นาที', category: CAT_AUTH, subcategory: 'จัดการ Token' },
+    { id: 'F004', title: 'Refresh Token Rotation', description: 'หมุนเวียน refresh token ทุกครั้งที่ใช้', category: CAT_AUTH, subcategory: 'จัดการ Token' },
   ]
 
-  const F005: Feature = { id: 'F005', title: 'รีเซ็ตรหัสผ่านผ่านอีเมล', description: 'ส่ง link รีเซ็ตรหัสผ่านไปยังอีเมลของผู้ใช้', category: CAT_AUTH }
-  const F006: Feature = { id: 'F006', title: 'สมัครสมาชิกด้วยอีเมล', description: 'ลงทะเบียนบัญชีใหม่ด้วยอีเมลและรหัสผ่าน', category: CAT_AUTH }
+  const F005: Feature = { id: 'F005', title: 'รีเซ็ตรหัสผ่านผ่านอีเมล', description: 'ส่ง link รีเซ็ตรหัสผ่านไปยังอีเมลของผู้ใช้', category: CAT_AUTH, subcategory: 'รีเซ็ตรหัสผ่าน' }
+  const F006: Feature = { id: 'F006', title: 'สมัครสมาชิกด้วยอีเมล', description: 'ลงทะเบียนบัญชีใหม่ด้วยอีเมลและรหัสผ่าน', category: CAT_AUTH, subcategory: 'ลงทะเบียนสมาชิก' }
 
   const userFeatures: Feature[] = [
-    { id: 'U001', title: 'จัดการโปรไฟล์ผู้ใช้', description: 'แก้ไขชื่อ รูปภาพ และข้อมูลส่วนตัว', category: CAT_USER },
-    { id: 'U002', title: 'ระบบสิทธิ์ Role-based', description: 'กำหนดสิทธิ์แบบ Admin / Editor / Viewer', category: CAT_USER },
-    { id: 'U003', title: 'Audit Log การกระทำ', description: 'บันทึก log ทุก action สำคัญของผู้ใช้', category: CAT_USER },
+    { id: 'U001', title: 'จัดการโปรไฟล์ผู้ใช้', description: 'แก้ไขชื่อ รูปภาพ และข้อมูลส่วนตัว', category: CAT_USER, subcategory: 'โปรไฟล์ผู้ใช้' },
+    { id: 'U002', title: 'ระบบสิทธิ์ Role-based', description: 'กำหนดสิทธิ์แบบ Admin / Editor / Viewer', category: CAT_USER, subcategory: 'สิทธิ์การเข้าถึง' },
+    { id: 'U003', title: 'Audit Log การกระทำ', description: 'บันทึก log ทุก action สำคัญของผู้ใช้', category: CAT_USER, subcategory: 'Audit Log' },
   ]
 
   // ---- Notification features ----
-  const N001_OLD: Feature = { id: 'N001', title: 'แจ้งเตือนผ่านอีเมล', description: 'ส่งอีเมลแจ้งเตือนเมื่อมีกิจกรรมสำคัญ', category: CAT_NOTIFY }
-  const N001_NEW: Feature = { id: 'N001', title: 'แจ้งเตือนผ่านอีเมลและ SMS', description: 'ส่งทั้งอีเมลและ SMS แจ้งเตือนพร้อมกัน (เพิ่มช่องทาง SMS ผ่าน Twilio)', category: CAT_NOTIFY }
-  const N002: Feature = { id: 'N002', title: 'Push Notification มือถือ (Firebase)', description: 'ส่ง push notification ผ่าน Firebase Cloud Messaging บน iOS และ Android', category: CAT_NOTIFY }
-  const N003: Feature = { id: 'N003', title: 'ศูนย์แจ้งเตือนภายในแอป', description: 'กล่องรวม notification ทุกประเภท กดอ่านแล้ว/ลบได้ พร้อม badge จำนวนที่ยังไม่อ่าน', category: CAT_NOTIFY }
-  const N004: Feature = { id: 'N004', title: 'ตั้งค่าการรับแจ้งเตือนส่วนตัว', description: 'ผู้ใช้เลือกเองว่าจะรับ notification ประเภทไหน ผ่านช่องทางใด', category: CAT_NOTIFY }
+  const N001_OLD: Feature = { id: 'N001', title: 'แจ้งเตือนผ่านอีเมล', description: 'ส่งอีเมลแจ้งเตือนเมื่อมีกิจกรรมสำคัญ', category: CAT_NOTIFY, subcategory: 'อีเมลและ SMS' }
+  const N001_NEW: Feature = { id: 'N001', title: 'แจ้งเตือนผ่านอีเมลและ SMS', description: 'ส่งทั้งอีเมลและ SMS แจ้งเตือนพร้อมกัน (เพิ่มช่องทาง SMS ผ่าน Twilio)', category: CAT_NOTIFY, subcategory: 'อีเมลและ SMS' }
+  const N002: Feature = { id: 'N002', title: 'Push Notification มือถือ (Firebase)', description: 'ส่ง push notification ผ่าน Firebase Cloud Messaging บน iOS และ Android', category: CAT_NOTIFY, subcategory: 'Push Notification' }
+  const N003: Feature = { id: 'N003', title: 'ศูนย์แจ้งเตือนภายในแอป', description: 'กล่องรวม notification ทุกประเภท กดอ่านแล้ว/ลบได้ พร้อม badge จำนวนที่ยังไม่อ่าน', category: CAT_NOTIFY, subcategory: 'แจ้งเตือนในแอป' }
+  const N004: Feature = { id: 'N004', title: 'ตั้งค่าการรับแจ้งเตือนส่วนตัว', description: 'ผู้ใช้เลือกเองว่าจะรับ notification ประเภทไหน ผ่านช่องทางใด', category: CAT_NOTIFY, subcategory: 'การตั้งค่า' }
 
   // ---- Report/Dashboard features ----
-  const R001_OLD: Feature = { id: 'R001', title: 'รายงานสรุปรายเดือน', description: 'สร้างรายงาน PDF สรุปกิจกรรมประจำเดือน ส่งออกอัตโนมัติ', category: CAT_REPORT }
-  const R001_NEW: Feature = { id: 'R001', title: 'รายงานสรุปแบบยืดหยุ่น', description: 'เลือกช่วงเวลาได้เอง รายวัน/สัปดาห์/เดือน พร้อม export PDF หรือ Excel', category: CAT_REPORT }
-  const R002: Feature = { id: 'R002', title: 'Dashboard แบบ Real-time', description: 'แสดงสถิติการใช้งาน, จำนวน active users, และ error rate แบบ live', category: CAT_REPORT }
-  const R003: Feature = { id: 'R003', title: 'Export ข้อมูลดิบเป็น CSV', description: 'ดาวน์โหลดข้อมูลทุก entity เป็นไฟล์ CSV สำหรับวิเคราะห์ภายนอก', category: CAT_REPORT }
+  const R001_OLD: Feature = { id: 'R001', title: 'รายงานสรุปรายเดือน', description: 'สร้างรายงาน PDF สรุปกิจกรรมประจำเดือน ส่งออกอัตโนมัติ', category: CAT_REPORT, subcategory: 'รายงานสรุป' }
+  const R001_NEW: Feature = { id: 'R001', title: 'รายงานสรุปแบบยืดหยุ่น', description: 'เลือกช่วงเวลาได้เอง รายวัน/สัปดาห์/เดือน พร้อม export PDF หรือ Excel', category: CAT_REPORT, subcategory: 'รายงานสรุป' }
+  const R002: Feature = { id: 'R002', title: 'Dashboard แบบ Real-time', description: 'แสดงสถิติการใช้งาน, จำนวน active users, และ error rate แบบ live', category: CAT_REPORT, subcategory: 'Dashboard' }
+  const R003: Feature = { id: 'R003', title: 'Export ข้อมูลดิบเป็น CSV', description: 'ดาวน์โหลดข้อมูลทุก entity เป็นไฟล์ CSV สำหรับวิเคราะห์ภายนอก', category: CAT_REPORT, subcategory: 'Export ข้อมูล' }
 
   // ---- Search/Filter features ----
-  const S001_OLD: Feature = { id: 'S001', title: 'ค้นหาด้วย Keyword', description: 'ค้นหาเนื้อหาด้วยคำค้นตรงตัวอักษร (exact match)', category: CAT_SEARCH }
-  const S001_NEW: Feature = { id: 'S001', title: 'ค้นหาแบบ Full-text Search', description: 'ค้นหาด้วย Elasticsearch รองรับ fuzzy search, relevance score, และ Thai tokenizer', category: CAT_SEARCH }
-  const S002_OLD: Feature = { id: 'S002', title: 'กรองข้อมูลพื้นฐาน', description: 'กรองด้วย dropdown เดี่ยวๆ ทีละ field', category: CAT_SEARCH }
-  const S003: Feature = { id: 'S003', title: 'กรองตามวันที่และสถานะหลายค่า', description: 'Date range picker + multi-select status filter พร้อม Apply/Reset', category: CAT_SEARCH }
-  const S004: Feature = { id: 'S004', title: 'บันทึก Search Preset', description: 'บันทึกชุดการกรองที่ใช้บ่อยเป็น shortcut เรียกได้ด้วยคลิกเดียว', category: CAT_SEARCH }
+  const S001_OLD: Feature = { id: 'S001', title: 'ค้นหาด้วย Keyword', description: 'ค้นหาเนื้อหาด้วยคำค้นตรงตัวอักษร (exact match)', category: CAT_SEARCH, subcategory: 'ค้นหา' }
+  const S001_NEW: Feature = { id: 'S001', title: 'ค้นหาแบบ Full-text Search', description: 'ค้นหาด้วย Elasticsearch รองรับ fuzzy search, relevance score, และ Thai tokenizer', category: CAT_SEARCH, subcategory: 'ค้นหา' }
+  const S002_OLD: Feature = { id: 'S002', title: 'กรองข้อมูลพื้นฐาน', description: 'กรองด้วย dropdown เดี่ยวๆ ทีละ field', category: CAT_SEARCH, subcategory: 'กรองข้อมูล' }
+  const S003: Feature = { id: 'S003', title: 'กรองตามวันที่และสถานะหลายค่า', description: 'Date range picker + multi-select status filter พร้อม Apply/Reset', category: CAT_SEARCH, subcategory: 'กรองข้อมูล' }
+  const S004: Feature = { id: 'S004', title: 'บันทึก Search Preset', description: 'บันทึกชุดการกรองที่ใช้บ่อยเป็น shortcut เรียกได้ด้วยคลิกเดียว', category: CAT_SEARCH, subcategory: 'Search Preset' }
 
   const CAT_STK_AUTH   = 'การเข้าสู่ระบบและลงทะเบียน'
   const CAT_STK_PROD   = 'จัดการข้อมูลสินค้า'
@@ -95,44 +95,44 @@ export async function POST() {
   const CAT_STK_NOTIF  = 'การแจ้งเตือนและการแจ้งข่าว'
 
   // ---- ระบบสต็อกสินค้า: Baseline features (ก่อน Sprint นี้) ----
-  const AUTH001_OLD:  Feature = { id: 'AUTH001',   title: 'เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน',          description: 'ล็อกอินด้วยอีเมลและรหัสผ่าน ไม่มีการยืนยันตัวตนเพิ่มเติม',                       category: CAT_STK_AUTH   }
-  const AUTH002:      Feature = { id: 'AUTH002',   title: 'ลงทะเบียนสมาชิกใหม่',                       description: 'สร้างบัญชีด้วยอีเมล ชื่อ-นามสกุล และรหัสผ่าน พร้อมยืนยันอีเมลก่อนเข้าใช้งาน',  category: CAT_STK_AUTH   }
-  const AUTH003_OLD:  Feature = { id: 'AUTH003',   title: 'รีเซ็ตรหัสผ่านผ่านลิงก์อีเมล',              description: 'ส่ง link รีเซ็ตรหัสผ่านไปยังอีเมล มีอายุ 1 ชั่วโมง',                             category: CAT_STK_AUTH   }
-  const PROD001_OLD:  Feature = { id: 'PROD001',   title: 'ค้นหาสินค้าด้วยชื่อ',                        description: 'ค้นหาสินค้าด้วย keyword แบบ exact match ไม่รองรับคำที่สะกดผิด',                  category: CAT_STK_PROD   }
-  const PROD002:      Feature = { id: 'PROD002',   title: 'เพิ่มและแก้ไขข้อมูลสินค้า',                  description: 'เพิ่มสินค้าใหม่ แก้ไขชื่อ ราคา หมวดหมู่ และรหัสบาร์โค้ด',                       category: CAT_STK_PROD   }
-  const PROD003:      Feature = { id: 'PROD003',   title: 'จัดการหมวดหมู่สินค้า',                       description: 'เพิ่ม แก้ไข ลบหมวดหมู่ และย้ายสินค้าระหว่างหมวดหมู่',                           category: CAT_STK_PROD   }
-  const PROD004:      Feature = { id: 'PROD004',   title: 'อัปโหลดรูปภาพสินค้า',                        description: 'อัปโหลดรูปสินค้าสูงสุด 3 รูปต่อชิ้น ขนาดไม่เกิน 5MB ต่อรูป',                   category: CAT_STK_PROD   }
-  const STOCK001_OLD: Feature = { id: 'STOCK001',  title: 'ดูจำนวนสต็อกปัจจุบัน',                       description: 'แสดงจำนวนสต็อกคงเหลือ กดปุ่มรีเฟรชด้วยตัวเองเพื่ออัปเดต',                      category: CAT_STK_STOCK  }
-  const STOCK002:     Feature = { id: 'STOCK002',  title: 'บันทึกรับสินค้าเข้าคลัง',                    description: 'กรอกจำนวนที่รับเข้า ระบุผู้จัดจำหน่าย วันที่ และหมายเหตุ',                       category: CAT_STK_STOCK  }
-  const STOCK003:     Feature = { id: 'STOCK003',  title: 'บันทึกเบิกสินค้าออก',                        description: 'กรอกจำนวนที่เบิกออก ระบุเหตุผลและแผนกที่รับ',                                   category: CAT_STK_STOCK  }
-  const STOCK004_OLD: Feature = { id: 'STOCK004',  title: 'ตั้งค่าขั้นต่ำสต็อกรายสินค้า',              description: 'ตั้ง minimum stock level ทีละ 1 รายการผ่านหน้าแก้ไขสินค้า',                    category: CAT_STK_STOCK  }
-  const STOCK005:     Feature = { id: 'STOCK005',  title: 'นำเข้าสต็อกจากไฟล์ CSV (เวอร์ชันเก่า)',    description: 'อัปโหลด CSV เพื่ออัปเดตสต็อก รองรับเฉพาะ ASCII ไม่มี error report',               category: CAT_STK_STOCK  }
-  const REPORT001_OLD: Feature = { id: 'REPORT001', title: 'รายงานสต็อกคงเหลือ (ตารางพื้นฐาน)',        description: 'แสดงสต็อกคงเหลือเป็นตาราง ไม่สามารถกรองหรือ export ได้',                         category: CAT_STK_REPORT }
-  const REPORT002:    Feature = { id: 'REPORT002',  title: 'พิมพ์รายงานสต็อกแบบ Basic',                description: 'พิมพ์รายงานสต็อกผ่านหน้าเว็บ ไม่มีตัวเลือกกรองหรือปรับแต่ง layout',           category: CAT_STK_REPORT }
+  const AUTH001_OLD:  Feature = { id: 'AUTH001',   title: 'เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน',          description: 'ล็อกอินด้วยอีเมลและรหัสผ่าน ไม่มีการยืนยันตัวตนเพิ่มเติม',                       category: CAT_STK_AUTH,   subcategory: 'เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน' }
+  const AUTH002:      Feature = { id: 'AUTH002',   title: 'ลงทะเบียนสมาชิกใหม่',                       description: 'สร้างบัญชีด้วยอีเมล ชื่อ-นามสกุล และรหัสผ่าน พร้อมยืนยันอีเมลก่อนเข้าใช้งาน',  category: CAT_STK_AUTH,   subcategory: 'ลงทะเบียนสมาชิก' }
+  const AUTH003_OLD:  Feature = { id: 'AUTH003',   title: 'รีเซ็ตรหัสผ่านผ่านลิงก์อีเมล',              description: 'ส่ง link รีเซ็ตรหัสผ่านไปยังอีเมล มีอายุ 1 ชั่วโมง',                             category: CAT_STK_AUTH,   subcategory: 'รีเซ็ตรหัสผ่าน' }
+  const PROD001_OLD:  Feature = { id: 'PROD001',   title: 'ค้นหาสินค้าด้วยชื่อ',                        description: 'ค้นหาสินค้าด้วย keyword แบบ exact match ไม่รองรับคำที่สะกดผิด',                  category: CAT_STK_PROD,   subcategory: 'ค้นหาสินค้า' }
+  const PROD002:      Feature = { id: 'PROD002',   title: 'เพิ่มและแก้ไขข้อมูลสินค้า',                  description: 'เพิ่มสินค้าใหม่ แก้ไขชื่อ ราคา หมวดหมู่ และรหัสบาร์โค้ด',                       category: CAT_STK_PROD,   subcategory: 'จัดการสินค้า' }
+  const PROD003:      Feature = { id: 'PROD003',   title: 'จัดการหมวดหมู่สินค้า',                       description: 'เพิ่ม แก้ไข ลบหมวดหมู่ และย้ายสินค้าระหว่างหมวดหมู่',                           category: CAT_STK_PROD,   subcategory: 'หมวดหมู่สินค้า' }
+  const PROD004:      Feature = { id: 'PROD004',   title: 'อัปโหลดรูปภาพสินค้า',                        description: 'อัปโหลดรูปสินค้าสูงสุด 3 รูปต่อชิ้น ขนาดไม่เกิน 5MB ต่อรูป',                   category: CAT_STK_PROD,   subcategory: 'รูปภาพสินค้า' }
+  const STOCK001_OLD: Feature = { id: 'STOCK001',  title: 'ดูจำนวนสต็อกปัจจุบัน',                       description: 'แสดงจำนวนสต็อกคงเหลือ กดปุ่มรีเฟรชด้วยตัวเองเพื่ออัปเดต',                      category: CAT_STK_STOCK,  subcategory: 'ดูสต็อก' }
+  const STOCK002:     Feature = { id: 'STOCK002',  title: 'บันทึกรับสินค้าเข้าคลัง',                    description: 'กรอกจำนวนที่รับเข้า ระบุผู้จัดจำหน่าย วันที่ และหมายเหตุ',                       category: CAT_STK_STOCK,  subcategory: 'รับสินค้า' }
+  const STOCK003:     Feature = { id: 'STOCK003',  title: 'บันทึกเบิกสินค้าออก',                        description: 'กรอกจำนวนที่เบิกออก ระบุเหตุผลและแผนกที่รับ',                                   category: CAT_STK_STOCK,  subcategory: 'เบิกสินค้า' }
+  const STOCK004_OLD: Feature = { id: 'STOCK004',  title: 'ตั้งค่าขั้นต่ำสต็อกรายสินค้า',              description: 'ตั้ง minimum stock level ทีละ 1 รายการผ่านหน้าแก้ไขสินค้า',                    category: CAT_STK_STOCK,  subcategory: 'ตั้งค่าขั้นต่ำสต็อก' }
+  const STOCK005:     Feature = { id: 'STOCK005',  title: 'นำเข้าสต็อกจากไฟล์ CSV (เวอร์ชันเก่า)',    description: 'อัปโหลด CSV เพื่ออัปเดตสต็อก รองรับเฉพาะ ASCII ไม่มี error report',               category: CAT_STK_STOCK,  subcategory: 'นำเข้าข้อมูล' }
+  const REPORT001_OLD: Feature = { id: 'REPORT001', title: 'รายงานสต็อกคงเหลือ (ตารางพื้นฐาน)',        description: 'แสดงสต็อกคงเหลือเป็นตาราง ไม่สามารถกรองหรือ export ได้',                         category: CAT_STK_REPORT, subcategory: 'รายงานสต็อก' }
+  const REPORT002:    Feature = { id: 'REPORT002',  title: 'พิมพ์รายงานสต็อกแบบ Basic',                description: 'พิมพ์รายงานสต็อกผ่านหน้าเว็บ ไม่มีตัวเลือกกรองหรือปรับแต่ง layout',           category: CAT_STK_REPORT, subcategory: 'พิมพ์รายงาน' }
 
   // ---- ระบบสต็อกสินค้า: Sprint features (ใหม่/เปลี่ยนแปลง) ----
   // การเข้าสู่ระบบและลงทะเบียน
-  const AUTH001_NEW:  Feature = { id: 'AUTH001',   title: 'เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน + OTP',      description: 'ล็อกอินด้วยอีเมลและรหัสผ่าน เพิ่มขั้นตอน OTP ทาง Email สำหรับ Admin',           category: CAT_STK_AUTH   }
-  const AUTH003_NEW:  Feature = { id: 'AUTH003',   title: 'รีเซ็ตรหัสผ่านผ่าน OTP SMS',                 description: 'ส่ง OTP 6 หลักทาง SMS แทน link อีเมล หมดอายุใน 5 นาที',                        category: CAT_STK_AUTH   }
-  const AUTH004:      Feature = { id: 'AUTH004',   title: 'เข้าสู่ระบบด้วย Google Account',             description: 'ล็อกอินด้วยบัญชี Google ขององค์กร ไม่ต้องจำรหัสผ่านแยก',                      category: CAT_STK_AUTH   }
-  const AUTH005:      Feature = { id: 'AUTH005',   title: 'เข้าสู่ระบบด้วยเบอร์โทรศัพท์',               description: 'กรอกเบอร์โทรและ OTP SMS เพื่อล็อกอิน ไม่ต้องใช้รหัสผ่าน',                      category: CAT_STK_AUTH   }
-  const AUTH006:      Feature = { id: 'AUTH006',   title: 'ออกจากระบบทุกอุปกรณ์พร้อมกัน',               description: 'ยกเลิก session ทุกอุปกรณ์พร้อมกัน สำหรับกรณีบัญชีถูกขโมยหรือสูญหาย',           category: CAT_STK_AUTH   }
+  const AUTH001_NEW:  Feature = { id: 'AUTH001',   title: 'เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน + OTP',      description: 'ล็อกอินด้วยอีเมลและรหัสผ่าน เพิ่มขั้นตอน OTP ทาง Email สำหรับ Admin',           category: CAT_STK_AUTH,   subcategory: 'เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน' }
+  const AUTH003_NEW:  Feature = { id: 'AUTH003',   title: 'รีเซ็ตรหัสผ่านผ่าน OTP SMS',                 description: 'ส่ง OTP 6 หลักทาง SMS แทน link อีเมล หมดอายุใน 5 นาที',                        category: CAT_STK_AUTH,   subcategory: 'รีเซ็ตรหัสผ่าน' }
+  const AUTH004:      Feature = { id: 'AUTH004',   title: 'เข้าสู่ระบบด้วย Google Account',             description: 'ล็อกอินด้วยบัญชี Google ขององค์กร ไม่ต้องจำรหัสผ่านแยก',                      category: CAT_STK_AUTH,   subcategory: 'เข้าสู่ระบบด้วย Google' }
+  const AUTH005:      Feature = { id: 'AUTH005',   title: 'เข้าสู่ระบบด้วยเบอร์โทรศัพท์',               description: 'กรอกเบอร์โทรและ OTP SMS เพื่อล็อกอิน ไม่ต้องใช้รหัสผ่าน',                      category: CAT_STK_AUTH,   subcategory: 'เข้าสู่ระบบด้วยเบอร์โทรศัพท์' }
+  const AUTH006:      Feature = { id: 'AUTH006',   title: 'ออกจากระบบทุกอุปกรณ์พร้อมกัน',               description: 'ยกเลิก session ทุกอุปกรณ์พร้อมกัน สำหรับกรณีบัญชีถูกขโมยหรือสูญหาย',           category: CAT_STK_AUTH,   subcategory: 'จัดการ Session' }
   // จัดการข้อมูลสินค้า
-  const PROD001_NEW:  Feature = { id: 'PROD001',   title: 'ค้นหาและกรองสินค้าขั้นสูง',                  description: 'Full-text search + กรองตามหมวดหมู่ ช่วงราคา สถานะสต็อก Export ผลลัพธ์เป็น CSV', category: CAT_STK_PROD   }
-  const PROD005:      Feature = { id: 'PROD005',   title: 'นำเข้าสินค้าจากไฟล์ Excel',                  description: 'อัปโหลดไฟล์ .xlsx เพิ่มสินค้าหลายรายการพร้อมกัน รองรับ validation ก่อน import',  category: CAT_STK_PROD   }
-  const PROD006:      Feature = { id: 'PROD006',   title: 'ส่งออกรายการสินค้าเป็น CSV',                  description: 'ดาวน์โหลดรายการสินค้าทั้งหมดหรือตามที่กรองเป็นไฟล์ CSV',                        category: CAT_STK_PROD   }
-  const PROD007:      Feature = { id: 'PROD007',   title: 'จัดการข้อมูลผู้จัดจำหน่าย',                  description: 'เพิ่ม แก้ไข ลบข้อมูล supplier เชื่อมโยงกับสินค้าแต่ละรายการ',                    category: CAT_STK_PROD   }
+  const PROD001_NEW:  Feature = { id: 'PROD001',   title: 'ค้นหาและกรองสินค้าขั้นสูง',                  description: 'Full-text search + กรองตามหมวดหมู่ ช่วงราคา สถานะสต็อก Export ผลลัพธ์เป็น CSV', category: CAT_STK_PROD,   subcategory: 'ค้นหาสินค้า' }
+  const PROD005:      Feature = { id: 'PROD005',   title: 'นำเข้าสินค้าจากไฟล์ Excel',                  description: 'อัปโหลดไฟล์ .xlsx เพิ่มสินค้าหลายรายการพร้อมกัน รองรับ validation ก่อน import',  category: CAT_STK_PROD,   subcategory: 'นำเข้าข้อมูล' }
+  const PROD006:      Feature = { id: 'PROD006',   title: 'ส่งออกรายการสินค้าเป็น CSV',                  description: 'ดาวน์โหลดรายการสินค้าทั้งหมดหรือตามที่กรองเป็นไฟล์ CSV',                        category: CAT_STK_PROD,   subcategory: 'ส่งออกข้อมูล' }
+  const PROD007:      Feature = { id: 'PROD007',   title: 'จัดการข้อมูลผู้จัดจำหน่าย',                  description: 'เพิ่ม แก้ไข ลบข้อมูล supplier เชื่อมโยงกับสินค้าแต่ละรายการ',                    category: CAT_STK_PROD,   subcategory: 'ผู้จัดจำหน่าย' }
   // จัดการสต็อกและคลังสินค้า
-  const STOCK001_NEW: Feature = { id: 'STOCK001',  title: 'ดูสต็อก Real-time ทุกสาขา',                  description: 'แสดงสต็อกอัปเดตอัตโนมัติทุก 30 วินาที เปรียบเทียบยอดระหว่างสาขาได้',             category: CAT_STK_STOCK  }
-  const STOCK004_NEW: Feature = { id: 'STOCK004',  title: 'ตั้งค่าขั้นต่ำสต็อกแบบ Bulk',               description: 'ตั้ง minimum stock level ทีละหลายรายการพร้อมกัน รองรับอัปโหลดผ่าน Excel',       category: CAT_STK_STOCK  }
-  const STOCK006:     Feature = { id: 'STOCK006',  title: 'ดูประวัติการเคลื่อนไหวสต็อก',                description: 'แสดงรายการรับ/เบิก/โอน ย้อนหลัง 90 วัน กรองตามสินค้าและช่วงวันที่ได้',         category: CAT_STK_STOCK  }
-  const STOCK007:     Feature = { id: 'STOCK007',  title: 'โอนสต็อกระหว่างสาขา',                        description: 'สร้างใบโอนสินค้าจากสาขาหนึ่งไปอีกสาขา ยืนยันรับก่อนตัดยอด',                   category: CAT_STK_STOCK  }
-  const STOCK008:     Feature = { id: 'STOCK008',  title: 'ปรับยอดสต็อกฉุกเฉิน',                        description: 'Admin แก้ไขจำนวนสต็อกได้โดยตรง พร้อมบันทึกเหตุผลและผู้อนุมัติ',                 category: CAT_STK_STOCK  }
+  const STOCK001_NEW: Feature = { id: 'STOCK001',  title: 'ดูสต็อก Real-time ทุกสาขา',                  description: 'แสดงสต็อกอัปเดตอัตโนมัติทุก 30 วินาที เปรียบเทียบยอดระหว่างสาขาได้',             category: CAT_STK_STOCK,  subcategory: 'ดูสต็อก' }
+  const STOCK004_NEW: Feature = { id: 'STOCK004',  title: 'ตั้งค่าขั้นต่ำสต็อกแบบ Bulk',               description: 'ตั้ง minimum stock level ทีละหลายรายการพร้อมกัน รองรับอัปโหลดผ่าน Excel',       category: CAT_STK_STOCK,  subcategory: 'ตั้งค่าขั้นต่ำสต็อก' }
+  const STOCK006:     Feature = { id: 'STOCK006',  title: 'ดูประวัติการเคลื่อนไหวสต็อก',                description: 'แสดงรายการรับ/เบิก/โอน ย้อนหลัง 90 วัน กรองตามสินค้าและช่วงวันที่ได้',         category: CAT_STK_STOCK,  subcategory: 'ประวัติสต็อก' }
+  const STOCK007:     Feature = { id: 'STOCK007',  title: 'โอนสต็อกระหว่างสาขา',                        description: 'สร้างใบโอนสินค้าจากสาขาหนึ่งไปอีกสาขา ยืนยันรับก่อนตัดยอด',                   category: CAT_STK_STOCK,  subcategory: 'โอนสต็อก' }
+  const STOCK008:     Feature = { id: 'STOCK008',  title: 'ปรับยอดสต็อกฉุกเฉิน',                        description: 'Admin แก้ไขจำนวนสต็อกได้โดยตรง พร้อมบันทึกเหตุผลและผู้อนุมัติ',                 category: CAT_STK_STOCK,  subcategory: 'ปรับยอดฉุกเฉิน' }
   // รายงานและวิเคราะห์ข้อมูล
-  const REPORT001_NEW: Feature = { id: 'REPORT001', title: 'รายงานวิเคราะห์สต็อก (กราฟ + กรองวันที่)',  description: 'แสดงกราฟการเคลื่อนไหวสต็อก กรองช่วงวันที่ได้ export Excel',                       category: CAT_STK_REPORT }
-  const REPORT003:    Feature = { id: 'REPORT003',  title: 'รายงานสินค้าใกล้หมดอายุ',                    description: 'แสดงสินค้าที่จะหมดอายุใน 30/60/90 วัน ส่งออก Excel และแจ้งเตือนล่วงหน้า',      category: CAT_STK_REPORT }
+  const REPORT001_NEW: Feature = { id: 'REPORT001', title: 'รายงานวิเคราะห์สต็อก (กราฟ + กรองวันที่)',  description: 'แสดงกราฟการเคลื่อนไหวสต็อก กรองช่วงวันที่ได้ export Excel',                       category: CAT_STK_REPORT, subcategory: 'รายงานสต็อก' }
+  const REPORT003:    Feature = { id: 'REPORT003',  title: 'รายงานสินค้าใกล้หมดอายุ',                    description: 'แสดงสินค้าที่จะหมดอายุใน 30/60/90 วัน ส่งออก Excel และแจ้งเตือนล่วงหน้า',      category: CAT_STK_REPORT, subcategory: 'รายงานหมดอายุ' }
   // การแจ้งเตือน
-  const NOTIF001:     Feature = { id: 'NOTIF001',  title: 'แจ้งเตือน Push Notification บนมือถือ',       description: 'ส่ง push notification ผ่าน Firebase เมื่อสต็อกต่ำกว่าขั้นต่ำหรือสินค้าหมด',    category: CAT_STK_NOTIF  }
+  const NOTIF001:     Feature = { id: 'NOTIF001',  title: 'แจ้งเตือน Push Notification บนมือถือ',       description: 'ส่ง push notification ผ่าน Firebase เมื่อสต็อกต่ำกว่าขั้นต่ำหรือสินค้าหมด',    category: CAT_STK_NOTIF,  subcategory: 'Push Notification' }
 
   const mobileFeatures: Feature[] = [
     { id: 'M001', title: 'Push Notification', description: 'แจ้งเตือนผ่าน Firebase FCM', category: 'Notification' },

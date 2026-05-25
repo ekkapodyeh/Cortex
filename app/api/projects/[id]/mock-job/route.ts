@@ -11,144 +11,44 @@ const MOCK_COMMITS = [
 
 // ─── เพิ่มใหม่ (added) ───────────────────────────────────────────────────────
 const ADDED: Feature[] = [
-  {
-    id: 'AUTH004',
-    title: 'เข้าสู่ระบบด้วย Google Account',
-    description: 'รองรับ Sign in with Google สำหรับบัญชีองค์กร (@company.com) ผ่าน OAuth 2.0',
-    category: 'การเข้าสู่ระบบและลงทะเบียน',
-  },
-  {
-    id: 'AUTH005',
-    title: 'เข้าสู่ระบบด้วยเบอร์โทรศัพท์',
-    description: 'กรอกเบอร์โทรและ OTP SMS 6 หลัก หมดอายุ 5 นาที ไม่ต้องจำรหัสผ่าน',
-    category: 'การเข้าสู่ระบบและลงทะเบียน',
-  },
-  {
-    id: 'PROD005',
-    title: 'นำเข้าสินค้าจากไฟล์ Excel',
-    description: 'อัปโหลด .xlsx เพิ่มสินค้าหลายรายการพร้อมกัน รองรับ validation ก่อน import และแสดง error report',
-    category: 'จัดการข้อมูลสินค้า',
-  },
-  {
-    id: 'PROD006',
-    title: 'ส่งออกรายการสินค้าเป็น CSV',
-    description: 'ดาวน์โหลดรายการสินค้าตามที่กรองเป็นไฟล์ CSV พร้อม header และ encoding UTF-8',
-    category: 'จัดการข้อมูลสินค้า',
-  },
-  {
-    id: 'PROD007',
-    title: 'จัดการข้อมูลผู้จัดจำหน่าย (Supplier)',
-    description: 'เพิ่ม แก้ไข ลบ supplier เชื่อมกับสินค้าแต่ละรายการ ดูประวัติการสั่งซื้อย้อนหลัง',
-    category: 'จัดการข้อมูลสินค้า',
-  },
-  {
-    id: 'STOCK006',
-    title: 'หน้าประวัติการเคลื่อนไหวสต็อก',
-    description: 'ดูรายการรับ/เบิก/โอนย้อนหลัง 90 วัน กรองตามสินค้าและวันที่ Export Excel ได้',
-    category: 'จัดการสต็อกและคลังสินค้า',
-  },
-  {
-    id: 'REPORT001',
-    title: 'รายงานสต็อกพร้อมกราฟและกรองวันที่',
-    description: 'หน้าใหม่แสดงกราฟแนวโน้มสต็อก กรองช่วงวันที่ได้ แยกตามสาขา Export PDF/Excel',
-    category: 'รายงานและวิเคราะห์ข้อมูล',
-  },
-  {
-    id: 'REPORT003',
-    title: 'รายงานสินค้าใกล้หมดอายุ',
-    description: 'แสดงสินค้าที่จะหมดอายุใน 30/60/90 วัน ส่งออก Excel และตั้งค่าแจ้งเตือนอัตโนมัติ',
-    category: 'รายงานและวิเคราะห์ข้อมูล',
-  },
-  {
-    id: 'NOTIF001',
-    title: 'Push Notification บนมือถือ',
-    description: 'ส่ง push notification ผ่าน Firebase Cloud Messaging เมื่อสต็อกต่ำหรือสินค้าหมด',
-    category: 'การแจ้งเตือนและการแจ้งข่าว',
-  },
+  { id: 'AUTH004', title: 'เข้าสู่ระบบด้วย Google Account',           description: 'รองรับ Sign in with Google สำหรับบัญชีองค์กร (@company.com) ผ่าน OAuth 2.0',                    category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'เข้าสู่ระบบด้วย Google'           },
+  { id: 'AUTH005', title: 'เข้าสู่ระบบด้วยเบอร์โทรศัพท์',             description: 'กรอกเบอร์โทรและ OTP SMS 6 หลัก หมดอายุ 5 นาที ไม่ต้องจำรหัสผ่าน',                              category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'เข้าสู่ระบบด้วยเบอร์โทรศัพท์'     },
+  { id: 'PROD005', title: 'นำเข้าสินค้าจากไฟล์ Excel',                description: 'อัปโหลด .xlsx เพิ่มสินค้าหลายรายการพร้อมกัน รองรับ validation ก่อน import และแสดง error report', category: 'จัดการข้อมูลสินค้า',             subcategory: 'นำเข้าข้อมูล'                      },
+  { id: 'PROD006', title: 'ส่งออกรายการสินค้าเป็น CSV',                description: 'ดาวน์โหลดรายการสินค้าตามที่กรองเป็นไฟล์ CSV พร้อม header และ encoding UTF-8',                   category: 'จัดการข้อมูลสินค้า',             subcategory: 'ส่งออกข้อมูล'                      },
+  { id: 'PROD007', title: 'จัดการข้อมูลผู้จัดจำหน่าย (Supplier)',      description: 'เพิ่ม แก้ไข ลบ supplier เชื่อมกับสินค้าแต่ละรายการ ดูประวัติการสั่งซื้อย้อนหลัง',            category: 'จัดการข้อมูลสินค้า',             subcategory: 'ผู้จัดจำหน่าย'                     },
+  { id: 'STOCK006', title: 'หน้าประวัติการเคลื่อนไหวสต็อก',           description: 'ดูรายการรับ/เบิก/โอนย้อนหลัง 90 วัน กรองตามสินค้าและวันที่ Export Excel ได้',                  category: 'จัดการสต็อกและคลังสินค้า',       subcategory: 'ประวัติสต็อก'                       },
+  { id: 'REPORT001', title: 'รายงานสต็อกพร้อมกราฟและกรองวันที่',      description: 'หน้าใหม่แสดงกราฟแนวโน้มสต็อก กรองช่วงวันที่ได้ แยกตามสาขา Export PDF/Excel',                  category: 'รายงานและวิเคราะห์ข้อมูล',       subcategory: 'รายงานสต็อก'                        },
+  { id: 'REPORT003', title: 'รายงานสินค้าใกล้หมดอายุ',                 description: 'แสดงสินค้าที่จะหมดอายุใน 30/60/90 วัน ส่งออก Excel และตั้งค่าแจ้งเตือนอัตโนมัติ',             category: 'รายงานและวิเคราะห์ข้อมูล',       subcategory: 'รายงานหมดอายุ'                      },
+  { id: 'NOTIF001', title: 'Push Notification บนมือถือ',                description: 'ส่ง push notification ผ่าน Firebase Cloud Messaging เมื่อสต็อกต่ำหรือสินค้าหมด',               category: 'การแจ้งเตือนและการแจ้งข่าว',     subcategory: 'Push Notification'                  },
 ]
 
 // ─── แก้ไข (modified) ────────────────────────────────────────────────────────
 const MODIFIED = [
   {
-    old: {
-      id: 'AUTH001',
-      title: 'เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน',
-      description: 'ผู้ดูแลระบบล็อกอินด้วยอีเมลและรหัสผ่าน',
-      category: 'การเข้าสู่ระบบและลงทะเบียน',
-    } as Feature,
-    new: {
-      id: 'AUTH001',
-      title: 'เข้าสู่ระบบด้วยอีเมล + OTP ยืนยันตัวตนสำหรับ Admin',
-      description: 'Admin ล็อกอินด้วยอีเมล/รหัสผ่าน แล้วยืนยัน OTP 6 หลักทาง Email ก่อนเข้าระบบ',
-      category: 'การเข้าสู่ระบบและลงทะเบียน',
-    } as Feature,
+    old: { id: 'AUTH001', title: 'เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน',          description: 'ผู้ดูแลระบบล็อกอินด้วยอีเมลและรหัสผ่าน',                                         category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน' } as Feature,
+    new: { id: 'AUTH001', title: 'เข้าสู่ระบบด้วยอีเมล + OTP ยืนยันตัวตนสำหรับ Admin', description: 'Admin ล็อกอินด้วยอีเมล/รหัสผ่าน แล้วยืนยัน OTP 6 หลักทาง Email ก่อนเข้าระบบ', category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'เข้าสู่ระบบด้วยอีเมลและรหัสผ่าน' } as Feature,
   },
   {
-    old: {
-      id: 'AUTH003',
-      title: 'รีเซ็ตรหัสผ่านผ่านลิงก์ทางอีเมล',
-      description: 'ส่ง reset link ทางอีเมล มีอายุ 1 ชั่วโมง',
-      category: 'การเข้าสู่ระบบและลงทะเบียน',
-    } as Feature,
-    new: {
-      id: 'AUTH003',
-      title: 'รีเซ็ตรหัสผ่านผ่าน OTP SMS',
-      description: 'เปลี่ยนจาก reset link ทางอีเมล เป็น OTP 6 หลักทาง SMS หมดอายุใน 5 นาที',
-      category: 'การเข้าสู่ระบบและลงทะเบียน',
-    } as Feature,
+    old: { id: 'AUTH003', title: 'รีเซ็ตรหัสผ่านผ่านลิงก์ทางอีเมล',          description: 'ส่ง reset link ทางอีเมล มีอายุ 1 ชั่วโมง',                                         category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'รีเซ็ตรหัสผ่าน' } as Feature,
+    new: { id: 'AUTH003', title: 'รีเซ็ตรหัสผ่านผ่าน OTP SMS',                description: 'เปลี่ยนจาก reset link ทางอีเมล เป็น OTP 6 หลักทาง SMS หมดอายุใน 5 นาที',         category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'รีเซ็ตรหัสผ่าน' } as Feature,
   },
   {
-    old: {
-      id: 'PROD001',
-      title: 'ค้นหาสินค้าตามชื่อและ SKU',
-      description: 'ค้นหาสินค้าด้วยชื่อหรือรหัส SKU แบบ exact match',
-      category: 'จัดการข้อมูลสินค้า',
-    } as Feature,
-    new: {
-      id: 'PROD001',
-      title: 'ค้นหาสินค้าแบบ Full-text + กรองขั้นสูง',
-      description: 'Full-text search + กรองตามหมวดหมู่ ช่วงราคา สถานะสต็อก สาขา Export เป็น CSV ได้',
-      category: 'จัดการข้อมูลสินค้า',
-    } as Feature,
+    old: { id: 'PROD001', title: 'ค้นหาสินค้าตามชื่อและ SKU',                 description: 'ค้นหาสินค้าด้วยชื่อหรือรหัส SKU แบบ exact match',                                  category: 'จัดการข้อมูลสินค้า',             subcategory: 'ค้นหาสินค้า' } as Feature,
+    new: { id: 'PROD001', title: 'ค้นหาสินค้าแบบ Full-text + กรองขั้นสูง',   description: 'Full-text search + กรองตามหมวดหมู่ ช่วงราคา สถานะสต็อก สาขา Export เป็น CSV ได้', category: 'จัดการข้อมูลสินค้า',             subcategory: 'ค้นหาสินค้า' } as Feature,
   },
   {
-    old: {
-      id: 'STOCK001',
-      title: 'ดูยอดสต็อกปัจจุบันแต่ละสาขา',
-      description: 'แสดงยอดสต็อกสินค้าแต่ละสาขา อัปเดตทุก 5 นาที',
-      category: 'จัดการสต็อกและคลังสินค้า',
-    } as Feature,
-    new: {
-      id: 'STOCK001',
-      title: 'ดูสต็อก Real-time ทุกสาขาพร้อมเปรียบเทียบ',
-      description: 'อัปเดตอัตโนมัติทุก 30 วินาที เปรียบเทียบยอดระหว่างสาขา แสดง trend 7 วัน',
-      category: 'จัดการสต็อกและคลังสินค้า',
-    } as Feature,
+    old: { id: 'STOCK001', title: 'ดูยอดสต็อกปัจจุบันแต่ละสาขา',             description: 'แสดงยอดสต็อกสินค้าแต่ละสาขา อัปเดตทุก 5 นาที',                                   category: 'จัดการสต็อกและคลังสินค้า',       subcategory: 'ดูสต็อก' } as Feature,
+    new: { id: 'STOCK001', title: 'ดูสต็อก Real-time ทุกสาขาพร้อมเปรียบเทียบ', description: 'อัปเดตอัตโนมัติทุก 30 วินาที เปรียบเทียบยอดระหว่างสาขา แสดง trend 7 วัน',       category: 'จัดการสต็อกและคลังสินค้า',       subcategory: 'ดูสต็อก' } as Feature,
   },
   {
-    old: {
-      id: 'STOCK004',
-      title: 'ตั้งค่าจำนวนขั้นต่ำสต็อกทีละรายการ',
-      description: 'กำหนด minimum stock แต่ละสินค้าทีละรายการ',
-      category: 'จัดการสต็อกและคลังสินค้า',
-    } as Feature,
-    new: {
-      id: 'STOCK004',
-      title: 'ตั้งค่าขั้นต่ำสต็อกแบบ Bulk พร้อม Excel Import',
-      description: 'ตั้งค่าทีละหลายรายการพร้อมกัน รองรับอัปโหลด Excel และ preview ก่อน save',
-      category: 'จัดการสต็อกและคลังสินค้า',
-    } as Feature,
+    old: { id: 'STOCK004', title: 'ตั้งค่าจำนวนขั้นต่ำสต็อกทีละรายการ',      description: 'กำหนด minimum stock แต่ละสินค้าทีละรายการ',                                        category: 'จัดการสต็อกและคลังสินค้า',       subcategory: 'ตั้งค่าขั้นต่ำสต็อก' } as Feature,
+    new: { id: 'STOCK004', title: 'ตั้งค่าขั้นต่ำสต็อกแบบ Bulk พร้อม Excel Import', description: 'ตั้งค่าทีละหลายรายการพร้อมกัน รองรับอัปโหลด Excel และ preview ก่อน save',   category: 'จัดการสต็อกและคลังสินค้า',       subcategory: 'ตั้งค่าขั้นต่ำสต็อก' } as Feature,
   },
 ]
 
 // ─── ลบออก (removed) ─────────────────────────────────────────────────────────
 const REMOVED: Feature[] = [
-  {
-    id: 'STOCK005',
-    title: 'นำเข้าสต็อกจาก CSV แบบเก่า',
-    description: 'อัปโหลดไฟล์ CSV รูปแบบ legacy เพื่อเพิ่มสต็อก',
-    category: 'จัดการสต็อกและคลังสินค้า',
-  },
+  { id: 'STOCK005', title: 'นำเข้าสต็อกจาก CSV แบบเก่า', description: 'อัปโหลดไฟล์ CSV รูปแบบ legacy เพื่อเพิ่มสต็อก', category: 'จัดการสต็อกและคลังสินค้า', subcategory: 'นำเข้าข้อมูล' },
 ]
 
 export async function POST(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {

@@ -4,8 +4,7 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { Feature, DiffResult } from '@/lib/types'
-import { IMPACT } from '@/lib/impact-data'
-import { CaretRightIcon, FileIcon, PlayIcon, PresentationChartIcon, PlusIcon, XIcon } from '@phosphor-icons/react'
+import { CaretRightIcon, FileIcon, PlayIcon, PresentationChartIcon, XIcon } from '@phosphor-icons/react'
 
 interface SprintReqItem {
   id: string
@@ -30,6 +29,7 @@ interface FeatureItem {
   oldFeature: Feature | null
   changeType: ChangeType
   category: string
+  subcategory: string
   req: SprintReqItem | null
 }
 
@@ -50,137 +50,33 @@ function ChangeBadge({ type }: { type: ChangeType }) {
 }
 
 
-function groupByCategory(items: FeatureItem[]) {
-  const map = new Map<string, FeatureItem[]>()
-  for (const item of items) {
-    if (!map.has(item.category)) map.set(item.category, [])
-    map.get(item.category)!.push(item)
-  }
-  return Array.from(map.entries()).map(([cat, features]) => ({ cat, features }))
-}
-
-function CategoryCard({ cat, items }: { cat: string; items: FeatureItem[] }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl overflow-hidden">
-      <button onClick={() => setOpen(o => !o)} className="w-full px-5 py-4 flex items-center gap-3 text-left hover:bg-[var(--bg-hover)] transition-colors">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-[var(--text-primary)]">{cat}</p>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">{items.length} รายการ</p>
-        </div>
-        <CaretRightIcon size={14} className={`text-[var(--text-muted)] transition-transform duration-200 shrink-0 ${open ? 'rotate-90' : ''}`} />
-      </button>
-      {open && (
-        <>
-          <div className="grid grid-cols-[120px_1fr_1fr] border-t border-b border-[var(--border)]">
-            <div />
-            <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider px-4 py-2">ของเดิม</p>
-            <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider px-4 py-2 border-l border-[var(--border)]">ของใหม่</p>
-          </div>
-          {items.map((item, i) => {
-            const impact = IMPACT[item.feature.id]
-            return (
-              <div key={item.feature.id} className={i > 0 ? 'border-t border-[var(--border)]' : ''}>
-                <div className="grid grid-cols-[120px_1fr_1fr]">
-                  <div className="px-4 py-3 flex items-start">
-                    <ChangeBadge type={item.changeType} />
-                  </div>
-                  <div className="px-4 py-3">
-                    {item.oldFeature ? (
-                      <>
-                        <p className="text-sm font-medium text-[var(--text-primary)]">{item.oldFeature.title}</p>
-                        {item.oldFeature.description && <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{item.oldFeature.description}</p>}
-                      </>
-                    ) : item.changeType === 'added' ? (
-                      <p className="text-xs text-[var(--text-muted)] italic">ไม่มีก่อนหน้านี้</p>
-                    ) : (
-                      <>
-                        <p className="text-sm font-medium text-[var(--text-primary)]">{item.feature.title}</p>
-                        {item.feature.description && <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{item.feature.description}</p>}
-                      </>
-                    )}
-                  </div>
-                  <div className="px-4 py-3 border-l border-[var(--border)]">
-                    {item.changeType === 'removed' ? (
-                      <p className="text-xs text-[var(--status-red)] italic">ถูกลบออกจากโค้ดแล้ว</p>
-                    ) : (
-                      <>
-                        <p className="text-sm font-medium text-[var(--text-primary)]">{item.feature.title}</p>
-                        {item.feature.description && <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{item.feature.description}</p>}
-                      </>
-                    )}
-                    {impact && (
-                      <div className="flex items-start gap-1.5 mt-2 bg-[var(--bg-hover)] border border-[var(--border)] rounded-lg px-2.5 py-2">
-                        <span className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider shrink-0 mt-0.5 leading-none">Impact</span>
-                        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{impact}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </>
-      )}
-    </div>
-  )
-}
-
-// ─── Upload zone (compact, for adding more docs) ───
-function AddDocButton({ projectId, jobId }: { projectId: string; jobId: string }) {
-  const [dragging, setDragging] = useState(false)
-  const [processing, setProcessing] = useState(false)
-  const [processingName, setProcessingName] = useState<string | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const router = useRouter()
-
-  async function handleFile(file: File) {
-    setProcessingName(file.name)
-    setProcessing(true)
-    await new Promise(r => setTimeout(r, 1800))
-    const mockItems = [
-      { id: `SR-${Date.now()}-1`, featureId: 'FR001', title: 'เพิ่ม Fraud Detection Rule Engine', description: 'ตรวจจับธุรกรรมน่าสงสัยด้วย Rule-based System เช่น วงเงินเกิน 500K/24h', priority: 'high', changeType: 'add' },
-      { id: `SR-${Date.now()}-2`, featureId: 'P003', title: 'เพิ่มระบบ Installment Payment', description: 'รองรับผ่อนชำระ 3/6/12 เดือนผ่าน KBank และ SCB', priority: 'medium', changeType: 'add' },
-      { id: `SR-${Date.now()}-3`, featureId: 'AUD001', title: 'ปรับปรุง Audit Log System', description: 'เพิ่ม Structured Logging (JSON), Export CSV/Excel, Retention Policy 90 วัน', priority: 'low', changeType: 'modify' },
-    ]
-    await fetch(`/api/projects/${projectId}/sprint-requirements`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jobId, items: mockItems, fileName: file.name, createdBy: 'BA' }),
-    })
-    setProcessing(false)
-    router.refresh()
-  }
-
-  if (processing) {
-    return (
-      <div className="flex items-center gap-3 px-4 py-3 border border-[var(--border)] rounded-xl">
-        <div className="w-4 h-4 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin shrink-0" />
-        <div className="min-w-0">
-          <p className="text-xs font-medium text-[var(--text-primary)] truncate">{processingName}</p>
-          <p className="text-[10px] text-[var(--text-muted)]">กำลังประมวลผล...</p>
-        </div>
-      </div>
-    )
-  }
+function CategoryCard({ cat, items, projectId, updatedAt }: { cat: string; items: FeatureItem[]; projectId: string; updatedAt: string }) {
+  const addedCount = items.filter(i => i.changeType === 'added').length
+  const modifiedCount = items.filter(i => i.changeType === 'modified').length
+  const removedCount = items.filter(i => i.changeType === 'removed').length
 
   return (
-    <div
-      onDragOver={e => { e.preventDefault(); setDragging(true) }}
-      onDragLeave={() => setDragging(false)}
-      onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
-      onClick={() => inputRef.current?.click()}
-      className={`flex items-center gap-2 px-4 py-3 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${
-        dragging ? 'border-[var(--accent)] bg-[var(--accent)]/5' : 'border-[var(--border)] hover:border-[var(--accent)]/50 hover:bg-[var(--bg-hover)]'
-      }`}
+    <Link
+      href={`/projects/${projectId}/sprint-review/detail?cat=${encodeURIComponent(cat)}`}
+      className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-5 py-4 flex items-center gap-4 hover:bg-[var(--bg-hover)] transition-colors"
     >
-      <PlusIcon size={16} />
-      <div>
-        <p className="text-xs font-medium text-[var(--text-primary)]">เพิ่มเอกสาร Requirement</p>
-        <p className="text-[10px] text-[var(--text-muted)]">.pdf, .docx, .txt</p>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-[var(--text-primary)]">{cat}</p>
+        <p className="text-[11px] text-[var(--text-muted)] mt-0.5">อัปเดตล่าสุด {new Date(updatedAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' })}</p>
       </div>
-      <input ref={inputRef} type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
-    </div>
+      <div className="flex items-center gap-2 shrink-0">
+        {addedCount > 0 && (
+          <span className="text-xs font-medium text-[var(--status-green)] bg-green-900/15 px-2 py-0.5 rounded">+{addedCount}</span>
+        )}
+        {modifiedCount > 0 && (
+          <span className="text-xs font-medium text-[var(--status-yellow)] bg-yellow-900/15 px-2 py-0.5 rounded">~{modifiedCount}</span>
+        )}
+        {removedCount > 0 && (
+          <span className="text-xs font-medium text-[var(--status-red)] bg-red-900/15 px-2 py-0.5 rounded">-{removedCount}</span>
+        )}
+        <CaretRightIcon size={14} className="text-[var(--text-muted)]" />
+      </div>
+    </Link>
   )
 }
 
@@ -322,9 +218,9 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
   const hasReq = sprintDocs.length > 0
 
   const items: FeatureItem[] = [
-    ...(diffResult.added ?? []).map(f => ({ feature: f, oldFeature: null, changeType: 'added' as const, category: f.category ?? 'ทั่วไป', req: reqMap.get(f.id) ?? null })),
-    ...(diffResult.modified ?? []).map(c => ({ feature: c.new, oldFeature: c.old, changeType: 'modified' as const, category: c.new.category ?? 'ทั่วไป', req: reqMap.get(c.new.id) ?? null })),
-    ...(diffResult.removed ?? []).map(f => ({ feature: f, oldFeature: null, changeType: 'removed' as const, category: f.category ?? 'ทั่วไป', req: reqMap.get(f.id) ?? null })),
+    ...(diffResult.added ?? []).map(f => ({ feature: f, oldFeature: null, changeType: 'added' as const, category: f.category ?? 'ทั่วไป', subcategory: f.subcategory ?? '', req: reqMap.get(f.id) ?? null })),
+    ...(diffResult.modified ?? []).map(c => ({ feature: c.new, oldFeature: c.old, changeType: 'modified' as const, category: c.new.category ?? 'ทั่วไป', subcategory: c.new.subcategory ?? '', req: reqMap.get(c.new.id) ?? null })),
+    ...(diffResult.removed ?? []).map(f => ({ feature: f, oldFeature: null, changeType: 'removed' as const, category: f.category ?? 'ทั่วไป', subcategory: f.subcategory ?? '', req: reqMap.get(f.id) ?? null })),
   ]
 
   const diffFeatureIds = new Set([
@@ -352,17 +248,13 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
 
   return (
     <div className="p-6 pb-24 pr-[320px]">
+      <div className="max-w-[832px] mx-auto">
       <div className="flex items-start justify-between mb-6">
         <div>
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">Sprint Review</h2>
           <p className="text-sm text-[var(--text-muted)] mt-1">ติดตามการเปลี่ยนแปลงจากโค้ดปัจจุบัน</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {historyHref && (
-            <Link href={historyHref} className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-[var(--accent)]/40 hover:bg-[var(--bg-hover)]">
-              ประวัติการอัปเดต
-            </Link>
-          )}
           {mockButton}
           {resetButton}
         </div>
@@ -375,86 +267,12 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
         </div>
       )}
 
-      <div className="space-y-4">
-          {hasReq ? (
-            <>
-              {/* เสร็จแล้ว */}
-              {doneItems.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
-                    <p className="text-[24px] font-semibold text-[var(--status-green)]">เสร็จแล้ว</p>
-                    <span className="text-xs text-[var(--status-green)] bg-green-900/15 px-2 py-0.5 rounded-full">{doneItems.length} รายการ</span>
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    {groupByCategory(doneItems).map(({ cat, features }) => (
-                      <CategoryCard key={cat} cat={cat} items={features} />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* ไม่ถูกต้อง */}
-              {partialItems.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
-                    <p className="text-[24px] font-semibold text-[var(--status-yellow)]">ไม่ถูกต้อง</p>
-                    <span className="text-xs text-[var(--status-yellow)] bg-yellow-900/15 px-2 py-0.5 rounded-full">{partialItems.length} รายการ</span>
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    {groupByCategory(partialItems).map(({ cat, features }) => (
-                      <CategoryCard key={cat} cat={cat} items={features} />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* ไม่มีใน Requirement */}
-              {noReqItems.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
-                    <p className="text-[24px] font-semibold text-[var(--text-muted)]">ไม่มีใน Requirement</p>
-                    <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded-full">{noReqItems.length} รายการ</span>
-                    <p className="text-xs text-[var(--text-muted)]">— มีการเปลี่ยนแปลงในโค้ดแต่ไม่ได้ระบุใน Req</p>
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    {groupByCategory(noReqItems).map(({ cat, features }) => (
-                      <CategoryCard key={cat} cat={cat} items={features} />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* ยังไม่ครบ */}
-              {notDoneItems.length > 0 && (
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
-                    <p className="text-[24px] font-semibold text-[var(--status-red)]">ยังไม่ครบ</p>
-                    <span className="text-xs text-[var(--status-red)] bg-red-900/15 px-2 py-0.5 rounded-full">{notDoneItems.length} รายการ</span>
-                    <p className="text-xs text-[var(--text-muted)]">— อยู่ใน Requirement แต่ยังไม่พบในโค้ด</p>
-                  </div>
-                  <div className="bg-[var(--bg-card)] border border-red-800/25 rounded-xl overflow-hidden divide-y divide-[var(--border)]">
-                    {notDoneItems.map(req => (
-                      <div key={req.id} className="px-5 py-4 flex items-start gap-3">
-                        <span className="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded shrink-0 text-[var(--status-red)] bg-red-900/10 mt-0.5">
-                          {req.changeType === 'add' ? '+ ต้องเพิ่ม' : req.changeType === 'modify' ? '~ ต้องแก้' : '− ต้องลบ'}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-[var(--text-primary)]">{req.title}</p>
-                          {req.description && <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{req.description}</p>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-            </>
-          ) : (
-            // No req — category view
-            groups.map(({ cat, features }) => (
-              <CategoryCard key={cat} cat={cat} items={features} />
-            ))
-          )}
+      <div className="space-y-3">
+          {groups.map(({ cat, features }) => (
+            <CategoryCard key={cat} cat={cat} items={features} projectId={projectId} updatedAt={triggeredAt} />
+          ))}
         </div>
+      </div>
 
       {/* ─── Right panel (fixed) ─── */}
       <div className="fixed top-0 right-0 h-screen w-72 overflow-y-auto py-8 px-6 bg-[var(--bg-base)] z-10 space-y-4">

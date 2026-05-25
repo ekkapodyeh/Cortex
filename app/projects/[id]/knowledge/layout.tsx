@@ -4,13 +4,18 @@ import { KnowledgeDocNav } from '@/components/KnowledgeDocNav'
 import type { Feature } from '@/lib/types'
 
 function groupByCategory(features: Feature[]) {
-  const map = new Map<string, Feature[]>()
+  const catMap = new Map<string, Map<string, Feature[]>>()
   for (const f of features) {
     const cat = f.category ?? 'ทั่วไป'
-    if (!map.has(cat)) map.set(cat, [])
-    map.get(cat)!.push(f)
+    const sub = f.subcategory ?? ''
+    if (!catMap.has(cat)) catMap.set(cat, new Map())
+    if (!catMap.get(cat)!.has(sub)) catMap.get(cat)!.set(sub, [])
+    catMap.get(cat)!.get(sub)!.push(f)
   }
-  return Array.from(map.entries()).map(([category, features]) => ({ category, features }))
+  return Array.from(catMap.entries()).map(([category, subMap]) => ({
+    category,
+    subcategories: Array.from(subMap.entries()).map(([subcategory, features]) => ({ subcategory, features })),
+  }))
 }
 
 export default async function KnowledgeLayout({

@@ -3,6 +3,7 @@ export interface Feature {
   title: string
   description: string
   category?: string
+  subcategory?: string
 }
 
 export interface FeatureChange {

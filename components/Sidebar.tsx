@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { SquaresFourIcon, LightningIcon, MagnifyingGlassIcon, BookOpenIcon, ClipboardTextIcon } from '@phosphor-icons/react'
+import { MagnifyingGlassIcon, BookOpenIcon, ClipboardTextIcon, ClockCounterClockwiseIcon } from '@phosphor-icons/react'
 
 interface SidebarProps {
   projectId: string
@@ -18,15 +18,19 @@ interface NavItem {
 export function Sidebar({ projectId, projectName }: SidebarProps) {
   const pathname = usePathname()
 
+  const sprintBase = `/projects/${projectId}/sprint-review`
+
   const navItems: NavItem[] = [
-    { label: 'Dashboard',            href: `/projects/${projectId}`,               icon: <SquaresFourIcon size={18} /> },
-    { label: 'งานวิเคราะห์',         href: `/projects/${projectId}/monitor`,        icon: <LightningIcon size={18} /> },
-    { label: 'Sprint Review',        href: `/projects/${projectId}/sprint-review`,  icon: <MagnifyingGlassIcon size={18} /> },
-    { label: 'Knowledge Doc',        href: `/projects/${projectId}/knowledge`,      icon: <BookOpenIcon size={18} /> },
-    { label: 'Document Requirement', href: `/projects/${projectId}/requirements`,   icon: <ClipboardTextIcon size={18} /> },
+    { label: 'Sprint Review',           href: sprintBase,                                   icon: <MagnifyingGlassIcon size={18} /> },
+    { label: 'Knowledge Doc',           href: `/projects/${projectId}/knowledge`,            icon: <BookOpenIcon size={18} /> },
+    { label: 'ประวัติการอัปเดต',        href: `${sprintBase}/history`,                      icon: <ClockCounterClockwiseIcon size={18} /> },
+    { label: 'Document Requirement',    href: `/projects/${projectId}/requirements`,         icon: <ClipboardTextIcon size={18} /> },
   ]
 
   const isActive = (href: string) => {
+    if (href === sprintBase) {
+      return pathname.startsWith(href) && !pathname.startsWith(`${sprintBase}/history`)
+    }
     if (href === `/projects/${projectId}`) return pathname === `/projects/${projectId}`
     return pathname.startsWith(href)
   }

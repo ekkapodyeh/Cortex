@@ -2,8 +2,6 @@ export const dynamic = 'force-dynamic'
 
 import { db } from '@/lib/db'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { CaretLeftIcon } from '@phosphor-icons/react/dist/ssr'
 import type { Feature, DiffResult } from '@/lib/types'
 import { HistoryItem } from './HistoryItem'
 
@@ -40,13 +38,6 @@ export default async function SprintHistoryPage({
       <div className="max-w-[808px] mx-auto flex flex-col gap-[48px]">
         {/* Header */}
         <div className="flex flex-col gap-3">
-          <Link
-            href={`/projects/${id}/sprint-review`}
-            className="flex items-center gap-1.5 text-xs text-[#757575] hover:text-[var(--text-primary)] transition-colors w-fit"
-          >
-            <CaretLeftIcon size={12} />
-            Sprint Review
-          </Link>
           <div className="flex flex-col gap-1">
             <h2 className="font-semibold text-[30px] leading-[45px] text-[var(--text-primary)]">ประวัติการอัปเดต Knowledge</h2>
             <p className="text-sm text-[var(--text-muted)]">รายการที่เปลี่ยนแปลงในแต่ละ version</p>

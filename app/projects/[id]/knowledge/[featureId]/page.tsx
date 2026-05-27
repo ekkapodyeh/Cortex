@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { db } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { BrowserIcon, CodeIcon } from '@phosphor-icons/react/dist/ssr'
 import type { Feature } from '@/lib/types'
 
 function groupByCategory(features: Feature[]) {
@@ -73,10 +74,12 @@ export default async function FeatureDetailPage({
       {/* Tabs */}
       <div className="flex gap-0 mt-5 border-b border-[var(--border)]">
         <button className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-[var(--accent)] border-b-2 border-[var(--accent)] -mb-px">
-          <span className="text-[10px]">🟠</span> Business
+          <BrowserIcon size={14} className="shrink-0" />
+          Business
         </button>
         <button className="px-4 py-2.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] flex items-center gap-1.5">
-          <span className="text-[10px]">📋</span> Technical
+          <CodeIcon size={14} className="shrink-0" />
+          Technical
         </button>
       </div>
 

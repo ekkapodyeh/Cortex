@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CaretRightIcon } from '@phosphor-icons/react'
+import { CaretRightIcon, ClockCounterClockwiseIcon, BookOpenIcon, MonitorIcon } from '@phosphor-icons/react'
 
 interface Feature {
   id: string
@@ -40,7 +40,7 @@ function SubcategoryItem({ projectId, subcategory, features }: { projectId: stri
             <Link
               key={f.id}
               href={href}
-              className={`block pl-5 pr-3 py-1.5 rounded-md text-xs transition-colors truncate ${
+              className={`block pl-5 pr-3 py-2 rounded-lg text-sm transition-colors truncate ${
                 active
                   ? 'text-[var(--accent)] bg-[var(--accent)]/10'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
@@ -58,7 +58,7 @@ function SubcategoryItem({ projectId, subcategory, features }: { projectId: stri
     <div>
       <button
         onClick={() => setOpen(o => !o)}
-        className={`w-full flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-colors text-left ${
+        className={`w-full flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors text-left ${
           hasActive
             ? 'text-[var(--accent)]'
             : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
@@ -79,7 +79,7 @@ function SubcategoryItem({ projectId, subcategory, features }: { projectId: stri
               <Link
                 key={f.id}
                 href={href}
-                className={`block pl-8 pr-3 py-1.5 rounded-md text-xs transition-colors truncate ${
+                className={`block pl-8 pr-3 py-2 rounded-lg text-sm transition-colors truncate ${
                   active
                     ? 'text-[var(--accent)] bg-[var(--accent)]/10'
                     : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'
@@ -105,13 +105,13 @@ function CategoryItem({ projectId, category, subcategories }: { projectId: strin
     <div>
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-1.5 px-3 py-1 rounded-md transition-colors text-left hover:bg-[var(--bg-hover)]"
+        className="w-full flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors text-left hover:bg-[var(--bg-hover)]"
       >
         <CaretRightIcon
           size={10}
           className={`shrink-0 text-[var(--text-muted)] transition-transform duration-150 ${open ? 'rotate-90' : ''}`}
         />
-        <span className="text-xs font-medium text-[var(--text-secondary)] truncate">{category}</span>
+        <span className="text-sm font-medium text-[var(--text-secondary)] truncate">{category}</span>
       </button>
       {open && (
         <div className="space-y-0.5 mt-0.5 ml-1">
@@ -132,38 +132,72 @@ function CategoryItem({ projectId, category, subcategories }: { projectId: strin
 export function KnowledgeDocNav({ projectId, groups }: KnowledgeDocNavProps) {
   const pathname = usePathname()
   const overviewHref = `/projects/${projectId}/knowledge`
+  const sprintHref = `/projects/${projectId}/sprint-review`
+  const studioHref = `/studio/${projectId}`
+
   const isOverview = pathname === overviewHref
+  const isSprint = pathname.startsWith(sprintHref)
 
   return (
-    <aside className="w-52 shrink-0 border-r border-[var(--border)] py-5 overflow-y-auto">
-      <div className="px-3 space-y-0.5">
-        <Link
-          href={overviewHref}
-          className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-            isOverview
-              ? 'bg-[var(--accent)]/15 text-[var(--accent)] font-medium'
-              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
-          }`}
-        >
-          Business Overview
-        </Link>
-      </div>
-
-      <div className="mt-4 px-3">
+    <aside className="w-[280px] shrink-0 border-r border-[var(--border)] py-5 overflow-y-auto">
+      {/* Getting Started */}
+      <div className="px-3">
         <p className="px-3 pb-2 text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest">
-          Content
+          Getting Started
         </p>
-        <div className="space-y-1">
-          {groups.map(({ category, subcategories }) => (
-            <CategoryItem
-              key={category}
-              projectId={projectId}
-              category={category}
-              subcategories={subcategories}
-            />
-          ))}
+        <div className="space-y-0.5">
+          <Link
+            href={overviewHref}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+              isOverview
+                ? 'bg-[var(--accent)]/15 text-[var(--accent)] font-medium'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            <BookOpenIcon size={15} className="shrink-0" />
+            Business Overview
+          </Link>
+          <a
+            href={studioHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+          >
+            <MonitorIcon size={15} className="shrink-0" />
+            Workspace Studio
+          </a>
+          <Link
+            href={sprintHref}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+              isSprint
+                ? 'bg-[var(--accent)]/15 text-[var(--accent)] font-medium'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            <ClockCounterClockwiseIcon size={15} className="shrink-0" />
+            Sprint Review
+          </Link>
         </div>
       </div>
+
+      {/* Content */}
+      {groups.length > 0 && (
+        <div className="mt-5 px-3">
+          <p className="px-3 pb-2 text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest">
+            Content
+          </p>
+          <div className="space-y-1">
+            {groups.map(({ category, subcategories }) => (
+              <CategoryItem
+                key={category}
+                projectId={projectId}
+                category={category}
+                subcategories={subcategories}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </aside>
   )
 }

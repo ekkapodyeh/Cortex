@@ -48,8 +48,8 @@ function CategoryCard({ cat, items, projectId, updatedAt, reqMap, pendingCount }
       className="bg-[#222] rounded-xl p-5 flex items-center gap-4 hover:brightness-105 transition-all"
     >
       <div className="flex-1 min-w-0 flex flex-col gap-1">
-        <p className="font-['IBM_Plex_Sans_Thai',_sans-serif] font-semibold text-base text-[var(--text-primary)]">{cat}</p>
-        <p className="font-['IBM_Plex_Sans_Thai',_sans-serif] text-xs text-[var(--text-muted)]">อัปเดตล่าสุด {new Date(updatedAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' })}</p>
+        <p className="font-semibold text-base text-[var(--text-primary)]">{cat}</p>
+        <p className="text-xs text-[var(--text-muted)]">อัปเดตล่าสุด {new Date(updatedAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' })}</p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         {hasReq ? (
@@ -130,8 +130,8 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
-            <h2 className="font-['Poppins',_sans-serif] font-semibold text-[30px] leading-[45px] text-[var(--text-primary)]">Sprint Review</h2>
-            <p className="font-['IBM_Plex_Sans_Thai',_sans-serif] text-sm text-[var(--text-muted)]">ติดตามการเปลี่ยนแปลงจากโค้ดปัจจุบัน</p>
+            <h2 className="font-semibold text-[30px] leading-[45px] text-[var(--text-primary)]">Sprint Review</h2>
+            <p className="text-sm text-[var(--text-muted)]">ติดตามการเปลี่ยนแปลงจากโค้ดปัจจุบัน</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {mockButton}

@@ -44,7 +44,7 @@ export function Sidebar({ projectId }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-[10px] rounded-lg text-sm transition-colors font-['Poppins',_sans-serif] ${
+              className={`flex items-center gap-3 px-3 py-[10px] rounded-lg text-sm transition-colors ${
                 active
                   ? 'bg-[var(--bg-base)] text-[var(--brand)]'
                   : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'

@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 import { SprintReviewClient } from './SprintReviewClient'
 import { MockJobButton } from '@/components/MockJobButton'
 import { ResetJobsButton } from '@/components/ResetJobsButton'
-import type { DiffResult } from '@/lib/types'
+import type { DiffResult, Feature } from '@/lib/types'
 
 export default async function SprintReviewPage({
   params,
@@ -22,6 +22,13 @@ export default async function SprintReviewPage({
     orderBy: { triggeredAt: 'desc' },
     include: { updateDoc: true },
   })
+
+  // ดึง features จาก KnowledgeDoc ล่าสุดเพื่อ map featureId → title/category
+  const latestDoc = await db.knowledgeDoc.findFirst({
+    where: { projectId: id },
+    orderBy: { version: 'desc' },
+  })
+  const allFeatures = (latestDoc?.features as unknown as Feature[]) ?? []
 
   // ดึง SprintRequirement จากทุก job ของ project เพื่อให้ persist ข้าม reset
   const allSprintRequirements = await db.sprintRequirement.findMany({
@@ -51,6 +58,7 @@ export default async function SprintReviewPage({
         mockButton={<MockJobButton projectId={id} />}
         resetButton={<ResetJobsButton projectId={id} />}
         historyHref={`/projects/${id}/sprint-review/history`}
+        allFeatures={allFeatures}
         noDiff
       />
     )
@@ -76,6 +84,7 @@ export default async function SprintReviewPage({
       mockButton={<MockJobButton projectId={id} />}
       resetButton={<ResetJobsButton projectId={id} />}
       historyHref={`/projects/${id}/sprint-review/history`}
+      allFeatures={allFeatures}
       noDiff={!hasPendingDiff}
     />
   )

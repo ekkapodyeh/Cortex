@@ -15,17 +15,18 @@ interface FeatureItem {
   subcategory: string
 }
 
-function CategoryCard({ cat, items, projectId, updatedAt, reqMap, pendingCount }: {
+function CategoryCard({ cat, items, projectId, updatedAt, reqMap, pendingCount, forcePending }: {
   cat: string; items: FeatureItem[]; projectId: string; updatedAt: string
   reqMap: Map<string, string> | null
   pendingCount: number
+  forcePending?: boolean
 }) {
   const addedCount = items.filter(i => i.changeType === 'added').length
   const modifiedCount = items.filter(i => i.changeType === 'modified').length
   const removedCount = items.filter(i => i.changeType === 'removed').length
 
   let doneCount = 0, totalReq = 0
-  if (reqMap) {
+  if (reqMap && !forcePending) {
     for (const item of items) {
       const reqChangeType = reqMap.get(item.feature.id)
       if (!reqChangeType) continue
@@ -37,9 +38,12 @@ function CategoryCard({ cat, items, projectId, updatedAt, reqMap, pendingCount }
       if (match) doneCount++
     }
     totalReq += pendingCount
+  } else if (forcePending) {
+    totalReq = items.length
+    doneCount = 0
   }
 
-  const hasReq = reqMap !== null && totalReq > 0
+  const hasReq = (reqMap !== null || forcePending) && totalReq > 0
   const allDone = hasReq && doneCount === totalReq
 
   return (
@@ -78,6 +82,7 @@ interface Props {
   jobId: string
   diffResult: DiffResult
   sprintDocs: SprintDoc[]
+  allFeatures?: Feature[]
   commitSha: string
   commitMsg: string
   author: string
@@ -88,7 +93,7 @@ interface Props {
   noDiff?: boolean
 }
 
-export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, commitSha, commitMsg, author, triggeredAt, mockButton, resetButton, noDiff }: Props) {
+export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, allFeatures = [], commitSha, commitMsg, author, triggeredAt, mockButton, resetButton, noDiff }: Props) {
   const items: FeatureItem[] = [
     ...(diffResult.added ?? []).map(f => ({ feature: f, oldFeature: null, changeType: 'added' as const, category: f.category ?? 'ทั่วไป', subcategory: f.subcategory ?? '' })),
     ...(diffResult.modified ?? []).map(c => ({ feature: c.new, oldFeature: c.old, changeType: 'modified' as const, category: c.new.category ?? 'ทั่วไป', subcategory: c.new.subcategory ?? '' })),
@@ -101,6 +106,8 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
     categoryMap.get(item.category)!.push(item)
   }
   const groups = Array.from(categoryMap.entries()).map(([cat, features]) => ({ cat, features }))
+
+  const featureById = new Map(allFeatures.map(f => [f.id, f]))
 
   const allReqItems = sprintDocs.flatMap(d => d.items as any[])
   const reqMap: Map<string, string> | null = sprintDocs.length > 0
@@ -141,12 +148,46 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, c
 
         {/* Content */}
         <div className="flex flex-col gap-4">
-          {noDiff && (
+          {noDiff && sprintDocs.length === 0 && (
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border)]">
               <div className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-pulse shrink-0" />
               <p className="text-sm text-[var(--text-muted)]">รอการวิเคราะห์โค้ด — ยังไม่มี Code Push ใหม่ รายการด้านล่างจึงแสดงเป็น <span className="text-[var(--status-red)]">ยังไม่ครบ</span> ทั้งหมด</p>
             </div>
           )}
+
+          {/* เมื่อยังไม่มี Code Push แต่มี requirement → สร้าง groups จาก req items โดยตรง */}
+          {noDiff && reqMap && allReqItems.length > 0 && (() => {
+            const pendingGroups = new Map<string, FeatureItem[]>()
+            for (const r of allReqItems as any[]) {
+              // ใช้ feature จาก KnowledgeDoc ถ้ามี ไม่งั้นสร้างจากข้อมูลใน req item เลย
+              const knownFeature = featureById.get(r.featureId)
+              const cat = knownFeature?.category ?? r.category ?? 'ทั่วไป'
+              const f: Feature = knownFeature ?? {
+                id: r.featureId,
+                title: r.title ?? r.featureId,
+                description: r.description ?? '',
+                category: cat,
+                subcategory: r.subcategory ?? '',
+              }
+              if (!pendingGroups.has(cat)) pendingGroups.set(cat, [])
+              pendingGroups.get(cat)!.push({
+                feature: f,
+                oldFeature: null,
+                changeType: r.changeType === 'add' ? 'added' : r.changeType === 'modify' ? 'modified' : 'removed',
+                category: cat,
+                subcategory: f.subcategory ?? '',
+              })
+            }
+            const entries = Array.from(pendingGroups.entries())
+            return (
+              <div className="flex flex-col gap-3">
+                <p className="text-[20px] font-semibold text-[var(--status-red)]">ยังไม่สำเร็จ ({entries.length})</p>
+                {entries.map(([cat, features]) => (
+                  <CategoryCard key={cat} cat={cat} items={features} projectId={projectId} updatedAt={triggeredAt} reqMap={reqMap} pendingCount={0} forcePending />
+                ))}
+              </div>
+            )
+          })()}
 
           {reqMap ? (() => {
             const getDone = (features: FeatureItem[]) => {

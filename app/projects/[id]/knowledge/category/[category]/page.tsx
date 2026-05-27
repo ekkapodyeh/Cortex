@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowUpRightIcon, CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react/dist/ssr'
+import { CategoryDiagramViewer } from '@/components/CategoryDiagramViewer'
 import type { Feature } from '@/lib/types'
 
 export default async function CategoryOverviewPage({
@@ -26,6 +27,8 @@ export default async function CategoryOverviewPage({
   const features = (latestDoc.features as unknown as Feature[]) ?? []
   const categoryFeatures = features.filter((f) => (f.category ?? 'ทั่วไป') === category)
   if (categoryFeatures.length === 0) notFound()
+
+  const flowDiagram = categoryFeatures.find((f) => f.flowDiagram)?.flowDiagram ?? null
 
   // Build category list for prev/next navigation
   const categoryOrder: string[] = []
@@ -55,14 +58,11 @@ export default async function CategoryOverviewPage({
           <h2 className="text-[20px] font-semibold text-[var(--text-primary)]">
             Feature Overview & How It Works
           </h2>
-          <div className="aspect-[16/9] bg-[var(--bg-card)] border border-[var(--border)] rounded-xl flex items-center justify-center">
-            <div className="text-center px-6">
-              <p className="text-sm text-[var(--text-muted)]">System Flow Diagram</p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">
-                แผนผังภาพรวมของ {category} จะแสดงที่นี่
-              </p>
-            </div>
-          </div>
+          <CategoryDiagramViewer
+            projectId={id}
+            category={category}
+            initialDiagram={flowDiagram}
+          />
         </section>
 
         {/* Content */}

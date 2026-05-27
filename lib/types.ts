@@ -1,9 +1,46 @@
+export interface APIEndpoint {
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+  path: string
+  headers?: Record<string, string>
+  requestBody?: string
+  response?: string
+}
+
+export interface DatabaseColumn {
+  name: string
+  type: string
+  description: string
+  primaryKey?: boolean
+}
+
+export interface DatabaseTable {
+  name: string
+  description?: string
+  columns: DatabaseColumn[]
+}
+
+export interface PageSpec {
+  name: string
+  path: string
+  endpoints: Array<{ method: string; path: string }>
+  description: string
+}
+
+export interface TechnicalSpec {
+  sequenceDiagram?: string
+  apiEndpoints?: APIEndpoint[]
+  databaseTables?: DatabaseTable[]
+  pages?: PageSpec[]
+}
+
 export interface Feature {
   id: string
   title: string
   description: string
   category?: string
   subcategory?: string
+  flowDiagram?: string
+  technicalSpec?: TechnicalSpec
 }
 
 export interface FeatureChange {

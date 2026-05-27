@@ -24,19 +24,22 @@ export default async function CategoryDetailPage({
   if (!project) notFound()
 
   const latestJob = await db.analysisJob.findFirst({
-    where: { projectId: id, status: 'DONE', updateDoc: { status: 'PENDING' } },
+    where: { projectId: id, status: 'DONE' },
     orderBy: { triggeredAt: 'desc' },
     include: { updateDoc: true },
   })
 
-  if (!latestJob?.updateDoc) notFound()
-
-  const diff = latestJob.updateDoc.diff as unknown as DiffResult
+  const hasPendingDiff = !!latestJob?.updateDoc && latestJob.updateDoc.status === 'PENDING'
+  const diff: DiffResult = hasPendingDiff
+    ? (latestJob!.updateDoc!.diff as unknown as DiffResult)
+    : { added: [], modified: [], removed: [] }
 
   const allSprintRequirements = await db.sprintRequirement.findMany({
     where: { job: { projectId: id } },
     orderBy: { createdAt: 'asc' },
   })
+
+  if (!hasPendingDiff && allSprintRequirements.length === 0) notFound()
 
   type RawItem = {
     id: string
@@ -52,8 +55,14 @@ export default async function CategoryDetailPage({
     ...(diff.removed ?? []).map(f => ({ id: f.id, changeType: 'removed' as const, subcategory: f.subcategory ?? '', feature: f, oldFeature: null })),
   ]
 
-  // All categories for the side nav
-  const allCategories = [...new Set(allItems.map(i => i.feature.category ?? 'ทั่วไป'))]
+  const allReqCategories = allSprintRequirements
+    .flatMap(r => r.items as any[])
+    .map(r => (r.category ?? 'ทั่วไป') as string)
+
+  const allCategories = [...new Set([
+    ...allItems.map(i => i.feature.category ?? 'ทั่วไป'),
+    ...allReqCategories,
+  ])]
 
   const catItems = allItems.filter(i => (i.feature.category ?? 'ทั่วไป') === cat)
 
@@ -102,7 +111,9 @@ export default async function CategoryDetailPage({
           newTitle: reqEntry.title ?? i.feature.title,
           newDescription: reqEntry.description ?? i.feature.description ?? null,
           impact: null,
-          reqStatus: (reqChangeType === 'add' ? 'pending' : 'incorrect') as 'pending' | 'incorrect',
+          reqStatus: (!hasPendingDiff
+            ? 'pending'
+            : reqChangeType === 'add' ? 'pending' : 'incorrect') as 'pending' | 'incorrect',
           reqNote: reqEntry.description ?? reqEntry.title ?? null,
           isSynthetic: true,
         }
@@ -191,14 +202,14 @@ export default async function CategoryDetailPage({
 
       <SprintReviewRightPanel
         projectId={id}
-        jobId={latestJob.id}
-        commitSha={latestJob.commitSha}
-        commitMsg={latestJob.commitMsg ?? ''}
-        author={latestJob.author}
-        triggeredAt={latestJob.triggeredAt.toISOString()}
+        jobId={latestJob?.id ?? ''}
+        commitSha={latestJob?.commitSha ?? ''}
+        commitMsg={latestJob?.commitMsg ?? ''}
+        author={latestJob?.author ?? ''}
+        triggeredAt={(latestJob?.triggeredAt ?? new Date()).toISOString()}
         diffResult={diff}
         sprintDocs={sprintDocs}
-        noDiff={false}
+        noDiff={!hasPendingDiff}
       />
     </div>
   )

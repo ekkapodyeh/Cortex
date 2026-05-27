@@ -97,22 +97,45 @@ function SubcategoryItem({ projectId, subcategory, features }: { projectId: stri
 
 function CategoryItem({ projectId, category, subcategories }: { projectId: string; category: string; subcategories: SubcategoryGroup[] }) {
   const pathname = usePathname()
+  const categoryHref = `/projects/${projectId}/knowledge/category/${encodeURIComponent(category)}`
   const allFeatures = subcategories.flatMap(s => s.features)
-  const hasActive = allFeatures.some(f => pathname === `/projects/${projectId}/knowledge/${f.id}`)
+  const featureActive = allFeatures.some(f => pathname === `/projects/${projectId}/knowledge/${f.id}`)
+  const categoryActive = pathname === categoryHref
+  const hasActive = featureActive || categoryActive
   const [open, setOpen] = useState(hasActive)
 
   return (
     <div>
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors text-left hover:bg-[var(--bg-hover)]"
+      <div
+        className={`flex items-stretch rounded-lg transition-colors ${
+          categoryActive
+            ? 'bg-[var(--accent)]/15'
+            : 'hover:bg-[var(--bg-hover)]'
+        }`}
       >
-        <CaretRightIcon
-          size={10}
-          className={`shrink-0 text-[var(--text-muted)] transition-transform duration-150 ${open ? 'rotate-90' : ''}`}
-        />
-        <span className="text-sm font-medium text-[var(--text-secondary)] truncate">{category}</span>
-      </button>
+        <button
+          onClick={() => setOpen(o => !o)}
+          aria-label={open ? 'Collapse' : 'Expand'}
+          className="flex items-center px-3 rounded-l-lg"
+        >
+          <CaretRightIcon
+            size={10}
+            className={`shrink-0 transition-transform duration-150 ${
+              categoryActive ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'
+            } ${open ? 'rotate-90' : ''}`}
+          />
+        </button>
+        <Link
+          href={categoryHref}
+          className={`flex-1 min-w-0 py-2 pr-3 rounded-r-lg text-left ${
+            categoryActive
+              ? 'text-[var(--accent)]'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+          }`}
+        >
+          <span className="text-sm font-medium truncate block">{category}</span>
+        </Link>
+      </div>
       {open && (
         <div className="space-y-0.5 mt-0.5 ml-1">
           {subcategories.map(({ subcategory, features }) => (

@@ -45,7 +45,13 @@ export function ProjectBreadcrumb({
     const afterSection = segments[sectionIdx + 1]
 
     if (afterSection) {
-      if (SUB_LABELS[afterSection]) {
+      if (afterSection === 'category') {
+        const categoryName = segments[sectionIdx + 2]
+          ? decodeURIComponent(segments[sectionIdx + 2])
+          : ''
+        items.push({ label: SECTION_LABELS[section], href: sectionHref })
+        if (categoryName) items.push({ label: categoryName })
+      } else if (SUB_LABELS[afterSection]) {
         items.push({ label: SECTION_LABELS[section], href: sectionHref })
         items.push({ label: SUB_LABELS[afterSection] })
       } else {

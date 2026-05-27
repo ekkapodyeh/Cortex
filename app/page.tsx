@@ -10,10 +10,10 @@ export default async function RootPage() {
     where: { name: 'ระบบสต็อกสินค้า' },
   })
 
-  if (project) redirect(`/projects/${project.id}`)
+  if (project) redirect(`/projects/${project.id}/sprint-review`)
 
   const fallback = await db.project.findFirst({ orderBy: { createdAt: 'asc' } })
-  if (fallback) redirect(`/projects/${fallback.id}`)
+  if (fallback) redirect(`/projects/${fallback.id}/sprint-review`)
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)]">

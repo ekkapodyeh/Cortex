@@ -5,7 +5,7 @@ import { CaretLeftIcon } from '@phosphor-icons/react/dist/ssr'
 import type { DiffResult, Feature } from '@/lib/types'
 import { IMPACT } from '@/lib/impact-data'
 import { SubcategoryList } from './SubcategoryList'
-import type { SubcategoryGroup, JobCommit } from './SubcategoryList'
+import type { SubcategoryGroup } from './SubcategoryList'
 import { SprintReviewRightPanel } from '../SprintReviewRightPanel'
 import { getProjectMock } from '@/lib/sprint-mocks'
 
@@ -101,13 +101,6 @@ export default async function CategoryDetailPage({
     } as any)
   }
 
-  const jobCommit: JobCommit | null = latestJob ? {
-    sha: latestJob.commitSha,
-    message: latestJob.commitMsg ?? '',
-    author: latestJob.author,
-    date: latestJob.triggeredAt.toISOString(),
-  } : null
-
   const groups: SubcategoryGroup[] = Array.from(subMap.entries()).map(([sub, its]) => ({
     sub,
     items: its.map((i: any) => {
@@ -125,9 +118,8 @@ export default async function CategoryDetailPage({
           reqStatus: (!hasPendingDiff
             ? 'pending'
             : reqChangeType === 'add' ? 'pending' : 'incorrect') as 'pending' | 'incorrect',
-          reqNote: reqEntry.title ?? null,
+          reqNote: reqEntry.description ?? reqEntry.title ?? null,
           isSynthetic: true,
-          commits: [],
         }
       }
 
@@ -154,10 +146,8 @@ export default async function CategoryDetailPage({
         newDescription: i.feature.description ?? null,
         impact: IMPACT[i.feature.id] ?? null,
         reqStatus,
-        reqNote: (req as any)?.title ?? null,
-        reqChangeType: (req as any)?.changeType ?? null,
+        reqNote: (req as any)?.description ?? (req as any)?.title ?? null,
         isSynthetic: false,
-        commits: jobCommit ? [jobCommit] : [],
       }
     }),
   }))
@@ -171,9 +161,9 @@ export default async function CategoryDetailPage({
 
   return (
     <div className="pt-[48px] px-[32px] pb-24 pr-[320px]">
-      <div className="max-w-[808px] mx-auto flex gap-8 items-start">
+      <div className="max-w-[808px] mx-auto flex gap-8">
         {/* Category side nav */}
-        <nav className="w-[200px] max-w-[200px] shrink-0 pt-1">
+        <nav className="w-[200px] shrink-0 pt-1">
           <div className="sticky top-12 flex flex-col gap-0.5">
             {allCategories.map(c => (
               <Link
@@ -192,7 +182,7 @@ export default async function CategoryDetailPage({
         </nav>
 
         {/* Main content */}
-        <div className="flex-1 min-w-0 max-w-[580px] flex flex-col gap-[48px]">
+        <div className="flex-1 min-w-0 flex flex-col gap-[48px]">
           {/* Header */}
           <div className="flex flex-col gap-3">
             <Link

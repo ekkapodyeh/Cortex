@@ -202,6 +202,31 @@ export function SprintReviewRightPanel({ projectId, jobId, commitSha, commitMsg,
               <p className="text-[10px] text-[var(--text-muted)]">{author} · {new Date(triggeredAt).toLocaleString('th-TH')}</p>
             </div>
 
+            {/* Diff stats */}
+            <div className="flex flex-col gap-3">
+              {(addedLen > 0 || modifiedLen > 0) && (
+                <div className="grid grid-cols-2 gap-3">
+                  {addedLen > 0 && (
+                    <div className="flex flex-col items-center justify-center gap-2 bg-[rgba(13,84,43,0.15)] border border-[rgba(2,102,48,0.3)] rounded-xl px-3 py-3">
+                      <span className="text-base font-bold leading-6 text-[var(--status-green)]">{addedLen}</span>
+                      <span className="text-xs text-[var(--status-green)]">เพิ่มใหม่</span>
+                    </div>
+                  )}
+                  {modifiedLen > 0 && (
+                    <div className="flex flex-col items-center justify-center gap-2 bg-[rgba(115,62,10,0.15)] border border-[rgba(137,75,0,0.3)] rounded-xl px-3 py-3">
+                      <span className="text-base font-bold leading-6 text-[var(--status-yellow)]">{modifiedLen}</span>
+                      <span className="text-xs text-[var(--status-yellow)]">แก้ไข</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              {removedLen > 0 && (
+                <div className="flex flex-col items-center justify-center gap-2 bg-[rgba(130,24,26,0.15)] border border-[rgba(159,7,18,0.3)] rounded-xl px-3 py-3 w-full">
+                  <span className="text-base font-bold leading-6 text-[var(--status-red)]">{removedLen}</span>
+                  <span className="text-xs text-[var(--status-red)]">ลบออก</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

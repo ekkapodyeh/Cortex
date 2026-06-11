@@ -26,7 +26,7 @@ export function SprintListCreateButton({ projectId, mockRequirements }: {
         className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
       >
         <PlusIcon size={16} />
-        สร้าง Sprint
+        สร้าง Bolt
       </button>
     </>
   )

@@ -176,13 +176,6 @@ export function SprintReviewRightPanel({ projectId, commitSha, commitMsg, author
                 )}
               </div>
 
-              {!noDiff && (
-                <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 flex flex-col gap-1.5">
-                  <code className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded self-start">{commitSha.slice(0, 7)}</code>
-                  <p className="text-xs font-medium text-[var(--text-primary)] leading-snug">{commitMsg || 'ไม่มี commit message'}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">{author} · {new Date(triggeredAt).toLocaleString('th-TH')}</p>
-                </div>
-              )}
             </div>
 
             <div className="flex flex-col gap-2">

@@ -5,16 +5,9 @@ import type { Feature, DiffResult } from '@/lib/types'
 import type { SprintReqMockItem } from '@/lib/sprint-mocks'
 import { CaretRightIcon } from '@phosphor-icons/react'
 import { SprintReviewRightPanel } from './SprintReviewRightPanel'
-import type { ActiveSprint, SprintReqItem } from './SprintReviewRightPanel'
+import type { ActiveSprint, SprintReqItem, SprintRequirementDoc } from './SprintReviewRightPanel'
 
-export type { ActiveSprint, SprintReqItem }
-
-export interface SprintRequirementDoc {
-  id: string
-  fileName: string | null
-  createdBy: string
-  items: SprintReqItem[]
-}
+export type { ActiveSprint, SprintReqItem, SprintRequirementDoc }
 
 type ChangeType = 'added' | 'modified' | 'removed'
 

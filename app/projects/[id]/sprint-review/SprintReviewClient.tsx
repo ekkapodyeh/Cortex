@@ -19,11 +19,12 @@ interface FeatureItem {
   subcategory: string
 }
 
-function CategoryCard({ cat, items, projectId, updatedAt, reqMap, pendingCount, forcePending }: {
+function CategoryCard({ cat, items, projectId, updatedAt, reqMap, pendingCount, forcePending, sprintId }: {
   cat: string; items: FeatureItem[]; projectId: string; updatedAt: string
   reqMap: Map<string, string> | null
   pendingCount: number
   forcePending?: boolean
+  sprintId?: string
 }) {
   const addedCount = items.filter(i => i.changeType === 'added').length
   const modifiedCount = items.filter(i => i.changeType === 'modified').length
@@ -52,7 +53,7 @@ function CategoryCard({ cat, items, projectId, updatedAt, reqMap, pendingCount, 
 
   return (
     <Link
-      href={`/projects/${projectId}/sprint-review/detail?cat=${encodeURIComponent(cat)}`}
+      href={`/projects/${projectId}/sprint-review/detail?cat=${encodeURIComponent(cat)}${sprintId ? `&sprintId=${sprintId}` : ''}`}
       className="bg-[#222] rounded-xl p-5 flex items-center gap-4 hover:brightness-105 transition-all"
     >
       <div className="flex-1 min-w-0 flex flex-col gap-1">
@@ -144,7 +145,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, activeSprint,
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
-            <h2 className="font-semibold text-[30px] leading-[45px] text-[var(--text-primary)]">Sprint Review</h2>
+            <h2 className="font-semibold text-[30px] leading-[45px] text-[var(--text-primary)]">BoltCheck</h2>
             <p className="text-sm text-[var(--text-muted)]">ติดตามการเปลี่ยนแปลงจากโค้ดปัจจุบัน</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -190,14 +191,14 @@ export function SprintReviewClient({ projectId, jobId, diffResult, activeSprint,
               <div className="flex flex-col gap-3">
                 <p className="text-[20px] font-semibold text-[var(--status-red)]">ยังไม่สำเร็จ ({entries.length})</p>
                 {entries.map(([cat, features]) => (
-                  <CategoryCard key={cat} cat={cat} items={features} projectId={projectId} updatedAt={triggeredAt} reqMap={reqMap} pendingCount={0} forcePending />
+                  <CategoryCard key={cat} cat={cat} items={features} projectId={projectId} updatedAt={triggeredAt} reqMap={reqMap} pendingCount={0} forcePending sprintId={activeSprint?.id} />
                 ))}
               </div>
             )
           })()}
 
           {reqMap ? (() => {
-            const getDone = (features: FeatureItem[]) => {
+            const getDone = (features: FeatureItem[], cat: string) => {
               let done = 0, total = 0
               for (const item of features) {
                 const req = reqMap.get(item.feature.id)
@@ -205,10 +206,11 @@ export function SprintReviewClient({ projectId, jobId, diffResult, activeSprint,
                 total++
                 if ((req === 'add' && item.changeType === 'added') || (req === 'modify' && item.changeType === 'modified') || (req === 'remove' && item.changeType === 'removed')) done++
               }
+              total += pendingByCategory.get(cat) ?? 0
               return { done, total }
             }
-            const notDone = groups.filter(({ features }) => { const { done, total } = getDone(features); return total > 0 && done < total })
-            const done = groups.filter(({ features }) => { const { done, total } = getDone(features); return total === 0 || done === total })
+            const notDone = groups.filter(({ cat, features }) => { const { done, total } = getDone(features, cat); return total > 0 && done < total })
+            const done = groups.filter(({ cat, features }) => { const { done, total } = getDone(features, cat); return total === 0 || done === total })
 
             return (
               <div className="flex flex-col gap-[48px]">
@@ -216,7 +218,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, activeSprint,
                   <div className="flex flex-col gap-3">
                     <p className="text-[20px] font-semibold text-[var(--status-red)]">ยังไม่สำเร็จ ({notDone.length})</p>
                     {notDone.map(({ cat, features }) => (
-                      <CategoryCard key={cat} cat={cat} items={features} projectId={projectId} updatedAt={triggeredAt} reqMap={reqMap} pendingCount={pendingByCategory.get(cat) ?? 0} />
+                      <CategoryCard key={cat} cat={cat} items={features} projectId={projectId} updatedAt={triggeredAt} reqMap={reqMap} pendingCount={pendingByCategory.get(cat) ?? 0} sprintId={activeSprint?.id} />
                     ))}
                   </div>
                 )}
@@ -224,7 +226,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, activeSprint,
                   <div className="flex flex-col gap-3">
                     <p className="text-[20px] font-semibold text-[var(--status-green)]">สำเร็จแล้ว ({done.length})</p>
                     {done.map(({ cat, features }) => (
-                      <CategoryCard key={cat} cat={cat} items={features} projectId={projectId} updatedAt={triggeredAt} reqMap={reqMap} pendingCount={pendingByCategory.get(cat) ?? 0} />
+                      <CategoryCard key={cat} cat={cat} items={features} projectId={projectId} updatedAt={triggeredAt} reqMap={reqMap} pendingCount={pendingByCategory.get(cat) ?? 0} sprintId={activeSprint?.id} />
                     ))}
                   </div>
                 )}
@@ -233,7 +235,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, activeSprint,
           })() : (
             <div className="flex flex-col gap-4">
               {groups.map(({ cat, features }) => (
-                <CategoryCard key={cat} cat={cat} items={features} projectId={projectId} updatedAt={triggeredAt} reqMap={reqMap} pendingCount={pendingByCategory.get(cat) ?? 0} />
+                <CategoryCard key={cat} cat={cat} items={features} projectId={projectId} updatedAt={triggeredAt} reqMap={reqMap} pendingCount={pendingByCategory.get(cat) ?? 0} sprintId={activeSprint?.id} />
               ))}
             </div>
           )}

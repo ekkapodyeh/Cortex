@@ -121,7 +121,7 @@ function ItemCard({ item, hasReq }: { item: SubcategoryGroup['items'][0]; hasReq
   const borderAccent =
     hasReq && item.reqStatus === 'done'      ? 'border-l-[3px] !border-l-[var(--status-green)]' :
     hasReq && item.reqStatus === 'incorrect' ? 'border-l-[3px] !border-l-[var(--status-red)]' :
-    hasReq && item.reqStatus === 'pending'   ? 'border-l-[3px] !border-l-[var(--status-yellow)] opacity-60' :
+    hasReq && item.reqStatus === 'pending'   ? 'border-l-[3px] !border-l-[var(--status-yellow)]' :
     hasReq && item.reqStatus === 'no-req'    ? 'border-l-[3px] !border-l-[var(--text-muted)]' :
     ''
 
@@ -153,7 +153,7 @@ function ItemCard({ item, hasReq }: { item: SubcategoryGroup['items'][0]; hasReq
         {/* ของเดิม */}
         <div className="flex gap-4 items-start">
           <p className="text-[12px] font-medium text-[#6b7280] whitespace-nowrap shrink-0 pt-0.5">ของเดิม</p>
-          {isAdded ? (
+          {isAdded || item.isSynthetic ? (
             <p className="text-[14px] text-[#6b7280]">ไม่มีก่อนหน้านี้</p>
           ) : (
             <div className="flex flex-col gap-2 flex-1 min-w-0">
@@ -171,12 +171,8 @@ function ItemCard({ item, hasReq }: { item: SubcategoryGroup['items'][0]; hasReq
           <p className="text-[12px] font-medium text-[#6b7280] whitespace-nowrap shrink-0 pt-0.5">ของใหม่</p>
           {isRemoved && !item.isSynthetic ? (
             <p className="text-[14px] text-[var(--status-red)]">ถูกลบออกจากโค้ดแล้ว</p>
-          ) : item.isSynthetic && isAdded ? (
-            <p className="text-[14px] text-[var(--text-muted)]">ยังไม่ได้ทำ</p>
-          ) : item.isSynthetic && isRemoved ? (
-            <p className="text-[14px] text-[var(--text-muted)]">ยังไม่ได้ลบ</p>
           ) : item.isSynthetic ? (
-            <p className="text-[14px] text-[var(--text-muted)]">ยังไม่ได้แก้ไข</p>
+            <p className="text-[14px] text-[var(--text-muted)]">ยังไม่ได้ทำ</p>
           ) : (
             <div className="flex flex-col gap-2 flex-1 min-w-0">
               <p className="text-[14px] font-medium text-[#f5f5f5]">{item.newTitle}</p>
@@ -192,17 +188,6 @@ function ItemCard({ item, hasReq }: { item: SubcategoryGroup['items'][0]; hasReq
         </div>
 
         {/* Commit button */}
-        {hasCommits && !item.isSynthetic && (
-          <div className="border-t border-[#2a2d2e] pt-4">
-            <button
-              onClick={() => setDrawerOpen(true)}
-              className="flex items-center gap-1.5 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-            >
-              <GitCommitIcon size={14} />
-              ดู commit ({item.commits!.length})
-            </button>
-          </div>
-        )}
       </div>
 
       {drawerOpen && hasCommits && (

@@ -21,7 +21,7 @@ export function Sidebar({ projectId }: SidebarProps) {
   const sprintBase = `/projects/${projectId}/sprint-review`
 
   const navItems: NavItem[] = [
-    { label: 'Sprint Review',        href: sprintBase,                                icon: MagnifyingGlassIcon },
+    { label: 'BoltCheck',        href: sprintBase,                                icon: MagnifyingGlassIcon },
     { label: 'Knowledge Doc',        href: `/projects/${projectId}/knowledge`,         icon: BookOpenIcon },
     { label: 'ประวัติการอัปเดต',     href: `${sprintBase}/history`,                   icon: ClockCounterClockwiseIcon },
   ]

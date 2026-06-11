@@ -33,8 +33,8 @@ export default async function SprintReviewPage({
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="font-semibold text-[30px] leading-[45px] text-[var(--text-primary)]">Sprint Review</h2>
-          <p className="text-sm text-[var(--text-muted)]">ติดตาม requirement แต่ละ Sprint</p>
+          <h2 className="font-semibold text-[30px] leading-[45px] text-[var(--text-primary)]">BoltCheck</h2>
+          <p className="text-sm text-[var(--text-muted)]">ติดตาม requirement แต่ละ Bolt</p>
         </div>
         {!openSprint && (
           <SprintListCreateButton projectId={id} mockRequirements={mockRequirements} />
@@ -44,8 +44,8 @@ export default async function SprintReviewPage({
       {/* Empty state */}
       {sprints.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <p className="text-base font-medium text-[var(--text-primary)]">ยังไม่มี Sprint</p>
-          <p className="text-sm text-[var(--text-muted)]">สร้าง Sprint แรกเพื่อเริ่มติดตาม requirement</p>
+          <p className="text-base font-medium text-[var(--text-primary)]">ยังไม่มี Bolt</p>
+          <p className="text-sm text-[var(--text-muted)]">สร้าง Bolt แรกเพื่อเริ่มติดตาม requirement</p>
         </div>
       )}
 
@@ -60,7 +60,7 @@ export default async function SprintReviewPage({
       {/* Closed Sprints */}
       {closedSprints.length > 0 && (
         <div className="flex flex-col gap-3">
-          <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">ประวัติ Sprint</p>
+          <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wide">ประวัติ Bolt</p>
           {closedSprints.map(sprint => (
             <SprintCard key={sprint.id} sprint={sprint} projectId={id} mockRequirements={mockRequirements} />
           ))}

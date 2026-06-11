@@ -53,14 +53,14 @@ export function CreateSprintModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div className="bg-[var(--bg-sidebar)] border border-[var(--border)] rounded-2xl p-6 w-[400px] flex flex-col gap-5">
         <div className="flex items-center justify-between">
-          <p className="text-base font-semibold text-[var(--text-primary)]">สร้าง Sprint ใหม่</p>
+          <p className="text-base font-semibold text-[var(--text-primary)]">สร้าง Bolt ใหม่</p>
           <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] transition-colors">
             <XIcon size={14} />
           </button>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs text-[var(--text-muted)]">ชื่อ Sprint</label>
+          <label className="text-xs text-[var(--text-muted)]">ชื่อ Bolt</label>
           <input
             value={name}
             onChange={e => setName(e.target.value)}

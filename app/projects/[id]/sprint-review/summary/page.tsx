@@ -122,7 +122,7 @@ export default async function SprintSummaryPage({
             className="flex items-center gap-1.5 text-xs text-[#757575] hover:text-[var(--text-primary)] transition-colors w-fit"
           >
             <CaretLeftIcon size={12} />
-            Sprint Review
+            BoltCheck
           </Link>
           <h2 className="font-semibold text-[30px] leading-[45px] text-[var(--text-primary)]">สรุปการแก้ไข</h2>
         </div>
@@ -132,7 +132,7 @@ export default async function SprintSummaryPage({
           <SummaryTable rows={reqRows} />
         ) : (
           <div className="text-center py-12 border border-dashed border-[var(--border)] rounded-xl">
-            <p className="text-sm text-[var(--text-muted)]">ยังไม่มี Sprint Requirement — กลับไปอัปโหลดที่หน้า Sprint Review</p>
+            <p className="text-sm text-[var(--text-muted)]">ยังไม่มี Bolt Requirement — กลับไปอัปโหลดที่หน้า BoltCheck</p>
           </div>
         )}
       </div>

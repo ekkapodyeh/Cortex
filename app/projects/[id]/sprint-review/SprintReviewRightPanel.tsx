@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { DiffResult } from '@/lib/types'
-import { FileIcon, PresentationChartIcon, XIcon, PlusIcon, LockSimpleIcon } from '@phosphor-icons/react'
+import { FileIcon, XIcon, PlusIcon, LockSimpleIcon } from '@phosphor-icons/react'
 import { CreateSprintModal } from './CreateSprintModal'
 
 export interface SprintReqItem {
@@ -47,11 +47,6 @@ function DocCard({ doc, projectId, sprintId, readOnly }: { doc: { id: string; fi
         <p className="text-xs font-medium text-[var(--text-primary)] truncate">{doc.fileName ?? 'requirement.pdf'}</p>
         <p className="text-[10px] text-[var(--text-muted)] mt-0.5">โดย {doc.createdBy}</p>
       </div>
-      {!readOnly && (
-        <button onClick={handleDelete} disabled={deleting} className="shrink-0 w-6 h-6 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--status-red)] hover:bg-red-900/10 transition-colors disabled:opacity-40">
-          {deleting ? <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin block" /> : <XIcon size={12} />}
-        </button>
-      )}
     </div>
   )
 }
@@ -134,46 +129,19 @@ export function SprintReviewRightPanel({ projectId, commitSha, commitMsg, author
 
       <div className="fixed top-[85px] right-0 h-[calc(100vh-85px)] w-[288px] overflow-y-auto pt-6 px-6 pb-8 bg-[var(--bg-sidebar)] border-l border-[var(--border)] z-10 flex flex-col gap-8">
 
-        {!activeSprint && (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <p className="text-xs font-medium text-[var(--text-muted)]">Sprint</p>
-              <p className="text-sm text-[var(--text-muted)]">ยังไม่มี Sprint — สร้างเพื่อเริ่มติดตาม requirement</p>
-            </div>
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-            >
-              <PlusIcon size={16} />
-              สร้าง Sprint
-            </button>
-          </div>
-        )}
 
         {activeSprint && (
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold text-[var(--text-primary)]">{activeSprint.name}</p>
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                    activeSprint.status === 'OPEN'
-                      ? 'text-[var(--status-green)] bg-[rgba(13,84,43,0.15)]'
-                      : 'text-[var(--text-muted)] bg-[var(--bg-hover)]'
-                  }`}>
-                    {activeSprint.status}
-                  </span>
-                </div>
-                {activeSprint.status === 'OPEN' && !readOnly && (
-                  <button
-                    onClick={handleCloseSprint}
-                    disabled={closing}
-                    className="flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--status-red)] transition-colors disabled:opacity-40"
-                  >
-                    <LockSimpleIcon size={12} />
-                    {closing ? 'กำลังปิด...' : 'ปิด Sprint'}
-                  </button>
-                )}
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-[var(--text-primary)]">{activeSprint.name}</p>
+                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                  activeSprint.status === 'OPEN'
+                    ? 'text-[var(--status-green)] bg-[rgba(13,84,43,0.15)]'
+                    : 'text-[var(--text-muted)] bg-[var(--bg-hover)]'
+                }`}>
+                  {activeSprint.status}
+                </span>
               </div>
 
             </div>
@@ -217,34 +185,20 @@ export function SprintReviewRightPanel({ projectId, commitSha, commitMsg, author
               </div>
             )}
 
-            {activeSprint.status === 'CLOSED' && !readOnly && (
+            {activeSprint.status === 'OPEN' && !readOnly && (
               <button
-                onClick={() => setShowModal(true)}
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+                onClick={handleCloseSprint}
+                disabled={closing}
+                className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl border border-[var(--border)] text-xs text-[var(--text-muted)] hover:text-[var(--status-red)] hover:border-[var(--status-red)] transition-colors disabled:opacity-40"
               >
-                <PlusIcon size={16} />
-                สร้าง Sprint ใหม่
+                <LockSimpleIcon size={13} />
+                {closing ? 'กำลังปิด...' : 'ปิด Bolt'}
               </button>
             )}
+
           </div>
         )}
 
-        {activeSprint?.status === 'OPEN' && (
-          noDiff ? (
-            <div className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--bg-hover)] border border-[var(--border)] text-sm font-medium text-[var(--text-muted)] cursor-not-allowed select-none mt-auto">
-              <PresentationChartIcon size={16} />
-              สรุปการแก้ไข
-            </div>
-          ) : (
-            <a
-              href={`/projects/${projectId}/sprint-review/summary`}
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity mt-auto"
-            >
-              <PresentationChartIcon size={16} />
-              สรุปการแก้ไข
-            </a>
-          )
-        )}
       </div>
     </>
   )

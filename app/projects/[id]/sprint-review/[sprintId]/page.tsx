@@ -47,12 +47,19 @@ export default async function SprintDetailPage({
     id: sprint.id,
     name: sprint.name,
     status: sprint.status as 'OPEN' | 'CLOSED',
-    requirements: sprint.requirements.map(r => ({
-      id: r.id,
-      fileName: r.fileName ?? null,
-      createdBy: r.createdBy,
-      items: r.items as unknown as any[],
-    })),
+    requirements: projectMock
+      ? [{
+          id: 'mock',
+          fileName: 'mock-requirements.pdf',
+          createdBy: 'mock',
+          items: projectMock.requirements,
+        }]
+      : sprint.requirements.map(r => ({
+          id: r.id,
+          fileName: r.fileName ?? null,
+          createdBy: r.createdBy,
+          items: r.items as unknown as any[],
+        })),
   }
 
   return (

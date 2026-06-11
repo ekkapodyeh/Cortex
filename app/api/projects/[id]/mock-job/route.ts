@@ -33,8 +33,8 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
 
   const diff: DiffResult = {
     added: mock.added,
-    modified: mock.modified,
-    removed: mock.removed,
+    modified: [],
+    removed: [],
   }
 
   const commit = mock.commits[Math.floor(Math.random() * mock.commits.length)]

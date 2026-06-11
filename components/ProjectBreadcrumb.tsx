@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 
 const SECTION_LABELS: Record<string, string> = {
   'knowledge':     'Knowledge Doc',
-  'sprint-review': 'Sprint Review',
+  'sprint-review': 'BoltCheck',
   'monitor':       'ประวัติการอัปเดต',
   'requirements':  'Document Requirement',
 }

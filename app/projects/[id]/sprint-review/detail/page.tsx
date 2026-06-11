@@ -14,10 +14,10 @@ export default async function CategoryDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ cat?: string }>
+  searchParams: Promise<{ cat?: string; sprintId?: string }>
 }) {
   const { id } = await params
-  const { cat } = await searchParams
+  const { cat, sprintId } = await searchParams
 
   if (!cat) notFound()
 
@@ -43,19 +43,31 @@ export default async function CategoryDetailPage({
     include: { requirements: true },
     orderBy: { createdAt: 'asc' },
   })
-  const activeSprintRaw = sprints.find(s => s.status === 'OPEN') ?? null
+  const activeSprintRaw = (sprintId ? sprints.find(s => s.id === sprintId) : null) ?? sprints.find(s => s.status === 'OPEN') ?? sprints[sprints.length - 1] ?? null
   const allSprintRequirements = activeSprintRaw?.requirements ?? []
-  const activeSprint = activeSprintRaw ? {
-    id: activeSprintRaw.id,
-    name: activeSprintRaw.name,
-    status: activeSprintRaw.status as 'OPEN' | 'CLOSED',
-    requirements: activeSprintRaw.requirements.map(r => ({
-      id: r.id,
-      fileName: r.fileName ?? null,
-      createdBy: r.createdBy,
-      items: r.items as unknown as any[],
-    })),
-  } : null
+  const activeSprint = projectMock
+    ? {
+        id: activeSprintRaw?.id ?? 'mock',
+        name: activeSprintRaw?.name ?? 'Bolt 1',
+        status: (activeSprintRaw?.status ?? 'OPEN') as 'OPEN' | 'CLOSED',
+        requirements: [{
+          id: 'mock',
+          fileName: 'mock-requirements.pdf',
+          createdBy: 'mock',
+          items: projectMock.requirements,
+        }],
+      }
+    : activeSprintRaw ? {
+        id: activeSprintRaw.id,
+        name: activeSprintRaw.name,
+        status: activeSprintRaw.status as 'OPEN' | 'CLOSED',
+        requirements: activeSprintRaw.requirements.map(r => ({
+          id: r.id,
+          fileName: r.fileName ?? null,
+          createdBy: r.createdBy,
+          items: r.items as unknown as any[],
+        })),
+      } : null
 
   if (!hasPendingDiff && allSprintRequirements.length === 0) notFound()
 
@@ -90,9 +102,11 @@ export default async function CategoryDetailPage({
     subMap.get(item.subcategory)!.push(item)
   }
 
-  const allReqItems = allSprintRequirements.flatMap(r => r.items as any[])
+  const allReqItems: any[] = projectMock
+    ? projectMock.requirements
+    : allSprintRequirements.flatMap(r => r.items as any[])
   const reqMap = new Map(allReqItems.map((r: any) => [r.featureId, r as any]))
-  const hasReq = allSprintRequirements.length > 0
+  const hasReq = allReqItems.length > 0
 
   // Requirements for this category not yet implemented (not in diff) → show as pending or incorrect
   const diffFeatureIds = new Set(allItems.map(i => i.id))
@@ -131,14 +145,12 @@ export default async function CategoryDetailPage({
         return {
           id: i.id,
           changeType: i.changeType,
-          oldTitle: reqChangeType !== 'add' ? (reqEntry.title ?? null) : null,
+          oldTitle: null,
           oldDescription: null,
           newTitle: reqEntry.title ?? i.feature.title,
           newDescription: reqEntry.description ?? i.feature.description ?? null,
           impact: null,
-          reqStatus: (!hasPendingDiff
-            ? 'pending'
-            : reqChangeType === 'add' ? 'pending' : 'incorrect') as 'pending' | 'incorrect',
+          reqStatus: 'pending' as const,
           reqNote: reqEntry.title ?? null,
           isSynthetic: true,
           commits: [],
@@ -173,14 +185,17 @@ export default async function CategoryDetailPage({
         isSynthetic: false,
         commits: jobCommit ? [jobCommit] : [],
       }
+    }).sort((a, b) => {
+      const order = { pending: 0, 'no-req': 1, incorrect: 2, done: 3, null: 4 }
+      return (order[a.reqStatus as keyof typeof order] ?? 4) - (order[b.reqStatus as keyof typeof order] ?? 4)
     }),
   }))
 
   return (
     <div className="pt-[48px] px-[32px] pb-24 pr-[320px]">
-      <div className="max-w-[808px] mx-auto flex gap-8 items-start">
+      <div className="max-w-[1200px] mx-auto flex gap-8 items-start">
         {/* Category side nav */}
-        <nav className="w-[200px] max-w-[200px] shrink-0 pt-1">
+        <nav className="w-[200px] lg:w-[300px] max-w-[300px] shrink-0 pt-1">
           <div className="sticky top-12 flex flex-col gap-0.5">
             {allCategories.map(c => (
               <Link
@@ -199,7 +214,7 @@ export default async function CategoryDetailPage({
         </nav>
 
         {/* Main content */}
-        <div className="flex-1 min-w-0 max-w-[580px] flex flex-col gap-[48px]">
+        <div className="flex-1 min-w-0 flex flex-col gap-[48px]">
           {/* Header */}
           <div className="flex flex-col gap-3">
             <Link
@@ -207,7 +222,7 @@ export default async function CategoryDetailPage({
               className="flex items-center gap-1.5 text-xs text-[#757575] hover:text-[var(--text-primary)] transition-colors w-fit"
             >
               <CaretLeftIcon size={12} />
-              Sprint Review
+              BoltCheck
             </Link>
             <h2 className="font-semibold text-[30px] leading-[45px] text-[var(--text-primary)]">{cat}</h2>
           </div>

@@ -198,7 +198,7 @@ export function KnowledgeDocNav({ projectId, groups }: KnowledgeDocNavProps) {
             }`}
           >
             <ClockCounterClockwiseIcon size={15} className="shrink-0" />
-            Sprint Review
+            BoltCheck
           </Link>
         </div>
       </div>

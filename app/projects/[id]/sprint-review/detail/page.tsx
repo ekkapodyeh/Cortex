@@ -38,10 +38,24 @@ export default async function CategoryDetailPage({
     ? (latestJob!.updateDoc!.diff as unknown as DiffResult)
     : { added: [], modified: [], removed: [] }
 
-  const allSprintRequirements = await db.sprintRequirement.findMany({
-    where: { job: { projectId: id } },
+  const sprints = await db.sprint.findMany({
+    where: { projectId: id },
+    include: { requirements: true },
     orderBy: { createdAt: 'asc' },
   })
+  const activeSprintRaw = sprints.find(s => s.status === 'OPEN') ?? null
+  const allSprintRequirements = activeSprintRaw?.requirements ?? []
+  const activeSprint = activeSprintRaw ? {
+    id: activeSprintRaw.id,
+    name: activeSprintRaw.name,
+    status: activeSprintRaw.status as 'OPEN' | 'CLOSED',
+    requirements: activeSprintRaw.requirements.map(r => ({
+      id: r.id,
+      fileName: r.fileName ?? null,
+      createdBy: r.createdBy,
+      items: r.items as unknown as any[],
+    })),
+  } : null
 
   if (!hasPendingDiff && allSprintRequirements.length === 0) notFound()
 
@@ -162,13 +176,6 @@ export default async function CategoryDetailPage({
     }),
   }))
 
-  const sprintDocs = allSprintRequirements.map(r => ({
-    id: r.id,
-    fileName: r.fileName ?? null,
-    createdBy: r.createdBy,
-    items: r.items as unknown as any[],
-  }))
-
   return (
     <div className="pt-[48px] px-[32px] pb-24 pr-[320px]">
       <div className="max-w-[808px] mx-auto flex gap-8 items-start">
@@ -222,7 +229,7 @@ export default async function CategoryDetailPage({
         author={latestJob?.author ?? ''}
         triggeredAt={(latestJob?.triggeredAt ?? new Date()).toISOString()}
         diffResult={diff}
-        sprintDocs={sprintDocs}
+        activeSprint={activeSprint}
         noDiff={!hasPendingDiff}
         mockRequirements={mockRequirements}
       />

@@ -36,11 +36,28 @@ export default async function SprintSummaryPage({
     orderBy: { triggeredAt: 'desc' },
     include: {
       updateDoc: true,
-      sprintRequirements: { orderBy: { createdAt: 'asc' } },
     },
   })
 
   if (!latestJob?.updateDoc) notFound()
+
+  const sprints = await db.sprint.findMany({
+    where: { projectId: id },
+    include: { requirements: true },
+    orderBy: { createdAt: 'asc' },
+  })
+  const activeSprintRaw = sprints.find(s => s.status === 'OPEN') ?? null
+  const activeSprint = activeSprintRaw ? {
+    id: activeSprintRaw.id,
+    name: activeSprintRaw.name,
+    status: activeSprintRaw.status as 'OPEN' | 'CLOSED',
+    requirements: activeSprintRaw.requirements.map(r => ({
+      id: r.id,
+      fileName: r.fileName ?? null,
+      createdBy: r.createdBy,
+      items: r.items as unknown as any[],
+    })),
+  } : null
 
   const lastKnowledge = await db.knowledgeDoc.findFirst({
     where: { projectId: id },
@@ -60,7 +77,7 @@ export default async function SprintSummaryPage({
   ]
   const diffMap = new Map(diffItems.map(d => [d.feature.id, d]))
 
-  const allReqItems = latestJob.sprintRequirements.flatMap(r => r.items as unknown as SprintReqItem[])
+  const allReqItems = (activeSprint?.requirements ?? []).flatMap(r => r.items as unknown as SprintReqItem[])
 
   const reqRows = allReqItems.map(req => {
     const diffItem = diffMap.get(req.featureId) ?? null
@@ -95,13 +112,6 @@ export default async function SprintSummaryPage({
     }
   }).filter(r => r.status === 'done')
 
-  const sprintDocs = latestJob.sprintRequirements.map(r => ({
-    id: r.id,
-    fileName: r.fileName ?? null,
-    createdBy: r.createdBy,
-    items: r.items as unknown as any[],
-  }))
-
   return (
     <div className="pt-[48px] px-[32px] pb-24 pr-[320px]">
       <div className="max-w-[808px] mx-auto flex flex-col gap-[48px]">
@@ -135,17 +145,9 @@ export default async function SprintSummaryPage({
         author={latestJob.author}
         triggeredAt={latestJob.triggeredAt.toISOString()}
         diffResult={diff}
-        sprintDocs={sprintDocs}
+        activeSprint={activeSprint}
         noDiff={false}
         mockRequirements={getProjectMock(project.name)?.requirements ?? []}
-        bottomAction={
-          <UpdateKnowledgeButton
-            projectId={id}
-            jobId={latestJob.id}
-            nextVersion={nextVersion}
-            alreadyApproved={alreadyApproved}
-          />
-        }
       />
     </div>
   )

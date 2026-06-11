@@ -4,7 +4,17 @@ import Link from 'next/link'
 import type { Feature, DiffResult } from '@/lib/types'
 import type { SprintReqMockItem } from '@/lib/sprint-mocks'
 import { CaretRightIcon } from '@phosphor-icons/react'
-import { SprintReviewRightPanel, type SprintDoc } from './SprintReviewRightPanel'
+import { SprintReviewRightPanel } from './SprintReviewRightPanel'
+import type { ActiveSprint, SprintReqItem } from './SprintReviewRightPanel'
+
+export type { ActiveSprint, SprintReqItem }
+
+export interface SprintRequirementDoc {
+  id: string
+  fileName: string | null
+  createdBy: string
+  items: SprintReqItem[]
+}
 
 type ChangeType = 'added' | 'modified' | 'removed'
 
@@ -82,7 +92,7 @@ interface Props {
   projectId: string
   jobId: string
   diffResult: DiffResult
-  sprintDocs: SprintDoc[]
+  activeSprint: ActiveSprint | null
   allFeatures?: Feature[]
   commitSha: string
   commitMsg: string
@@ -95,7 +105,8 @@ interface Props {
   mockRequirements: SprintReqMockItem[]
 }
 
-export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, allFeatures = [], commitSha, commitMsg, author, triggeredAt, mockButton, resetButton, noDiff, mockRequirements }: Props) {
+export function SprintReviewClient({ projectId, jobId, diffResult, activeSprint, allFeatures = [], commitSha, commitMsg, author, triggeredAt, mockButton, resetButton, noDiff, mockRequirements }: Props) {
+  const sprintDocs = activeSprint?.requirements ?? []
   const items: FeatureItem[] = [
     ...(diffResult.added ?? []).map(f => ({ feature: f, oldFeature: null, changeType: 'added' as const, category: f.category ?? 'ทั่วไป', subcategory: f.subcategory ?? '' })),
     ...(diffResult.modified ?? []).map(c => ({ feature: c.new, oldFeature: c.old, changeType: 'modified' as const, category: c.new.category ?? 'ทั่วไป', subcategory: c.new.subcategory ?? '' })),
@@ -243,7 +254,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, sprintDocs, a
         author={author}
         triggeredAt={triggeredAt}
         diffResult={diffResult}
-        sprintDocs={sprintDocs}
+        activeSprint={activeSprint}
         noDiff={noDiff ?? false}
         mockRequirements={mockRequirements}
       />

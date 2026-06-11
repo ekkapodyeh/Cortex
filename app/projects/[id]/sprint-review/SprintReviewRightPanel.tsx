@@ -2,12 +2,10 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import type { DiffResult } from '@/lib/types'
-import { FileIcon, PlayIcon, PresentationChartIcon, XIcon } from '@phosphor-icons/react'
+import { FileIcon, PlayIcon, PresentationChartIcon, XIcon, PlusIcon, LockSimpleIcon } from '@phosphor-icons/react'
 
-interface SprintReqItem {
-  id: string
+export interface SprintReqItem {
   featureId: string
   title: string
   description: string
@@ -17,31 +15,57 @@ interface SprintReqItem {
   subcategory?: string
 }
 
-export interface SprintDoc {
+export interface SprintRequirementDoc {
   id: string
   fileName: string | null
   createdBy: string
   items: SprintReqItem[]
 }
 
-function UploadZone({ projectId, jobId, mockRequirements }: { projectId: string; jobId: string; mockRequirements: SprintReqItem[] }) {
-  const [dragging, setDragging] = useState(false)
-  const [processing, setProcessing] = useState(false)
+export interface ActiveSprint {
+  id: string
+  name: string
+  status: 'OPEN' | 'CLOSED'
+  requirements: SprintRequirementDoc[]
+}
+
+function CreateSprintModal({
+  projectId,
+  sprintNumber,
+  mockRequirements,
+  onClose,
+}: {
+  projectId: string
+  sprintNumber: number
+  mockRequirements: SprintReqItem[]
+  onClose: () => void
+}) {
+  const [name, setName] = useState(`Sprint ${sprintNumber}`)
   const [fileName, setFileName] = useState<string | null>(null)
+  const [processing, setProcessing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   async function handleFile(file: File) {
     setFileName(file.name)
     setProcessing(true)
-    await new Promise(r => setTimeout(r, 1800))
-    const mockItems = mockRequirements
-    await fetch(`/api/projects/${projectId}/sprint-requirements`, {
+    const sprintRes = await fetch(`/api/projects/${projectId}/sprints`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jobId, items: mockItems, fileName: file.name, createdBy: 'BA' }),
+      body: JSON.stringify({ name }),
+    })
+    if (!sprintRes.ok) {
+      setProcessing(false)
+      return
+    }
+    const sprint = await sprintRes.json()
+    await fetch(`/api/projects/${projectId}/sprints/${sprint.id}/requirements`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: mockRequirements, fileName: file.name, createdBy: 'BA' }),
     })
     router.refresh()
+    onClose()
   }
 
   async function handleTrial() {
@@ -49,52 +73,66 @@ function UploadZone({ projectId, jobId, mockRequirements }: { projectId: string;
     await handleFile(mockFile)
   }
 
-  if (processing) {
-    return (
-      <div className="border-2 border-dashed border-[var(--border)] rounded-xl px-[22px] py-6 text-center">
-        <div className="w-7 h-7 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-sm font-medium text-[var(--text-primary)]">{fileName}</p>
-        <p className="text-xs text-[var(--text-muted)] mt-1">กำลังประมวลผล...</p>
-      </div>
-    )
-  }
-
   return (
-    <div
-      onDragOver={e => { e.preventDefault(); setDragging(true) }}
-      onDragLeave={() => setDragging(false)}
-      onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
-      onClick={() => inputRef.current?.click()}
-      className={`border-2 border-dashed rounded-xl px-[22px] py-6 flex flex-col items-center gap-3 cursor-pointer transition-colors ${
-        dragging ? 'border-[var(--accent)] bg-[var(--accent)]/5' : 'border-[var(--border)] hover:border-[var(--accent)]/40'
-      }`}
-    >
-      <FileIcon size={28} className="text-[var(--text-muted)]" />
-      <div className="flex flex-col gap-1 text-center">
-        <p className="text-sm font-medium text-[var(--text-primary)]">อัปโหลด Requirement</p>
-        <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-          วางไฟล์ที่นี่ หรือคลิกเพื่อเลือก<br />.pdf, .docx, .txt
-        </p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="bg-[var(--bg-sidebar)] border border-[var(--border)] rounded-2xl p-6 w-[400px] flex flex-col gap-5">
+        <div className="flex items-center justify-between">
+          <p className="text-base font-semibold text-[var(--text-primary)]">สร้าง Sprint ใหม่</p>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] transition-colors">
+            <XIcon size={14} />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs text-[var(--text-muted)]">ชื่อ Sprint</label>
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            disabled={processing}
+            className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-50"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs text-[var(--text-muted)]">Requirement File</label>
+          {processing ? (
+            <div className="border-2 border-dashed border-[var(--border)] rounded-xl px-4 py-5 text-center">
+              <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-xs text-[var(--text-muted)]">{fileName} — กำลังประมวลผล...</p>
+            </div>
+          ) : (
+            <div
+              onClick={() => inputRef.current?.click()}
+              className="border-2 border-dashed border-[var(--border)] hover:border-[var(--accent)]/40 rounded-xl px-4 py-5 flex flex-col items-center gap-2 cursor-pointer transition-colors"
+            >
+              <FileIcon size={24} className="text-[var(--text-muted)]" />
+              <div className="text-center">
+                <p className="text-xs font-medium text-[var(--text-primary)]">วางไฟล์ที่นี่ หรือคลิกเพื่อเลือก</p>
+                <p className="text-[10px] text-[var(--text-muted)] mt-0.5">.pdf, .docx, .txt</p>
+              </div>
+              <button
+                onClick={e => { e.stopPropagation(); handleTrial() }}
+                className="flex items-center gap-1 text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+              >
+                <PlayIcon size={11} weight="fill" />
+                ทดลองด้วย Mock Data
+              </button>
+            </div>
+          )}
+          <input ref={inputRef} type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
+        </div>
       </div>
-      <button
-        onClick={e => { e.stopPropagation(); handleTrial() }}
-        className="flex items-center gap-1 text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
-      >
-        <PlayIcon size={12} weight="fill" />
-        ทดลองด้วย Mock Data
-      </button>
-      <input ref={inputRef} type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
     </div>
   )
 }
 
-function DocCard({ doc, projectId }: { doc: SprintDoc; projectId: string }) {
+function DocCard({ doc, projectId, sprintId }: { doc: { id: string; fileName: string | null; createdBy: string }; projectId: string; sprintId: string }) {
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
 
   async function handleDelete() {
     setDeleting(true)
-    await fetch(`/api/projects/${projectId}/sprint-requirements/${doc.id}`, { method: 'DELETE' })
+    await fetch(`/api/projects/${projectId}/sprints/${sprintId}/requirements/${doc.id}`, { method: 'DELETE' })
     router.refresh()
   }
 
@@ -105,16 +143,8 @@ function DocCard({ doc, projectId }: { doc: SprintDoc; projectId: string }) {
         <p className="text-xs font-medium text-[var(--text-primary)] truncate">{doc.fileName ?? 'requirement.pdf'}</p>
         <p className="text-[10px] text-[var(--text-muted)] mt-0.5">โดย {doc.createdBy}</p>
       </div>
-      <button
-        onClick={handleDelete}
-        disabled={deleting}
-        className="shrink-0 w-6 h-6 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--status-red)] hover:bg-red-900/10 transition-colors disabled:opacity-40"
-      >
-        {deleting ? (
-          <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin block" />
-        ) : (
-          <XIcon size={12} />
-        )}
+      <button onClick={handleDelete} disabled={deleting} className="shrink-0 w-6 h-6 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--status-red)] hover:bg-red-900/10 transition-colors disabled:opacity-40">
+        {deleting ? <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin block" /> : <XIcon size={12} />}
       </button>
     </div>
   )
@@ -128,20 +158,20 @@ interface Props {
   author: string
   triggeredAt: string
   diffResult: DiffResult
-  sprintDocs: SprintDoc[]
+  activeSprint: ActiveSprint | null
   noDiff: boolean
   mockRequirements: SprintReqItem[]
-  bottomAction?: React.ReactNode
 }
 
-export function SprintReviewRightPanel({ projectId, jobId, commitSha, commitMsg, author, triggeredAt, diffResult, sprintDocs, noDiff, mockRequirements, bottomAction }: Props) {
+export function SprintReviewRightPanel({ projectId, commitSha, commitMsg, author, triggeredAt, diffResult, activeSprint, noDiff, mockRequirements }: Props) {
+  const [showModal, setShowModal] = useState(false)
+  const [closing, setClosing] = useState(false)
+  const router = useRouter()
+
+  const sprintDocs = activeSprint?.requirements ?? []
   const allReqItems = sprintDocs.flatMap(d => d.items)
   const reqMap = new Map(allReqItems.map(r => [r.featureId, r]))
   const hasReq = sprintDocs.length > 0
-
-  const addedLen = (diffResult.added ?? []).length
-  const modifiedLen = (diffResult.modified ?? []).length
-  const removedLen = (diffResult.removed ?? []).length
 
   const diffFeatureIds = new Set([
     ...(diffResult.added ?? []).map(f => f.id),
@@ -156,24 +186,8 @@ export function SprintReviewRightPanel({ projectId, jobId, commitSha, commitMsg,
     ...(diffResult.removed ?? []).map(f => ({ id: f.id, changeType: 'removed' as ChangeType, req: reqMap.get(f.id) ?? null })),
   ]
 
-  const doneCount = items.filter(i => {
-    if (!i.req) return false
-    return (
-      (i.req.changeType === 'add' && i.changeType === 'added') ||
-      (i.req.changeType === 'modify' && i.changeType === 'modified') ||
-      (i.req.changeType === 'remove' && i.changeType === 'removed')
-    )
-  }).length
-
-  const partialCount = items.filter(i => {
-    if (!i.req) return false
-    return !(
-      (i.req.changeType === 'add' && i.changeType === 'added') ||
-      (i.req.changeType === 'modify' && i.changeType === 'modified') ||
-      (i.req.changeType === 'remove' && i.changeType === 'removed')
-    )
-  }).length
-
+  const doneCount = items.filter(i => i.req && i.req.changeType === 'add' && i.changeType === 'added').length
+  const partialCount = items.filter(i => i.req && !(i.req.changeType === 'add' && i.changeType === 'added')).length
   const seen = new Set<string>()
   const notDoneCount = allReqItems.filter(r => {
     if (diffFeatureIds.has(r.featureId) || seen.has(r.featureId)) return false
@@ -186,87 +200,152 @@ export function SprintReviewRightPanel({ projectId, jobId, commitSha, commitMsg,
   const donePct = total > 0 ? (doneCount / total) * 100 : 0
   const partialPct = total > 0 ? (partialCount / total) * 100 : 0
 
+  async function handleCloseSprint() {
+    if (!activeSprint) return
+    setClosing(true)
+    await fetch(`/api/projects/${projectId}/sprints/${activeSprint.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'CLOSED' }),
+    })
+    router.refresh()
+    setClosing(false)
+  }
+
+  const nextSprintNumber = activeSprint ? parseInt(activeSprint.name.replace(/\D/g, '') || '1') + 1 : 1
+
   return (
-    <div className="fixed top-[85px] right-0 h-[calc(100vh-85px)] w-[288px] overflow-y-auto pt-6 px-6 pb-8 bg-[var(--bg-sidebar)] border-l border-[var(--border)] z-10 flex flex-col gap-8">
+    <>
+      {showModal && (
+        <CreateSprintModal
+          projectId={projectId}
+          sprintNumber={nextSprintNumber}
+          mockRequirements={mockRequirements}
+          onClose={() => setShowModal(false)}
+        />
+      )}
 
-      {/* Main content block */}
-      <div className="flex flex-col gap-6">
+      <div className="fixed top-[85px] right-0 h-[calc(100vh-85px)] w-[288px] overflow-y-auto pt-6 px-6 pb-8 bg-[var(--bg-sidebar)] border-l border-[var(--border)] z-10 flex flex-col gap-8">
 
-        {/* Section 1: commit + diff stats */}
-        {!noDiff && (
+        {!activeSprint && (
           <div className="flex flex-col gap-4">
-            {/* Commit card */}
-            <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 flex flex-col gap-1.5">
-              <code className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded self-start">{commitSha.slice(0, 7)}</code>
-              <p className="text-xs font-medium text-[var(--text-primary)] leading-snug">{commitMsg || 'ไม่มี commit message'}</p>
-              <p className="text-[10px] text-[var(--text-muted)]">{author} · {new Date(triggeredAt).toLocaleString('th-TH')}</p>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs font-medium text-[var(--text-muted)]">Sprint</p>
+              <p className="text-sm text-[var(--text-muted)]">ยังไม่มี Sprint — สร้างเพื่อเริ่มติดตาม requirement</p>
             </div>
-
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              <PlusIcon size={16} />
+              สร้าง Sprint
+            </button>
           </div>
         )}
 
-        {/* Section 2: upload/docs + progress (same group, gap-4 = 16px) */}
-        <div className="flex flex-col gap-4">
-          {/* Upload zone / doc cards */}
-          {sprintDocs.length === 0 ? (
-            <UploadZone projectId={projectId} jobId={jobId} mockRequirements={mockRequirements} />
-          ) : (
+        {activeSprint && (
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{activeSprint.name}</p>
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                    activeSprint.status === 'OPEN'
+                      ? 'text-[var(--status-green)] bg-[rgba(13,84,43,0.15)]'
+                      : 'text-[var(--text-muted)] bg-[var(--bg-hover)]'
+                  }`}>
+                    {activeSprint.status}
+                  </span>
+                </div>
+                {activeSprint.status === 'OPEN' && (
+                  <button
+                    onClick={handleCloseSprint}
+                    disabled={closing}
+                    className="flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--status-red)] transition-colors disabled:opacity-40"
+                  >
+                    <LockSimpleIcon size={12} />
+                    {closing ? 'กำลังปิด...' : 'ปิด Sprint'}
+                  </button>
+                )}
+              </div>
+
+              {!noDiff && (
+                <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-4 py-3 flex flex-col gap-1.5">
+                  <code className="text-xs font-mono text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded self-start">{commitSha.slice(0, 7)}</code>
+                  <p className="text-xs font-medium text-[var(--text-primary)] leading-snug">{commitMsg || 'ไม่มี commit message'}</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">{author} · {new Date(triggeredAt).toLocaleString('th-TH')}</p>
+                </div>
+              )}
+            </div>
+
             <div className="flex flex-col gap-2">
-              {sprintDocs.map(doc => (
-                <DocCard key={doc.id} doc={doc} projectId={projectId} />
-              ))}
+              {sprintDocs.length === 0 ? (
+                <p className="text-xs text-[var(--text-muted)]">ยังไม่มี requirement file</p>
+              ) : (
+                sprintDocs.map(doc => (
+                  <DocCard key={doc.id} doc={doc} projectId={projectId} sprintId={activeSprint.id} />
+                ))
+              )}
             </div>
-          )}
 
-          {/* Req progress */}
-          {hasReq && (
-            <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl overflow-hidden">
-              <div className="px-4 pt-3 pb-2">
-                <div className="flex items-end justify-between mb-2">
-                  <p className="text-xs text-[var(--text-muted)]">ความคืบหน้า</p>
-                  <p className="text-lg font-bold text-[var(--text-primary)]">{pct}<span className="text-xs font-normal text-[var(--text-muted)] ml-0.5">%</span></p>
+            {hasReq && (
+              <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl overflow-hidden">
+                <div className="px-4 pt-3 pb-2">
+                  <div className="flex items-end justify-between mb-2">
+                    <p className="text-xs text-[var(--text-muted)]">ความคืบหน้า</p>
+                    <p className="text-lg font-bold text-[var(--text-primary)]">{pct}<span className="text-xs font-normal text-[var(--text-muted)] ml-0.5">%</span></p>
+                  </div>
+                  <div className="h-2 bg-[var(--bg-hover)] rounded-full overflow-hidden flex">
+                    <div className="h-full bg-[var(--status-green)] transition-all duration-500" style={{ width: `${donePct}%` }} />
+                    <div className="h-full bg-[var(--status-yellow)] transition-all duration-500" style={{ width: `${partialPct}%` }} />
+                  </div>
                 </div>
-                <div className="h-2 bg-[var(--bg-hover)] rounded-full overflow-hidden flex">
-                  <div className="h-full bg-[var(--status-green)] transition-all duration-500" style={{ width: `${donePct}%` }} />
-                  <div className="h-full bg-[var(--status-yellow)] transition-all duration-500" style={{ width: `${partialPct}%` }} />
+                <div className="grid grid-cols-3 divide-x divide-[var(--border)] border-t border-[var(--border)]">
+                  <div className="py-3 text-center">
+                    <p className="text-lg font-bold text-[var(--status-green)]">{doneCount}</p>
+                    <p className="text-[10px] text-[var(--text-muted)]">เสร็จแล้ว</p>
+                  </div>
+                  <div className="py-3 text-center">
+                    <p className="text-lg font-bold text-[var(--status-yellow)]">{partialCount}</p>
+                    <p className="text-[10px] text-[var(--text-muted)]">ไม่ถูกต้อง</p>
+                  </div>
+                  <div className="py-3 text-center">
+                    <p className="text-lg font-bold text-[var(--status-red)]">{notDoneCount}</p>
+                    <p className="text-[10px] text-[var(--text-muted)]">ยังไม่ครบ</p>
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 divide-x divide-[var(--border)] border-t border-[var(--border)]">
-                <div className="py-3 text-center">
-                  <p className="text-lg font-bold text-[var(--status-green)]">{doneCount}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">เสร็จแล้ว</p>
-                </div>
-                <div className="py-3 text-center">
-                  <p className="text-lg font-bold text-[var(--status-yellow)]">{partialCount}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">ไม่ถูกต้อง</p>
-                </div>
-                <div className="py-3 text-center">
-                  <p className="text-lg font-bold text-[var(--status-red)]">{notDoneCount}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">ยังไม่ครบ</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+            )}
 
-      {/* Bottom action */}
-      {bottomAction ?? (
-        noDiff ? (
-          <div className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--bg-hover)] border border-[var(--border)] text-sm font-medium text-[var(--text-muted)] cursor-not-allowed select-none">
-            <PresentationChartIcon size={16} />
-            สรุปการแก้ไข
+            {activeSprint.status === 'CLOSED' && (
+              <button
+                onClick={() => setShowModal(true)}
+                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                <PlusIcon size={16} />
+                สร้าง Sprint ใหม่
+              </button>
+            )}
           </div>
-        ) : (
-          <Link
-            href={`/projects/${projectId}/sprint-review/summary`}
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            <PresentationChartIcon size={16} />
-            สรุปการแก้ไข
-          </Link>
-        )
-      )}
-    </div>
+        )}
+
+        {activeSprint?.status === 'OPEN' && (
+          noDiff ? (
+            <div className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--bg-hover)] border border-[var(--border)] text-sm font-medium text-[var(--text-muted)] cursor-not-allowed select-none mt-auto">
+              <PresentationChartIcon size={16} />
+              สรุปการแก้ไข
+            </div>
+          ) : (
+            <a
+              href={`/projects/${projectId}/sprint-review/summary`}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity mt-auto"
+            >
+              <PresentationChartIcon size={16} />
+              สรุปการแก้ไข
+            </a>
+          )
+        )}
+      </div>
+    </>
   )
 }

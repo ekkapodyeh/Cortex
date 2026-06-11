@@ -96,9 +96,10 @@ interface Props {
   historyHref?: string
   noDiff?: boolean
   mockRequirements: SprintReqMockItem[]
+  readOnly?: boolean
 }
 
-export function SprintReviewClient({ projectId, jobId, diffResult, activeSprint, allFeatures = [], commitSha, commitMsg, author, triggeredAt, mockButton, resetButton, noDiff, mockRequirements }: Props) {
+export function SprintReviewClient({ projectId, jobId, diffResult, activeSprint, allFeatures = [], commitSha, commitMsg, author, triggeredAt, mockButton, resetButton, noDiff, mockRequirements, readOnly }: Props) {
   const sprintDocs = activeSprint?.requirements ?? []
   const items: FeatureItem[] = [
     ...(diffResult.added ?? []).map(f => ({ feature: f, oldFeature: null, changeType: 'added' as const, category: f.category ?? 'ทั่วไป', subcategory: f.subcategory ?? '' })),
@@ -250,6 +251,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, activeSprint,
         activeSprint={activeSprint}
         noDiff={noDiff ?? false}
         mockRequirements={mockRequirements}
+        readOnly={readOnly ?? false}
       />
     </div>
   )

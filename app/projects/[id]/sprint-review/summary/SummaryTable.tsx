@@ -50,16 +50,14 @@ export function SummaryTable({ rows }: { rows: ReqRow[] }) {
     <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl overflow-hidden">
       <table className="w-full text-sm table-fixed">
         <colgroup>
-          <col className="w-[236px]" />
-          <col className="w-[236px]" />
-          <col className="w-[100px]" />
+          <col className="w-[260px]" />
+          <col className="w-[260px]" />
           <col />
         </colgroup>
         <thead>
           <tr className="border-b border-[var(--border)] bg-[var(--bg-hover)]">
             <th className={thCls}>Requirement</th>
             <th className={thCls}>ก่อนแก้</th>
-            <th className={thCls}>ต้องการ</th>
             <th className={thCls}>หลังแก้</th>
           </tr>
         </thead>
@@ -71,9 +69,6 @@ export function SummaryTable({ rows }: { rows: ReqRow[] }) {
               </td>
               <td className="px-4 py-4">
                 <FeatureCell title={beforeTitle} desc={beforeDesc} muted="ไม่มีก่อนหน้านี้" />
-              </td>
-              <td className="px-4 py-4">
-                <ReqTypeBadge type={req.changeType} />
               </td>
               <td className="px-4 py-4">
                 <FeatureCell

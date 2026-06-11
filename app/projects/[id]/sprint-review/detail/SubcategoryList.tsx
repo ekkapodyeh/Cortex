@@ -151,18 +151,20 @@ function ItemCard({ item, hasReq }: { item: SubcategoryGroup['items'][0]; hasReq
         ) : null}
 
         {/* ของเดิม */}
-        {!isAdded && (
-          <>
-            <div className="flex gap-4 items-start">
-              <p className="text-[12px] font-medium text-[#6b7280] whitespace-nowrap shrink-0 pt-0.5">ของเดิม</p>
-              <div className="flex flex-col gap-2 flex-1 min-w-0">
-                <p className="text-[14px] font-medium text-[#f5f5f5]">{item.oldTitle ?? item.newTitle}</p>
-                {item.oldDescription && <p className="text-[14px] text-[#909090] leading-[21px]">{item.oldDescription}</p>}
-              </div>
+        <div className="flex gap-4 items-start">
+          <p className="text-[12px] font-medium text-[#6b7280] whitespace-nowrap shrink-0 pt-0.5">ของเดิม</p>
+          {isAdded ? (
+            <p className="text-[14px] text-[#6b7280]">ไม่มีก่อนหน้านี้</p>
+          ) : (
+            <div className="flex flex-col gap-2 flex-1 min-w-0">
+              <p className="text-[14px] font-medium text-[#f5f5f5]">{item.oldTitle ?? item.newTitle}</p>
+              {item.oldDescription && <p className="text-[14px] text-[#909090] leading-[21px]">{item.oldDescription}</p>}
             </div>
-            <div className="border-t border-[#2a2d2e]" />
-          </>
-        )}
+          )}
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-[#2a2d2e]" />
 
         {/* ของใหม่ */}
         <div className="flex gap-4 items-start">

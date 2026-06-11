@@ -19,18 +19,6 @@ export default async function SprintHistoryPage({
   const history = await db.knowledgeDoc.findMany({
     where: { projectId: id },
     orderBy: { version: 'desc' },
-    include: {
-      sourceJob: {
-        select: {
-          commitSha: true,
-          commitMsg: true,
-          author: true,
-          triggeredAt: true,
-          updateDoc: { select: { diff: true } },
-          sprintRequirements: { select: { items: true } },
-        },
-      },
-    },
   })
 
   return (
@@ -53,19 +41,7 @@ export default async function SprintHistoryPage({
         ) : (
           <div className="flex flex-col gap-4">
             {history.map(doc => {
-              const diff = doc.sourceJob?.updateDoc?.diff as unknown as DiffResult | null
               const features = (doc.features as unknown as Feature[]) ?? []
-
-              const allReqItems = doc.sourceJob?.sprintRequirements?.flatMap(r => r.items as unknown as SprintReqItem[]) ?? []
-              let doneCount = 0
-              for (const req of allReqItems) {
-                const match =
-                  (req.changeType === 'add'    && (diff?.added    ?? []).some((f: any) => f.id === req.featureId)) ||
-                  (req.changeType === 'modify' && (diff?.modified ?? []).some((c: any) => c.new.id === req.featureId)) ||
-                  (req.changeType === 'remove' && (diff?.removed  ?? []).some((f: any) => f.id === req.featureId))
-                if (match) doneCount++
-              }
-              const totalReq = allReqItems.length
 
               return (
                 <HistoryItem
@@ -74,13 +50,13 @@ export default async function SprintHistoryPage({
                   approvedBy={doc.approvedBy}
                   createdAt={doc.createdAt.toISOString()}
                   featureCount={features.length}
-                  commitSha={doc.sourceJob?.commitSha ?? null}
-                  commitMsg={doc.sourceJob?.commitMsg ?? null}
-                  author={doc.sourceJob?.author ?? null}
-                  diff={diff}
+                  commitSha={null}
+                  commitMsg={null}
+                  author={null}
+                  diff={null}
                   knowledgeHref={`/projects/${id}/knowledge`}
-                  doneCount={totalReq > 0 ? doneCount : null}
-                  totalReq={totalReq > 0 ? totalReq : null}
+                  doneCount={null}
+                  totalReq={null}
                 />
               )
             })}

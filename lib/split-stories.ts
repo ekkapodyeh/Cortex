@@ -17,7 +17,7 @@ export function splitCompoundItems(items: any[], allFeatures: Feature[]): any[] 
     const part1 = item.title.slice(0, idx).trim()
     const part2 = item.title.slice(idx + connector.length).trim()
     if (!part1 || !part2) { result.push(item); continue }
-    let bestId = item.featureId
+    let bestId = `${item.featureId}__split1`
     let bestScore = 0
     for (const f of allFeatures) {
       if (f.id === item.featureId) continue

@@ -154,6 +154,7 @@ export default async function CategoryDetailPage({
 
   const sprintDocs = allSprintRequirements.map(r => ({
     id: r.id,
+    sprintId: r.sprintId,
     fileName: r.fileName ?? null,
     createdBy: r.createdBy,
     items: r.items as unknown as any[],

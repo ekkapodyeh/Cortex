@@ -203,7 +203,7 @@ export default async function CategoryDetailPage({
     <div className="pt-[48px] px-[32px] pb-24 pr-[320px]">
       <div className="max-w-[1200px] mx-auto flex gap-8 items-start">
         {/* Category side nav */}
-        <nav className="w-[200px] lg:w-[300px] max-w-[300px] shrink-0 pt-1">
+        <nav className="w-[200px] max-w-[200px] shrink-0 pt-1">
           <div className="sticky top-12 flex flex-col gap-0.5">
             {allCategories.map(c => (
               <Link

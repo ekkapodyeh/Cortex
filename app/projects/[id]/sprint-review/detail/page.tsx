@@ -8,6 +8,7 @@ import { SubcategoryList } from './SubcategoryList'
 import type { SubcategoryGroup, JobCommit } from './SubcategoryList'
 import { SprintReviewRightPanel } from '../SprintReviewRightPanel'
 import { getProjectMock } from '@/lib/sprint-mocks'
+import { splitCompoundItems } from '@/lib/split-stories'
 
 export default async function CategoryDetailPage({
   params,
@@ -32,6 +33,12 @@ export default async function CategoryDetailPage({
     orderBy: { triggeredAt: 'desc' },
     include: { updateDoc: true },
   })
+
+  const latestDoc = await db.knowledgeDoc.findFirst({
+    where: { projectId: id },
+    orderBy: { version: 'desc' },
+  })
+  const allFeatures = (latestDoc?.features as unknown as Feature[]) ?? []
 
   const hasPendingDiff = !!latestJob?.updateDoc && latestJob.updateDoc.status === 'PENDING'
   const diff: DiffResult = hasPendingDiff
@@ -102,9 +109,10 @@ export default async function CategoryDetailPage({
     subMap.get(item.subcategory)!.push(item)
   }
 
-  const allReqItems: any[] = projectMock
-    ? projectMock.requirements
-    : allSprintRequirements.flatMap(r => r.items as any[])
+  const allReqItems: any[] = splitCompoundItems(
+    projectMock ? projectMock.requirements : allSprintRequirements.flatMap(r => r.items as any[]),
+    allFeatures
+  )
   const reqMap = new Map(allReqItems.map((r: any) => [r.featureId, r as any]))
   const hasReq = allReqItems.length > 0
 

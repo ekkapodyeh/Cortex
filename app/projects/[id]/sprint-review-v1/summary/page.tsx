@@ -9,6 +9,7 @@ import { SummaryTable } from './SummaryTable'
 import { UpdateKnowledgeButton } from './UpdateKnowledgeButton'
 import { SprintReviewRightPanel } from '../SprintReviewRightPanel'
 import { getProjectMock } from '@/lib/sprint-mocks'
+import { splitCompoundItems } from '@/lib/split-stories'
 
 interface SprintReqItem {
   id: string
@@ -66,7 +67,9 @@ export default async function SprintSummaryPage({
   ]
   const diffMap = new Map(diffItems.map(d => [d.feature.id, d]))
 
-  const allReqItems = sprintRequirements.flatMap(r => r.items as unknown as SprintReqItem[])
+  const latestDoc = await db.knowledgeDoc.findFirst({ where: { projectId: id }, orderBy: { version: 'desc' } })
+  const allFeatures = (latestDoc?.features as unknown as Feature[]) ?? []
+  const allReqItems = splitCompoundItems(sprintRequirements.flatMap(r => r.items as unknown as any[]), allFeatures) as SprintReqItem[]
 
   const reqRows = allReqItems.map(req => {
     const diffItem = diffMap.get(req.featureId) ?? null

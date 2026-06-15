@@ -50,7 +50,7 @@ function ReqStatusBadge({ status }: { status: ReqStatus }) {
     </span>
   )
   if (status === 'pending') return (
-    <span className="text-[12px] font-medium text-[var(--status-yellow)] shrink-0">ไม่ครบ</span>
+    <span className="text-[12px] font-medium text-[var(--status-yellow)] shrink-0">ไม่มี</span>
   )
   if (status === 'no-req') return (
     <span className="text-[12px] font-medium text-[var(--text-muted)] shrink-0">ไม่มีใน Requirement</span>
@@ -197,7 +197,7 @@ function ReqSummary({ groups }: { groups: SubcategoryGroup[] }) {
       </div>
       <div className="flex flex-col items-center justify-center gap-1 bg-[rgba(115,62,10,0.12)] border border-[rgba(137,75,0,0.25)] rounded-xl px-3 py-4">
         <span className="text-2xl font-bold text-[var(--status-yellow)]">{pendingCount}</span>
-        <span className="text-xs text-[var(--status-yellow)]">ไม่ครบ</span>
+        <span className="text-xs text-[var(--status-yellow)]">ไม่มี</span>
       </div>
       {noReqCount > 0 && (
         <div className="flex flex-col items-center justify-center gap-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-4">

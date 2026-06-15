@@ -247,7 +247,7 @@ export default async function CategoryDetailPage({
         {partialItems.length > 0 && (
           <div className="flex items-center gap-2 bg-yellow-900/15 border border-yellow-800/30 rounded-xl px-5 py-3">
             <span className="text-xl font-bold text-[var(--status-yellow)]">{partialItems.length}</span>
-            <span className="text-sm text-[var(--status-yellow)]">ไม่ครบตาม Requirement</span>
+            <span className="text-sm text-[var(--status-yellow)]">ไม่มีตาม Requirement</span>
           </div>
         )}
         {missingItems.length > 0 && (

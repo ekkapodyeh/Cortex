@@ -47,7 +47,7 @@ function ReqStatusBadge({ status }: { status: ReqStatus }) {
     </span>
   )
   if (status === 'pending') return (
-    <span className="text-[12px] font-medium text-[var(--status-yellow)] shrink-0">ไม่ครบ</span>
+    <span className="text-[12px] font-medium text-[var(--status-yellow)] shrink-0">ไม่มี</span>
   )
   if (status === 'no-req') return (
     <span className="text-[12px] font-medium text-[var(--text-muted)] shrink-0">ไม่มีใน Requirement</span>

@@ -159,7 +159,7 @@ function CategoryRow({ group, href }: { group: CategoryGroup; href: string }) {
           </span>
         ) : (
           <span className="text-xs font-medium px-2.5 py-1 rounded-full text-[var(--status-red)] bg-red-900/20">
-            ✗ ไม่ครบตาม Requirement {totalBad}
+            ✗ ไม่มีตาม Requirement {totalBad}
           </span>
         )}
         <span className="text-[var(--text-muted)] text-sm ml-1">→</span>

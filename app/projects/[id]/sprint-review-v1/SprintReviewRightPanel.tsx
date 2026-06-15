@@ -248,7 +248,7 @@ export function SprintReviewRightPanel({ projectId, jobId, commitSha, commitMsg,
                 </div>
                 <div className="py-3 text-center">
                   <p className="text-lg font-bold text-[var(--status-yellow)]">{notDoneCount}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">ไม่ครบ</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">ไม่มี</p>
                 </div>
               </div>
             </div>

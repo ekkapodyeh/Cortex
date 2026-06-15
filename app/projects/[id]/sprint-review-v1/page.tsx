@@ -36,7 +36,7 @@ export default async function SprintReviewPage({
 
   // ดึง SprintRequirement จากทุก job ของ project เพื่อให้ persist ข้าม reset
   const allSprintRequirements = await db.sprintRequirement.findMany({
-    where: { job: { projectId: id } },
+    where: { projectId: id },
     orderBy: { createdAt: 'asc' },
   })
 

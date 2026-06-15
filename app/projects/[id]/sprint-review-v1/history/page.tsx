@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation'
 import type { Feature, DiffResult } from '@/lib/types'
 import { HistoryItem } from './HistoryItem'
 
-type SprintReqItem = { featureId: string; changeType: 'add' | 'modify' | 'remove' }
 
 export default async function SprintHistoryPage({
   params,
@@ -27,7 +26,6 @@ export default async function SprintHistoryPage({
           author: true,
           triggeredAt: true,
           updateDoc: { select: { diff: true } },
-          sprintRequirements: { select: { items: true } },
         },
       },
     },
@@ -56,16 +54,8 @@ export default async function SprintHistoryPage({
               const diff = doc.sourceJob?.updateDoc?.diff as unknown as DiffResult | null
               const features = (doc.features as unknown as Feature[]) ?? []
 
-              const allReqItems = doc.sourceJob?.sprintRequirements?.flatMap(r => r.items as unknown as SprintReqItem[]) ?? []
-              let doneCount = 0
-              for (const req of allReqItems) {
-                const match =
-                  (req.changeType === 'add'    && (diff?.added    ?? []).some((f: any) => f.id === req.featureId)) ||
-                  (req.changeType === 'modify' && (diff?.modified ?? []).some((c: any) => c.new.id === req.featureId)) ||
-                  (req.changeType === 'remove' && (diff?.removed  ?? []).some((f: any) => f.id === req.featureId))
-                if (match) doneCount++
-              }
-              const totalReq = allReqItems.length
+              const doneCount = null
+              const totalReq = null
 
               return (
                 <HistoryItem
@@ -79,8 +69,8 @@ export default async function SprintHistoryPage({
                   author={doc.sourceJob?.author ?? null}
                   diff={diff}
                   knowledgeHref={`/projects/${id}/knowledge`}
-                  doneCount={totalReq > 0 ? doneCount : null}
-                  totalReq={totalReq > 0 ? totalReq : null}
+                  doneCount={null}
+                  totalReq={null}
                 />
               )
             })}

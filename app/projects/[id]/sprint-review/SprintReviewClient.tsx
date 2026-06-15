@@ -159,7 +159,7 @@ export function SprintReviewClient({ projectId, jobId, diffResult, activeSprint,
           {noDiff && sprintDocs.length === 0 && (
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border)]">
               <div className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-pulse shrink-0" />
-              <p className="text-sm text-[var(--text-muted)]">รอการวิเคราะห์โค้ด — ยังไม่มี Code Push ใหม่ รายการด้านล่างจึงแสดงเป็น <span className="text-[var(--status-red)]">ยังไม่ครบ</span> ทั้งหมด</p>
+              <p className="text-sm text-[var(--text-muted)]">รอการวิเคราะห์โค้ด — ยังไม่มี Code Push ใหม่ รายการด้านล่างจึงแสดงเป็น <span className="text-[var(--status-red)]">ไม่ครบ</span> ทั้งหมด</p>
             </div>
           )}
 

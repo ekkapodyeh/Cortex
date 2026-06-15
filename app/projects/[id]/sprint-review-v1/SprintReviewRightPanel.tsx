@@ -259,15 +259,15 @@ export function SprintReviewRightPanel({ projectId, jobId, commitSha, commitMsg,
               <div className="grid grid-cols-3 divide-x divide-[var(--border)] border-t border-[var(--border)]">
                 <div className="py-3 text-center">
                   <p className="text-lg font-bold text-[var(--status-green)]">{doneCount}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">เสร็จแล้ว</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">ถูกต้อง</p>
                 </div>
                 <div className="py-3 text-center">
-                  <p className="text-lg font-bold text-[var(--status-yellow)]">{partialCount}</p>
+                  <p className="text-lg font-bold text-[var(--status-red)]">{partialCount}</p>
                   <p className="text-[10px] text-[var(--text-muted)]">ไม่ถูกต้อง</p>
                 </div>
                 <div className="py-3 text-center">
-                  <p className="text-lg font-bold text-[var(--status-red)]">{notDoneCount}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">ยังไม่ครบ</p>
+                  <p className="text-lg font-bold text-[var(--status-yellow)]">{notDoneCount}</p>
+                  <p className="text-[10px] text-[var(--text-muted)]">ไม่ครบ</p>
                 </div>
               </div>
             </div>

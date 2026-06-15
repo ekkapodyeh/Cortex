@@ -40,7 +40,7 @@ function ReqStatusBadge({ status }: { status: ReqStatus }) {
   if (status === 'done') return (
     <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[#22c55e] shrink-0">
       <span className="w-[18px] h-[18px] rounded-full bg-[#243e32] flex items-center justify-center text-[10px]">✓</span>
-      สำเร็จ
+      ถูกต้อง
     </span>
   )
   if (status === 'incorrect') return (
@@ -50,7 +50,7 @@ function ReqStatusBadge({ status }: { status: ReqStatus }) {
     </span>
   )
   if (status === 'pending') return (
-    <span className="text-[12px] font-medium text-[var(--status-yellow)] shrink-0">ยังไม่มี</span>
+    <span className="text-[12px] font-medium text-[var(--status-yellow)] shrink-0">ไม่ครบ</span>
   )
   if (status === 'no-req') return (
     <span className="text-[12px] font-medium text-[var(--text-muted)] shrink-0">ไม่มีใน Requirement</span>
@@ -155,7 +155,7 @@ function SubcategorySection({ group, hasReq }: { group: SubcategoryGroup; hasReq
                 ? 'text-[var(--status-green)] bg-[rgba(13,84,43,0.15)]'
                 : 'text-[#f47a00] bg-[rgba(244,122,0,0.1)]'
             }`}>
-              {doneCount}/{reqItems.length} สำเร็จ
+              {doneCount}/{reqItems.length} ถูกต้อง
             </span>
           ) : (
             <>
@@ -189,7 +189,7 @@ function ReqSummary({ groups }: { groups: SubcategoryGroup[] }) {
     <div className={`grid gap-3 ${noReqCount > 0 ? 'grid-cols-4' : 'grid-cols-3'}`}>
       <div className="flex flex-col items-center justify-center gap-1 bg-[rgba(13,84,43,0.12)] border border-[rgba(2,102,48,0.25)] rounded-xl px-3 py-4">
         <span className="text-2xl font-bold text-[var(--status-green)]">{doneCount}</span>
-        <span className="text-xs text-[var(--status-green)]">สำเร็จแล้ว</span>
+        <span className="text-xs text-[var(--status-green)]">ถูกต้อง</span>
       </div>
       <div className="flex flex-col items-center justify-center gap-1 bg-[rgba(130,24,26,0.12)] border border-[rgba(159,7,18,0.25)] rounded-xl px-3 py-4">
         <span className="text-2xl font-bold text-[var(--status-red)]">{incorrectCount}</span>
@@ -197,7 +197,7 @@ function ReqSummary({ groups }: { groups: SubcategoryGroup[] }) {
       </div>
       <div className="flex flex-col items-center justify-center gap-1 bg-[rgba(115,62,10,0.12)] border border-[rgba(137,75,0,0.25)] rounded-xl px-3 py-4">
         <span className="text-2xl font-bold text-[var(--status-yellow)]">{pendingCount}</span>
-        <span className="text-xs text-[var(--status-yellow)]">ยังไม่มี</span>
+        <span className="text-xs text-[var(--status-yellow)]">ไม่ครบ</span>
       </div>
       {noReqCount > 0 && (
         <div className="flex flex-col items-center justify-center gap-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-4">

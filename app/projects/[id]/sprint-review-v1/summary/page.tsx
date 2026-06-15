@@ -36,9 +36,15 @@ export default async function SprintSummaryPage({
     orderBy: { triggeredAt: 'desc' },
     include: {
       updateDoc: true,
-      sprintRequirements: { orderBy: { createdAt: 'asc' } },
     },
   })
+
+  const sprintRequirements = latestJob
+    ? await db.sprintRequirement.findMany({
+        where: { projectId: id },
+        orderBy: { createdAt: 'asc' },
+      })
+    : []
 
   if (!latestJob?.updateDoc) notFound()
 
@@ -60,7 +66,7 @@ export default async function SprintSummaryPage({
   ]
   const diffMap = new Map(diffItems.map(d => [d.feature.id, d]))
 
-  const allReqItems = latestJob.sprintRequirements.flatMap(r => r.items as unknown as SprintReqItem[])
+  const allReqItems = sprintRequirements.flatMap(r => r.items as unknown as SprintReqItem[])
 
   const reqRows = allReqItems.map(req => {
     const diffItem = diffMap.get(req.featureId) ?? null
@@ -95,7 +101,7 @@ export default async function SprintSummaryPage({
     }
   }).filter(r => r.status === 'done')
 
-  const sprintDocs = latestJob.sprintRequirements.map(r => ({
+  const sprintDocs = sprintRequirements.map(r => ({
     id: r.id,
     fileName: r.fileName ?? null,
     createdBy: r.createdBy,

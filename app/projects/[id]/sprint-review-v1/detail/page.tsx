@@ -39,7 +39,7 @@ export default async function CategoryDetailPage({
     : { added: [], modified: [], removed: [] }
 
   const allSprintRequirements = await db.sprintRequirement.findMany({
-    where: { job: { projectId: id } },
+    where: { projectId: id },
     orderBy: { createdAt: 'asc' },
   })
 

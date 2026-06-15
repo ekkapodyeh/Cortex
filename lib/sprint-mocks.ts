@@ -139,8 +139,8 @@ const FACTORYPRO: ProjectMock = {
 
 const WP_ADDED: Feature[] = [
   // การเข้าสู่ระบบและลงทะเบียน
-  { id: 'WP_AUTH001', title: 'เข้าสู่ระบบด้วย Username/Password',               description: 'ระบบ login มาตรฐาน รองรับ remember me และ force logout session เก่า',                                      category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'เข้าสู่ระบบ' },
-  { id: 'WP_AUTH003', title: 'ต่ออายุ Session อัตโนมัติเมื่อใกล้หมดอายุ',       description: 'ระบบ refresh token อัตโนมัติก่อนหมดอายุ 5 นาที โดยไม่ต้องให้ผู้ใช้ login ใหม่',                            category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'จัดการ Session' },
+  { id: 'WP_AUTH001', title: 'เข้าสู่ระบบด้วย Username/Password',               description: 'เข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่าน จำการเข้าสู่ระบบไว้ได้ และดีดอุปกรณ์เก่าที่ค้างอยู่ออก',                                      category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'เข้าสู่ระบบ' },
+  { id: 'WP_AUTH003', title: 'ต่ออายุการใช้งานอัตโนมัติก่อนหมดเวลา',       description: 'ระบบต่ออายุให้เองก่อนหมดเวลา 5 นาที ผู้ใช้จึงใช้งานต่อได้โดยไม่ต้องล็อกอินใหม่',                            category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'การคงอยู่ในระบบ' },
   { id: 'WP_AUTH006', title: 'สมัครสมาชิกด้วยเบอร์โทรและกำหนดชื่อ',             description: 'ผู้ใช้ใหม่สมัครด้วยเบอร์โทร ยืนยัน OTP และกำหนดชื่อแสดง',                                                  category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'ลงทะเบียนผู้ใช้ใหม่' },
   // จัดการสินค้าในคลัง
   { id: 'WP_STK001',  title: 'ดูรายการสินค้าคงคลังทั้งหมดแบบ real-time',         description: 'แสดงรายการสินค้าพร้อมยอดคงเหลือแยกตาม warehouse แบบ real-time',                                           category: 'จัดการสินค้าในคลัง',          subcategory: 'ภาพรวมสินค้า' },
@@ -181,7 +181,7 @@ const WP_ADDED: Feature[] = [
 const WP_REQUIREMENTS: SprintReqMockItem[] = [
   // การเข้าสู่ระบบและลงทะเบียน
   { id: 'SR_WP001',  featureId: 'WP_AUTH001', title: 'ผู้ใช้เข้าสู่ระบบด้วย Username/Password พร้อม Remember Me ได้',     description: 'ลดการ login ซ้ำทุกวัน',                                                              priority: 'high',   changeType: 'add', category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'เข้าสู่ระบบ' },
-  { id: 'SR_WP002',  featureId: 'WP_AUTH003', title: 'ผู้ใช้ไม่ถูก Logout กะทันหันเมื่อ Token หมดอายุ',                   description: 'ต้องการ auto-refresh token ไม่ให้ผู้ใช้ต้อง login ซ้ำ',                             priority: 'high',   changeType: 'add', category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'จัดการ Session' },
+  { id: 'SR_WP002',  featureId: 'WP_AUTH003', title: 'ใช้งานต่อเนื่องได้ ไม่หลุดออกจากระบบเอง',                   description: 'ผู้ใช้ที่ล็อกอินอยู่ใช้งานต่อได้เรื่อยๆ ไม่ถูกเด้งออกกลางคัน ระบบต่ออายุการใช้งานให้อัตโนมัติ',                             priority: 'high',   changeType: 'add', category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'การคงอยู่ในระบบ' },
   { id: 'SR_WP004',  featureId: 'WP_AUTH006', title: 'ผู้ใช้ใหม่สมัครสมาชิกด้วยเบอร์โทรและกำหนดชื่อได้',                 description: 'รองรับการ onboard ผู้ใช้ใหม่ผ่านเบอร์โทร',                                           priority: 'medium', changeType: 'add', category: 'การเข้าสู่ระบบและลงทะเบียน', subcategory: 'ลงทะเบียนผู้ใช้ใหม่' },
   // จัดการสินค้าในคลัง
   { id: 'SR_WP005',  featureId: 'WP_STK001',  title: 'ผู้ใช้ดูรายการสินค้าคงคลังทั้งหมดแบบ real-time แยก warehouse ได้',  description: 'ต้องการเห็นยอดคงเหลือแยก warehouse ทันที',                                           priority: 'high',   changeType: 'add', category: 'จัดการสินค้าในคลัง',          subcategory: 'ภาพรวมสินค้า' },

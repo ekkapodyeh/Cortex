@@ -328,7 +328,7 @@ export default async function CategoryDetailPage({
       ],
     },
   ]
-  const groupsWithMock = [...mockGroups, ...groups]
+  const groupsWithMock = groups.length === 0 ? mockGroups : groups
 
   return (
     <div className="pt-[48px] px-[32px] pb-24 pr-[320px]">

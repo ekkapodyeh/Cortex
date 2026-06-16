@@ -247,6 +247,26 @@ export default async function CategoryDetailPage({
     return { id, changeType: 'added', oldTitle: null, oldDescription: null, newTitle, newDescription, impact: null, reqStatus, reqNote, reqChangeType: reqStatus !== 'no-req' ? 'add' : null, isSynthetic, commits: [], changeTypeMismatchReason: null, conditions }
   }
   const MOCK_BY_CAT: Record<string, SubcategoryGroup[]> = {
+    'เข้าสู่ระบบ': [{
+      sub: 'การตรวจสอบสิทธิ์',
+      items: [
+        m('mk-auth-done', 'เข้าสู่ระบบด้วย Username/Password', 'ระบบ login มาตรฐาน รองรับ remember me และ force logout session เก่า', 'done', 'ผู้ใช้สามารถเข้าสู่ระบบด้วย Username และ Password ได้', [
+          { id: 'mk-a2-c1', description: 'ตรวจสอบ Username และ Password กับฐานข้อมูล', status: 'match', note: undefined },
+          { id: 'mk-a2-c2', description: 'รองรับ Remember me เก็บ session 30 วัน', status: 'match', note: undefined },
+          { id: 'mk-a2-c3', description: 'Force logout session เก่าเมื่อ login ใหม่', status: 'match', note: undefined },
+        ]),
+        m('mk-auth-wrong2', 'ยืนยันตัวตน 2 ขั้นตอน (OTP)', 'ระบบส่ง OTP ผ่าน SMS แต่ยังไม่รองรับ OTP ผ่าน Email', 'incorrect', 'ยืนยันตัวตนด้วย OTP ผ่าน SMS หรือ Email ได้', [
+          { id: 'mk-a2-c4', description: 'ส่ง OTP ผ่าน SMS ได้', status: 'match', note: undefined },
+          { id: 'mk-a2-c5', description: 'ส่ง OTP ผ่าน Email ได้', status: 'wrong', note: 'โค้ดทำ: รองรับเฉพาะ SMS ยังไม่ได้ทำ Email OTP' },
+          { id: 'mk-a2-c6', description: 'OTP หมดอายุหลัง 5 นาที', status: 'match', note: undefined },
+        ]),
+        m('mk-auth-pending2', 'Username ไม่สามารถกรอกภาษาไทยได้', 'Validate ให้ Username รับได้เฉพาะ a-z, 0-9 และ _ เท่านั้น', 'pending', 'Username รองรับเฉพาะภาษาอังกฤษและตัวเลข', [
+          { id: 'mk-a2-c7', description: 'Validate ห้ามกรอก Unicode ภาษาไทยใน Username', status: 'missing', note: undefined },
+          { id: 'mk-a2-c8', description: 'แสดง error message "Username ต้องเป็นภาษาอังกฤษเท่านั้น"', status: 'missing', note: undefined },
+        ], true),
+        m('mk-auth-noreq2', 'สามารถกดแสดงหรือซ่อนรหัสผ่านได้', 'ปุ่ม toggle แสดง/ซ่อน password ในช่อง input', 'no-req', null, []),
+      ],
+    }],
     'การเข้าสู่ระบบและลงทะเบียน': [{
       sub: 'การตรวจสอบสิทธิ์',
       items: [

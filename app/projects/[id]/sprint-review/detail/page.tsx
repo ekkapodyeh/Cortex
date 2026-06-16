@@ -241,71 +241,94 @@ export default async function CategoryDetailPage({
     }))
   )
 
-  // MOCK: แสดงครบทุกเคส
-  const mockGroup = {
-    sub: '[Mock] ตัวอย่าง',
-    items: [
-      {
-        id: 'mock-wrong-1',
-        changeType: 'added' as const,
-        oldTitle: null,
-        oldDescription: null,
-        newTitle: 'ค้นหาสินค้าใน Inventory',
-        newDescription: 'ระบบค้นหาสินค้าด้วย keyword เดียว และแสดงผลทันที',
-        impact: null,
-        reqStatus: 'incorrect' as const,
-        reqNote: 'ผู้ใช้ค้นหาสินค้าได้หลายเงื่อนไขพร้อมกัน',
-        reqChangeType: 'add' as const,
-        isSynthetic: false,
-        commits: [],
-        changeTypeMismatchReason: null,
-        conditions: [
-          { id: 'mock-c1', description: 'ค้นหาได้หลายเงื่อนไขพร้อมกัน (ชื่อ + หมวดหมู่ + ราคา)', status: 'wrong' as const, note: 'โค้ดทำ: ค้นหาได้เฉพาะ keyword เดียว ยังไม่รองรับหลายเงื่อนไข' },
-          { id: 'mock-c2', description: 'แสดงผลการค้นหาแบบ real-time ขณะพิมพ์', status: 'match' as const, note: undefined },
-          { id: 'mock-c3', description: 'กรองผลลัพธ์ตามหมวดหมู่สินค้าได้', status: 'missing' as const, note: undefined },
-          { id: 'mock-c5', description: 'ผู้ใช้งานสามารถบันทึกค่าไว้ค้นหาภายหลังได้', status: 'missing' as const, note: undefined },
-          { id: 'mock-c4', description: 'บันทึก search history อัตโนมัติ', status: 'extra' as const, note: undefined },
-        ],
-      },
-      {
-        id: 'mock-done-extra',
-        changeType: 'added' as const,
-        oldTitle: null,
-        oldDescription: null,
-        newTitle: 'แจ้งเตือนผ่าน LINE Notify เมื่อสินค้าต่ำกว่า Reorder Point',
-        newDescription: 'ระบบตรวจสอบ stock ทุก 1 ชั่วโมง และส่ง LINE Notify พร้อมชื่อสินค้า จำนวน และ Reorder Point',
-        impact: null,
-        reqStatus: 'done' as const,
-        reqNote: 'ระบบแจ้งเตือนเมื่อสินค้าต่ำกว่า Reorder Point',
-        reqChangeType: 'add' as const,
-        isSynthetic: false,
-        commits: [],
-        changeTypeMismatchReason: null,
-        conditions: [
-          { id: 'mock-d1', description: 'ตรวจสอบ stock และแจ้งเตือนเมื่อต่ำกว่า Reorder Point', status: 'match' as const, note: undefined },
-          { id: 'mock-d2', description: 'ส่งการแจ้งเตือนผ่าน LINE Notify', status: 'match' as const, note: undefined },
-          { id: 'mock-d3', description: 'แจ้งเตือนซ้ำทุก 6 ชั่วโมงถ้ายังไม่ได้เติม stock', status: 'extra' as const, note: undefined },
-        ],
-      },
-      {
-        id: 'mock-noreq-1',
-        changeType: 'added' as const,
-        oldTitle: null,
-        oldDescription: null,
-        newTitle: 'Export รายงานเป็น PDF',
-        newDescription: 'ระบบ export ข้อมูลสินค้าเป็นไฟล์ PDF ได้',
-        impact: null,
-        reqStatus: 'no-req' as const,
-        reqNote: null,
-        reqChangeType: null,
-        isSynthetic: false,
-        commits: [],
-        changeTypeMismatchReason: null,
-        conditions: [],
-      },
-    ],
-  }
-  const groupsWithMock = [mockGroup, ...groups]
+  // MOCK: แสดงครบ 4 เคส พร้อมข้อมูลสมจริง
+  const mockGroups: SubcategoryGroup[] = [
+    {
+      sub: 'การจัดการสต็อกสินค้า',
+      items: [
+        // เคส 1: ถูกต้อง — ทำครบตาม Req ทุก condition
+        {
+          id: 'mock-done-1',
+          changeType: 'added' as const,
+          oldTitle: null,
+          oldDescription: null,
+          newTitle: 'เพิ่มสินค้าใหม่เข้าคลัง',
+          newDescription: 'พนักงานกรอก ชื่อสินค้า หมวดหมู่ จำนวน ราคาต้นทุน และกำหนด Reorder Point ระบบบันทึกและแสดงสินค้าใหม่ในรายการทันที',
+          impact: null,
+          reqStatus: 'done' as const,
+          reqNote: 'พนักงานสามารถเพิ่มสินค้าใหม่พร้อมกำหนด Reorder Point ได้',
+          reqChangeType: 'add' as const,
+          isSynthetic: false,
+          commits: [],
+          changeTypeMismatchReason: null,
+          conditions: [
+            { id: 'mock-d1-c1', description: 'กรอกชื่อสินค้า หมวดหมู่ จำนวน และราคาต้นทุนได้', status: 'match' as const, note: undefined },
+            { id: 'mock-d1-c2', description: 'กำหนดค่า Reorder Point ต่อสินค้าได้', status: 'match' as const, note: undefined },
+            { id: 'mock-d1-c3', description: 'สินค้าใหม่แสดงในรายการทันทีหลังบันทึก', status: 'match' as const, note: undefined },
+          ],
+        },
+        // เคส 2: ไม่ถูกต้อง — ทำไม่ครบ Req บางข้อยังขาด
+        {
+          id: 'mock-wrong-1',
+          changeType: 'added' as const,
+          oldTitle: null,
+          oldDescription: null,
+          newTitle: 'ค้นหาสินค้าในคลัง',
+          newDescription: 'ค้นหาด้วย keyword ชื่อสินค้า แสดงผลทันทีขณะพิมพ์ ยังไม่รองรับกรองหลายเงื่อนไขพร้อมกัน',
+          impact: null,
+          reqStatus: 'incorrect' as const,
+          reqNote: 'ค้นหาสินค้าได้หลายเงื่อนไขพร้อมกัน และบันทึกประวัติการค้นหา',
+          reqChangeType: 'add' as const,
+          isSynthetic: false,
+          commits: [],
+          changeTypeMismatchReason: null,
+          conditions: [
+            { id: 'mock-w1-c1', description: 'ค้นหาได้หลายเงื่อนไขพร้อมกัน (ชื่อ + หมวดหมู่ + ราคา)', status: 'wrong' as const, note: 'โค้ดทำ: ค้นหาได้เฉพาะชื่อสินค้าเท่านั้น ยังไม่รองรับกรองหลายเงื่อนไข' },
+            { id: 'mock-w1-c2', description: 'แสดงผลการค้นหาแบบ real-time ขณะพิมพ์', status: 'match' as const, note: undefined },
+            { id: 'mock-w1-c3', description: 'บันทึกประวัติการค้นหา 10 รายการล่าสุด', status: 'missing' as const, note: undefined },
+          ],
+        },
+        // เคส 3: ยังไม่เริ่ม — Req กำหนดมาแต่ยังไม่มีโค้ดเลย
+        {
+          id: 'mock-pending-1',
+          changeType: 'added' as const,
+          oldTitle: null,
+          oldDescription: null,
+          newTitle: 'แจ้งเตือนเมื่อสินค้าใกล้หมด',
+          newDescription: 'ระบบตรวจสอบ stock เทียบกับ Reorder Point และแจ้งเตือนผ่าน LINE Notify',
+          impact: null,
+          reqStatus: 'pending' as const,
+          reqNote: 'แจ้งเตือนผ่าน LINE Notify เมื่อสินค้าต่ำกว่า Reorder Point',
+          reqChangeType: 'add' as const,
+          isSynthetic: true,
+          commits: [],
+          changeTypeMismatchReason: null,
+          conditions: [
+            { id: 'mock-p1-c1', description: 'ตรวจสอบ stock เทียบ Reorder Point ทุก 1 ชั่วโมง', status: 'missing' as const, note: undefined },
+            { id: 'mock-p1-c2', description: 'ส่งข้อความแจ้งเตือนผ่าน LINE Notify พร้อมชื่อสินค้าและจำนวนคงเหลือ', status: 'missing' as const, note: undefined },
+          ],
+        },
+        // เคส 4: ไม่มีใน Req — โค้ดทำมาแต่ Req ไม่ได้สั่ง
+        {
+          id: 'mock-noreq-1',
+          changeType: 'added' as const,
+          oldTitle: null,
+          oldDescription: null,
+          newTitle: 'Export รายงานสต็อกเป็น PDF',
+          newDescription: 'ส่งออกรายงานสรุปสินค้าทั้งหมดพร้อมสถานะ stock เป็นไฟล์ PDF',
+          impact: null,
+          reqStatus: 'no-req' as const,
+          reqNote: null,
+          reqChangeType: null,
+          isSynthetic: false,
+          commits: [],
+          changeTypeMismatchReason: null,
+          conditions: [],
+        },
+      ],
+    },
+  ]
+  const groupsWithMock = [...mockGroups, ...groups]
 
   return (
     <div className="pt-[48px] px-[32px] pb-24 pr-[320px]">

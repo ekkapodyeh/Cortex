@@ -285,7 +285,7 @@ export default async function CategoryDetailPage({
           {groups.length === 0 ? (
             <p className="text-sm text-[var(--text-muted)]">ไม่มีรายการในหมวดนี้</p>
           ) : (
-            <SubcategoryList groups={groupsWithMock} hasReq={hasReq} />
+            <SubcategoryList groups={groupsWithMock} hasReq={hasReq || mockGroups.length > 0} />
           )}
         </div>
       </div>

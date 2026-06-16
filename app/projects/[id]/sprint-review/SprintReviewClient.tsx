@@ -68,7 +68,7 @@ function CategoryCard({ cat, items, projectId, updatedAt, reqMap, pendingCount, 
               ? 'text-[var(--status-green)] bg-[rgba(13,84,43,0.15)]'
               : 'text-[var(--status-yellow)] bg-[rgba(115,62,10,0.15)]'
           }`}>
-            {doneCount}/{totalReq} สำเร็จ
+            {doneCount}/{totalReq}
           </span>
         ) : (
           <>

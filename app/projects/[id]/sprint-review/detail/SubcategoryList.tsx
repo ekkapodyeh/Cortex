@@ -259,7 +259,7 @@ function SubcategorySection({ group, hasReq }: { group: SubcategoryGroup; hasReq
               ? 'text-[var(--status-green)] bg-[rgba(13,84,43,0.15)]'
               : 'text-[#f47a00] bg-[rgba(244,122,0,0.1)]'
           }`}>
-            {doneCount}/{reqItems.length} ถูกต้อง
+            {doneCount}/{reqItems.length}
           </span>
         )}
       </div>

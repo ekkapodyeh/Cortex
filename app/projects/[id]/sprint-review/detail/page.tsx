@@ -8,7 +8,6 @@ import type { DiffResult, Feature } from '@/lib/types'
 import { IMPACT } from '@/lib/impact-data'
 import { SubcategoryList } from './SubcategoryList'
 import type { SubcategoryGroup, JobCommit } from './SubcategoryList'
-import { getMockGroups } from './mockData'
 import { SprintReviewRightPanel } from '../SprintReviewRightPanel'
 import { getProjectMock } from '@/lib/sprint-mocks'
 import { compareConditions } from '@/lib/compare-conditions'
@@ -244,7 +243,77 @@ export default async function CategoryDetailPage({
     }))
   )
 
-  const mockGroups: SubcategoryGroup[] = getMockGroups(cat)
+  const MOCK_DATA: Record<string, SubcategoryGroup> = {
+    'เข้าสู่ระบบ': { sub: 'การตรวจสอบสิทธิ์', items: [] },
+    'การเข้าสู่ระบบและลงทะเบียน': { sub: 'การตรวจสอบสิทธิ์', items: [] },
+    'จัดการสินค้าในคลัง': { sub: 'การจัดการสต็อก', items: [] },
+    'รับและส่งสินค้า': { sub: 'การรับสินค้า', items: [] },
+    'เบิก-จ่ายสินค้า': { sub: 'การเบิกสินค้า', items: [] },
+    'ตรวจนับสินค้า': { sub: 'การตรวจนับ', items: [] },
+    'รายงานและสถิติ': { sub: 'รายงานสรุป', items: [] },
+    'จัดการผู้ใช้งาน': { sub: 'สิทธิ์และบัญชีผู้ใช้', items: [] },
+  }
+  const mockSub = MOCK_DATA[cat]?.sub ?? 'ตัวอย่างสถานะ'
+  const mockGroups: SubcategoryGroup[] = [{
+    sub: mockSub,
+    items: [
+      {
+        id: 'mk-done',
+        changeType: 'added' as const,
+        oldTitle: null, oldDescription: null,
+        newTitle: 'เข้าสู่ระบบด้วย Username/Password',
+        newDescription: 'ระบบ login มาตรฐาน รองรับ remember me และ force logout session เก่า',
+        impact: null, reqStatus: 'done' as const,
+        reqNote: 'ผู้ใช้สามารถเข้าสู่ระบบด้วย Username และ Password ได้',
+        reqChangeType: 'add' as const, isSynthetic: false, commits: [], changeTypeMismatchReason: null,
+        conditions: [
+          { id: 'mk-c1', description: 'ตรวจสอบ Username และ Password กับฐานข้อมูล', status: 'match' as const },
+          { id: 'mk-c2', description: 'รองรับ Remember me เก็บ session 30 วัน', status: 'match' as const },
+          { id: 'mk-c3', description: 'Force logout session เก่าเมื่อ login ใหม่', status: 'match' as const },
+        ],
+      },
+      {
+        id: 'mk-wrong',
+        changeType: 'added' as const,
+        oldTitle: null, oldDescription: null,
+        newTitle: 'ยืนยันตัวตน 2 ขั้นตอน (OTP)',
+        newDescription: 'ระบบส่ง OTP ผ่าน SMS แต่ยังไม่รองรับ OTP ผ่าน Email',
+        impact: null, reqStatus: 'incorrect' as const,
+        reqNote: 'ยืนยันตัวตนด้วย OTP ผ่าน SMS หรือ Email ได้',
+        reqChangeType: 'add' as const, isSynthetic: false, commits: [], changeTypeMismatchReason: null,
+        conditions: [
+          { id: 'mk-c4', description: 'ส่ง OTP ผ่าน SMS ได้', status: 'match' as const },
+          { id: 'mk-c5', description: 'ส่ง OTP ผ่าน Email ได้', status: 'wrong' as const, note: 'โค้ดทำ: รองรับเฉพาะ SMS ยังไม่ได้ทำ Email OTP' },
+          { id: 'mk-c6', description: 'OTP หมดอายุหลัง 5 นาที', status: 'match' as const },
+        ],
+      },
+      {
+        id: 'mk-pending',
+        changeType: 'added' as const,
+        oldTitle: null, oldDescription: null,
+        newTitle: 'Username ไม่สามารถกรอกภาษาไทยได้',
+        newDescription: 'Validate ให้ Username รับได้เฉพาะ a-z, 0-9 และ _ เท่านั้น',
+        impact: null, reqStatus: 'pending' as const,
+        reqNote: 'Username รองรับเฉพาะภาษาอังกฤษและตัวเลข',
+        reqChangeType: 'add' as const, isSynthetic: true, commits: [], changeTypeMismatchReason: null,
+        conditions: [
+          { id: 'mk-c7', description: 'Validate ห้ามกรอก Unicode ภาษาไทยใน Username', status: 'missing' as const },
+          { id: 'mk-c8', description: 'แสดง error message "Username ต้องเป็นภาษาอังกฤษเท่านั้น"', status: 'missing' as const },
+        ],
+      },
+      {
+        id: 'mk-noreq',
+        changeType: 'added' as const,
+        oldTitle: null, oldDescription: null,
+        newTitle: 'สามารถกดแสดงหรือซ่อนรหัสผ่านได้',
+        newDescription: 'ปุ่ม toggle แสดง/ซ่อน password ในช่อง input',
+        impact: null, reqStatus: 'no-req' as const,
+        reqNote: 'ไม่ได้ระบุใน Requirement',
+        reqChangeType: null, isSynthetic: false, commits: [], changeTypeMismatchReason: null,
+        conditions: [],
+      },
+    ],
+  }]
 
   return (
     <div className="pt-[48px] px-[32px] pb-24 pr-[320px]">

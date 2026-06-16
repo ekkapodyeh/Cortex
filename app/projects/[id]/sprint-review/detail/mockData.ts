@@ -27,7 +27,30 @@ function item(
   }
 }
 
+export function getMockGroups(cat: string): SubcategoryGroup[] {
+  return MOCK_BY_CAT[cat] ?? MOCK_BY_CAT['__default__'] ?? []
+}
+
 export const MOCK_BY_CAT: Record<string, SubcategoryGroup[]> = {
+  '__default__': [{
+    sub: 'ตัวอย่างสถานะทั้งหมด',
+    items: [
+      item('mk-def-done', 'ฟีเจอร์ที่ทำครบตาม Requirement', 'ทำครบทุก condition ที่ระบุใน Req', 'done', 'ทำฟีเจอร์นี้ให้ครบทุก condition', [
+        { id: 'mk-def-c1', description: 'Condition ข้อที่ 1 ครบถ้วน', status: 'match' },
+        { id: 'mk-def-c2', description: 'Condition ข้อที่ 2 ครบถ้วน', status: 'match' },
+      ]),
+      item('mk-def-wrong', 'ฟีเจอร์ที่ทำไม่ครบ Requirement', 'ทำบางส่วน บาง condition ยังไม่ตรงหรือขาด', 'incorrect', 'ทำฟีเจอร์นี้ให้ครบทุก condition', [
+        { id: 'mk-def-c3', description: 'Condition ที่ทำแล้วตรง', status: 'match' },
+        { id: 'mk-def-c4', description: 'Condition ที่ทำไม่ตรง Req', status: 'wrong', note: 'โค้ดทำ: ทำได้บางส่วน ยังไม่ครบตามที่ Req กำหนด' },
+        { id: 'mk-def-c5', description: 'Condition ที่ยังไม่ได้ทำ', status: 'missing' },
+      ]),
+      item('mk-def-pending', 'ฟีเจอร์ที่ยังไม่ได้เริ่มทำ', 'Req กำหนดให้ทำ แต่ยังไม่มีโค้ดส่วนนี้เลย', 'pending', 'ทำฟีเจอร์นี้ให้ครบ', [
+        { id: 'mk-def-c6', description: 'Condition ที่ยังไม่มีโค้ด', status: 'missing' },
+        { id: 'mk-def-c7', description: 'Condition ที่ยังไม่มีโค้ด', status: 'missing' },
+      ], true),
+      item('mk-def-noreq', 'ฟีเจอร์ที่โค้ดทำมาแต่ไม่ได้อยู่ใน Req', 'Dev เพิ่มมาเอง ไม่ได้อยู่ใน Requirement', 'no-req', null, []),
+    ],
+  }],
   'เข้าสู่ระบบ': [{
     sub: 'การตรวจสอบสิทธิ์',
     items: [

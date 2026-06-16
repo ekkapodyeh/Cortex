@@ -8,7 +8,7 @@ import type { DiffResult, Feature } from '@/lib/types'
 import { IMPACT } from '@/lib/impact-data'
 import { SubcategoryList } from './SubcategoryList'
 import type { SubcategoryGroup, JobCommit } from './SubcategoryList'
-import { MOCK_BY_CAT } from './mockData'
+import { getMockGroups } from './mockData'
 import { SprintReviewRightPanel } from '../SprintReviewRightPanel'
 import { getProjectMock } from '@/lib/sprint-mocks'
 import { compareConditions } from '@/lib/compare-conditions'
@@ -244,7 +244,7 @@ export default async function CategoryDetailPage({
     }))
   )
 
-  const mockGroups: SubcategoryGroup[] = MOCK_BY_CAT[cat] ?? []
+  const mockGroups: SubcategoryGroup[] = getMockGroups(cat)
   const groupsWithMock: SubcategoryGroup[] = [...groups, ...mockGroups]
 
   return (

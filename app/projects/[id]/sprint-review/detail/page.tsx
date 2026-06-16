@@ -193,17 +193,21 @@ export default async function CategoryDetailPage({
 
         let conditions: ConditionResult[] = []
         let conditionsCompared = false
-        if ((req as any)?.conditions?.length) {
+        const reqConditions = (req as any)?.conditions?.length
+          ? (req as any).conditions
+          : req ? [{ id: `mock-${i.id}-1`, description: (req as any).title ?? i.feature.title }] : []
+
+        if (reqConditions.length) {
           try {
-            conditions = await compareConditions((req as any).conditions, i.feature.description ?? '')
+            conditions = await compareConditions(reqConditions, i.feature.description ?? '')
             conditionsCompared = true
           } catch {
-            // mock: สลับ wrong/missing เพื่อแสดง UI ครบทุกเคส
-            conditions = (req as any).conditions.map((c: any, idx: number) => ({
+            // mock: ถ้า reqStatus done → match ทั้งหมด, ถ้าไม่ → สลับ wrong/missing
+            conditions = reqConditions.map((c: any, idx: number) => ({
               id: c.id,
               description: c.description,
-              status: idx % 2 === 0 ? ('wrong' as const) : ('missing' as const),
-              note: idx % 2 === 0 ? `โค้ดทำ: ${i.feature.description?.slice(0, 60) ?? '—'}` : undefined,
+              status: reqStatus === 'done' ? ('match' as const) : idx % 2 === 0 ? ('wrong' as const) : ('missing' as const),
+              note: reqStatus !== 'done' && idx % 2 === 0 ? `โค้ดทำ: ${i.feature.description?.slice(0, 60) ?? '—'}` : undefined,
             }))
             conditionsCompared = true
           }

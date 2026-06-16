@@ -69,10 +69,16 @@ function ReqStatusBadge({ status }: { status: ReqStatus }) {
       ถูกต้อง
     </span>
   )
-  if (status === 'incorrect' || status === 'pending') return (
+  if (status === 'incorrect') return (
     <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[var(--status-red)] shrink-0">
       <span className="w-[18px] h-[18px] rounded-full bg-[rgba(130,24,26,0.2)] flex items-center justify-center text-[10px]">✗</span>
       ไม่ถูกต้อง
+    </span>
+  )
+  if (status === 'pending') return (
+    <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[var(--status-yellow)] shrink-0">
+      <span className="w-[18px] h-[18px] rounded-full bg-[rgba(115,62,10,0.2)] flex items-center justify-center text-[10px]">−</span>
+      ยังไม่เริ่ม
     </span>
   )
   if (status === 'no-req') return (

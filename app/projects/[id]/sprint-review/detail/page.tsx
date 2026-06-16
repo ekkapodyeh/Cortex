@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { db } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -282,7 +284,7 @@ export default async function CategoryDetailPage({
           </div>
 
           {/* Content */}
-          {groups.length === 0 ? (
+          {groupsWithMock.length === 0 ? (
             <p className="text-sm text-[var(--text-muted)]">ไม่มีรายการในหมวดนี้</p>
           ) : (
             <SubcategoryList groups={groupsWithMock} hasReq={hasReq || mockGroups.length > 0} />

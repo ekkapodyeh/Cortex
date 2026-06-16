@@ -237,9 +237,9 @@ export default async function CategoryDetailPage({
     }))
   )
 
-  // MOCK: แสดงเคส "ไม่ถูกต้อง เพราะ conditions ไม่ตรง"
+  // MOCK: แสดงครบทุกเคส
   const mockGroup = {
-    sub: '[Mock] ตัวอย่าง: Conditions ไม่ตรง',
+    sub: '[Mock] ตัวอย่าง',
     items: [
       {
         id: 'mock-wrong-1',
@@ -259,7 +259,25 @@ export default async function CategoryDetailPage({
           { id: 'mock-c1', description: 'ค้นหาได้หลายเงื่อนไขพร้อมกัน (ชื่อ + หมวดหมู่ + ราคา)', status: 'wrong' as const, note: 'โค้ดทำ: ค้นหาได้เฉพาะ keyword เดียว ยังไม่รองรับหลายเงื่อนไข' },
           { id: 'mock-c2', description: 'แสดงผลการค้นหาแบบ real-time ขณะพิมพ์', status: 'match' as const, note: undefined },
           { id: 'mock-c3', description: 'กรองผลลัพธ์ตามหมวดหมู่สินค้าได้', status: 'missing' as const, note: undefined },
+          { id: 'mock-c5', description: 'ผู้ใช้งานสามารถบันทึกค่าไว้ค้นหาภายหลังได้', status: 'missing' as const, note: undefined },
+          { id: 'mock-c4', description: 'บันทึก search history อัตโนมัติ', status: 'extra' as const, note: undefined },
         ],
+      },
+      {
+        id: 'mock-noreq-1',
+        changeType: 'added' as const,
+        oldTitle: null,
+        oldDescription: null,
+        newTitle: 'Export รายงานเป็น PDF',
+        newDescription: 'ระบบ export ข้อมูลสินค้าเป็นไฟล์ PDF ได้',
+        impact: null,
+        reqStatus: 'no-req' as const,
+        reqNote: null,
+        reqChangeType: null,
+        isSynthetic: false,
+        commits: [],
+        changeTypeMismatchReason: null,
+        conditions: [],
       },
     ],
   }

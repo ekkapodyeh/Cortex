@@ -40,7 +40,7 @@ function ConditionRow({ condition }: { condition: ConditionResult }) {
     match:   { icon: '✓', label: '',        cls: 'text-[var(--status-green)]',  bg: 'bg-[rgba(13,84,43,0.1)]' },
     wrong:   { icon: '✗', label: 'ไม่ตรง',  cls: 'text-[var(--status-red)]',    bg: 'bg-[rgba(130,24,26,0.1)]' },
     missing: { icon: '−', label: 'ไม่ครบ',  cls: 'text-[var(--status-yellow)]', bg: 'bg-[rgba(115,62,10,0.1)]' },
-    extra:   { icon: '+', label: 'เกิน',    cls: 'text-[var(--text-muted)]',    bg: 'bg-[var(--bg-hover)]' },
+    extra:   { icon: '+', label: 'ไม่มีใน Req', cls: 'text-[var(--text-muted)]',    bg: 'bg-[var(--bg-hover)]' },
   }
   const { icon, label, cls, bg } = config[condition.status]
   return (

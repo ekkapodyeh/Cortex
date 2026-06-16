@@ -48,7 +48,7 @@ export const MOCK_BY_CAT: Record<string, SubcategoryGroup[]> = {
         { id: 'mk-def-c6', description: 'Condition ที่ยังไม่มีโค้ด', status: 'missing' },
         { id: 'mk-def-c7', description: 'Condition ที่ยังไม่มีโค้ด', status: 'missing' },
       ], true),
-      item('mk-def-noreq', 'ฟีเจอร์ที่โค้ดทำมาแต่ไม่ได้อยู่ใน Req', 'Dev เพิ่มมาเอง ไม่ได้อยู่ใน Requirement', 'no-req', null, []),
+      item('mk-def-noreq', 'ฟีเจอร์ที่โค้ดทำมาแต่ไม่ได้อยู่ใน Req', 'Dev เพิ่มมาเอง ไม่ได้อยู่ใน Requirement', 'no-req', 'ไม่ได้ระบุใน Requirement', []),
     ],
   }],
   'เข้าสู่ระบบ': [{
@@ -68,7 +68,7 @@ export const MOCK_BY_CAT: Record<string, SubcategoryGroup[]> = {
         { id: 'mk-a-c7', description: 'Validate ห้ามกรอก Unicode ภาษาไทยใน Username', status: 'missing' },
         { id: 'mk-a-c8', description: 'แสดง error message "Username ต้องเป็นภาษาอังกฤษเท่านั้น"', status: 'missing' },
       ], true),
-      item('mk-auth-noreq', 'สามารถกดแสดงหรือซ่อนรหัสผ่านได้', 'ปุ่ม toggle แสดง/ซ่อน password ในช่อง input', 'no-req', null, []),
+      item('mk-auth-noreq', 'สามารถกดแสดงหรือซ่อนรหัสผ่านได้', 'ปุ่ม toggle แสดง/ซ่อน password ในช่อง input', 'no-req', 'ไม่ได้ระบุใน Requirement', []),
     ],
   }],
   'การเข้าสู่ระบบและลงทะเบียน': [{
@@ -88,7 +88,7 @@ export const MOCK_BY_CAT: Record<string, SubcategoryGroup[]> = {
         { id: 'mk-b-c7', description: 'Validate ห้ามกรอก Unicode ภาษาไทยใน Username', status: 'missing' },
         { id: 'mk-b-c8', description: 'แสดง error message "Username ต้องเป็นภาษาอังกฤษเท่านั้น"', status: 'missing' },
       ], true),
-      item('mk-auth2-noreq', 'สามารถกดแสดงหรือซ่อนรหัสผ่านได้', 'ปุ่ม toggle แสดง/ซ่อน password ในช่อง input', 'no-req', null, []),
+      item('mk-auth2-noreq', 'สามารถกดแสดงหรือซ่อนรหัสผ่านได้', 'ปุ่ม toggle แสดง/ซ่อน password ในช่อง input', 'no-req', 'ไม่ได้ระบุใน Requirement', []),
     ],
   }],
   'จัดการสินค้าในคลัง': [{
@@ -108,7 +108,7 @@ export const MOCK_BY_CAT: Record<string, SubcategoryGroup[]> = {
         { id: 'mk-i-c7', description: 'ตรวจสอบ stock เทียบ Reorder Point ทุก 1 ชั่วโมง', status: 'missing' },
         { id: 'mk-i-c8', description: 'ส่งข้อความแจ้งเตือนผ่าน LINE Notify พร้อมชื่อสินค้าและจำนวนคงเหลือ', status: 'missing' },
       ], true),
-      item('mk-inv-noreq', 'Export รายงานสต็อกเป็น PDF', 'ส่งออกรายงานสรุปสินค้าทั้งหมดพร้อมสถานะ stock เป็นไฟล์ PDF', 'no-req', null, []),
+      item('mk-inv-noreq', 'Export รายงานสต็อกเป็น PDF', 'ส่งออกรายงานสรุปสินค้าทั้งหมดพร้อมสถานะ stock เป็นไฟล์ PDF', 'no-req', 'ไม่ได้ระบุใน Requirement', []),
     ],
   }],
   'รับและส่งสินค้า': [{
@@ -126,7 +126,7 @@ export const MOCK_BY_CAT: Record<string, SubcategoryGroup[]> = {
         { id: 'mk-r-c5', description: 'เปรียบเทียบจำนวนรับกับ PO อัตโนมัติ', status: 'missing' },
         { id: 'mk-r-c6', description: 'ส่ง notification ให้ Supervisor ทันที', status: 'missing' },
       ], true),
-      item('mk-recv-noreq', 'ถ่ายรูปสินค้าที่รับเข้าแนบกับใบรับ', 'อัปโหลดรูปสินค้าแนบกับเอกสารรับสินค้า', 'no-req', null, []),
+      item('mk-recv-noreq', 'ถ่ายรูปสินค้าที่รับเข้าแนบกับใบรับ', 'อัปโหลดรูปสินค้าแนบกับเอกสารรับสินค้า', 'no-req', 'ไม่ได้ระบุใน Requirement', []),
     ],
   }],
   'เบิก-จ่ายสินค้า': [{
@@ -145,7 +145,7 @@ export const MOCK_BY_CAT: Record<string, SubcategoryGroup[]> = {
         { id: 'mk-d-c6', description: 'แสดงรายการเบิกย้อนหลัง 90 วัน', status: 'missing' },
         { id: 'mk-d-c7', description: 'กรองตามแผนกและช่วงวันที่ได้', status: 'missing' },
       ], true),
-      item('mk-disp-noreq', 'Export ใบเบิกเป็นไฟล์ Excel', 'ส่งออกรายการใบเบิกเป็น .xlsx', 'no-req', null, []),
+      item('mk-disp-noreq', 'Export ใบเบิกเป็นไฟล์ Excel', 'ส่งออกรายการใบเบิกเป็น .xlsx', 'no-req', 'ไม่ได้ระบุใน Requirement', []),
     ],
   }],
   'ตรวจนับสินค้า': [{
@@ -163,7 +163,7 @@ export const MOCK_BY_CAT: Record<string, SubcategoryGroup[]> = {
         { id: 'mk-c-c5', description: 'สรุปรายการที่ stock ตรงและไม่ตรง', status: 'missing' },
         { id: 'mk-c-c6', description: 'แสดงมูลค่าส่วนต่างรวม', status: 'missing' },
       ], true),
-      item('mk-cnt-noreq', 'ถ่ายรูปสินค้าขณะตรวจนับ', 'อัปโหลดรูปสินค้าแนบกับรายการตรวจนับ', 'no-req', null, []),
+      item('mk-cnt-noreq', 'ถ่ายรูปสินค้าขณะตรวจนับ', 'อัปโหลดรูปสินค้าแนบกับรายการตรวจนับ', 'no-req', 'ไม่ได้ระบุใน Requirement', []),
     ],
   }],
   'รายงานและสถิติ': [{
@@ -181,7 +181,7 @@ export const MOCK_BY_CAT: Record<string, SubcategoryGroup[]> = {
         { id: 'mk-rp-c5', description: 'กรองสินค้าที่หมดอายุภายใน 30 วัน', status: 'missing' },
         { id: 'mk-rp-c6', description: 'แสดงจำนวนคงเหลือและวันหมดอายุ', status: 'missing' },
       ], true),
-      item('mk-rpt-noreq', 'Export กราฟเป็นไฟล์รูปภาพ', 'บันทึกกราฟเป็น PNG สำหรับนำไปใช้งาน', 'no-req', null, []),
+      item('mk-rpt-noreq', 'Export กราฟเป็นไฟล์รูปภาพ', 'บันทึกกราฟเป็น PNG สำหรับนำไปใช้งาน', 'no-req', 'ไม่ได้ระบุใน Requirement', []),
     ],
   }],
   'จัดการผู้ใช้งาน': [{
@@ -199,7 +199,7 @@ export const MOCK_BY_CAT: Record<string, SubcategoryGroup[]> = {
         { id: 'mk-u-c5', description: 'นับจำนวน login ผิดต่อเนื่อง', status: 'missing' },
         { id: 'mk-u-c6', description: 'ล็อก account ชั่วคราว 30 นาที หลังผิด 5 ครั้ง', status: 'missing' },
       ], true),
-      item('mk-usr-noreq', 'ดูประวัติการ login ของผู้ใช้แต่ละคน', 'Log การ login พร้อม IP และ device', 'no-req', null, []),
+      item('mk-usr-noreq', 'ดูประวัติการ login ของผู้ใช้แต่ละคน', 'Log การ login พร้อม IP และ device', 'no-req', 'ไม่ได้ระบุใน Requirement', []),
     ],
   }],
 }

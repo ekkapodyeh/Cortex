@@ -357,7 +357,7 @@ export default async function CategoryDetailPage({
           {/* Header */}
           <div className="flex flex-col gap-3">
             <Link
-              href={`/projects/${id}/sprint-review`}
+              href={sprintId ? `/projects/${id}/sprint-review/${sprintId}` : `/projects/${id}/sprint-review`}
               className="flex items-center gap-1.5 text-xs text-[#757575] hover:text-[var(--text-primary)] transition-colors w-fit"
             >
               <CaretLeftIcon size={12} />

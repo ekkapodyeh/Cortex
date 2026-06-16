@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { InfoIcon, GitCommitIcon, XIcon } from '@phosphor-icons/react'
+import type { ConditionResult } from '@/lib/types'
 
 type ChangeType = 'added' | 'modified' | 'removed'
 type ReqStatus = 'done' | 'incorrect' | 'pending' | 'no-req' | null
@@ -28,9 +29,37 @@ export interface SubcategoryGroup {
     reqChangeType?: 'add' | 'modify' | 'remove' | null
     isSynthetic?: boolean
     commits?: JobCommit[]
+    conditions?: ConditionResult[]
+    changeTypeMismatchReason?: string | null
   }>
 }
 
+
+function ConditionRow({ condition }: { condition: ConditionResult }) {
+  const config = {
+    match:   { icon: '✓', label: '',        cls: 'text-[var(--status-green)]',  bg: 'bg-[rgba(13,84,43,0.1)]' },
+    wrong:   { icon: '✗', label: 'ไม่ตรง',  cls: 'text-[var(--status-red)]',    bg: 'bg-[rgba(130,24,26,0.1)]' },
+    missing: { icon: '−', label: 'ไม่ครบ',  cls: 'text-[var(--status-yellow)]', bg: 'bg-[rgba(115,62,10,0.1)]' },
+    extra:   { icon: '+', label: 'เกิน',    cls: 'text-[var(--text-muted)]',    bg: 'bg-[var(--bg-hover)]' },
+  }
+  const { icon, label, cls, bg } = config[condition.status]
+  return (
+    <div className={`flex items-start gap-2 px-3 py-2 rounded-lg ${bg}`}>
+      <span className={`text-[13px] font-bold shrink-0 mt-0.5 ${cls}`}>{icon}</span>
+      <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          {label && (
+            <span className={`text-[11px] font-semibold shrink-0 ${cls}`}>{label}</span>
+          )}
+          <p className="text-[13px] text-[var(--text-primary)]">{condition.description}</p>
+        </div>
+        {condition.note && (
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">{condition.note}</p>
+        )}
+      </div>
+    </div>
+  )
+}
 
 function ReqStatusBadge({ status }: { status: ReqStatus }) {
   if (!status) return null
@@ -40,30 +69,18 @@ function ReqStatusBadge({ status }: { status: ReqStatus }) {
       ถูกต้อง
     </span>
   )
-  if (status === 'incorrect') return (
+  if (status === 'incorrect' || status === 'pending') return (
     <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[var(--status-red)] shrink-0">
       <span className="w-[18px] h-[18px] rounded-full bg-[rgba(130,24,26,0.2)] flex items-center justify-center text-[10px]">✗</span>
       ไม่ถูกต้อง
     </span>
   )
-  if (status === 'pending') return (
-    <span className="text-[12px] font-medium text-[var(--status-yellow)] shrink-0">ไม่ครบ</span>
-  )
   if (status === 'no-req') return (
-    <span className="text-[12px] font-medium text-[var(--text-muted)] shrink-0">ไม่มีใน Requirement</span>
+    <span className="text-[12px] font-medium text-[var(--text-muted)] shrink-0">ไม่มีใน Req</span>
   )
   return null
 }
 
-function incorrectReason(reqChangeType: 'add' | 'modify' | 'remove', actual: ChangeType, title: string, oldTitle: string | null): string {
-  if (reqChangeType === 'modify' && actual === 'added') return `Requirement ขอแก้ไขของเดิม แต่ dev สร้าง "${title}" ใหม่ทั้งหมดแทน`
-  if (reqChangeType === 'modify' && actual === 'removed') return `Requirement ขอแก้ไข "${oldTitle ?? title}" แต่ในโค้ดถูกลบออก`
-  if (reqChangeType === 'add' && actual === 'modified') return `Requirement ขอสร้างฟีเจอร์ใหม่ แต่ dev แก้ไข "${oldTitle ?? title}" แทน`
-  if (reqChangeType === 'add' && actual === 'removed') return `Requirement ขอเพิ่มฟีเจอร์ใหม่ แต่ "${title}" ถูกลบออกในโค้ด`
-  if (reqChangeType === 'remove' && actual === 'added') return `Requirement ขอลบออก แต่ dev สร้าง "${title}" ใหม่แทน`
-  if (reqChangeType === 'remove' && actual === 'modified') return `Requirement ขอลบ "${oldTitle ?? title}" ออก แต่ในโค้ดยังคงแก้ไขอยู่`
-  return 'การเปลี่ยนแปลงไม่ตรงกับ Requirement'
-}
 
 function CommitDrawer({ featureTitle, commits, onClose }: { featureTitle: string; commits: JobCommit[]; onClose: () => void }) {
   return (
@@ -121,7 +138,7 @@ function ItemCard({ item, hasReq }: { item: SubcategoryGroup['items'][0]; hasReq
   const borderAccent =
     hasReq && item.reqStatus === 'done'      ? 'border-l-[3px] !border-l-[var(--status-green)]' :
     hasReq && item.reqStatus === 'incorrect' ? 'border-l-[3px] !border-l-[var(--status-red)]' :
-    hasReq && item.reqStatus === 'pending'   ? 'border-l-[3px] !border-l-[var(--status-yellow)]' :
+    hasReq && item.reqStatus === 'pending'   ? 'border-l-[3px] !border-l-[var(--status-red)]' :
     hasReq && item.reqStatus === 'no-req'    ? 'border-l-[3px] !border-l-[var(--text-muted)]' :
     ''
 
@@ -134,13 +151,8 @@ function ItemCard({ item, hasReq }: { item: SubcategoryGroup['items'][0]; hasReq
         {item.reqNote ? (
           <div className="bg-[#141414] rounded-lg p-2 flex gap-2 items-start">
             <InfoIcon size={16} className="text-[var(--text-muted)] shrink-0 mt-0.5" />
-            <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+            <div className="flex-1 min-w-0">
               <p className="text-[14px] text-white leading-[21px]">{item.reqNote}</p>
-              {item.reqStatus === 'incorrect' && item.reqChangeType && (
-                <p className="text-[12px] text-[var(--status-red)] leading-[18px]">
-                  {incorrectReason(item.reqChangeType, item.changeType, item.newTitle, item.oldTitle)}
-                </p>
-              )}
             </div>
             {hasReq && <ReqStatusBadge status={item.reqStatus} />}
           </div>
@@ -153,7 +165,7 @@ function ItemCard({ item, hasReq }: { item: SubcategoryGroup['items'][0]; hasReq
         {/* ของเดิม */}
         <div className="flex gap-4 items-start">
           <p className="text-[12px] font-medium text-[#6b7280] whitespace-nowrap shrink-0 pt-0.5">ของเดิม</p>
-          {isAdded || item.isSynthetic ? (
+          {isAdded || item.isSynthetic || item.reqChangeType === 'add' ? (
             <p className="text-[14px] text-[#6b7280]">ไม่มีก่อนหน้านี้</p>
           ) : (
             <div className="flex flex-col gap-2 flex-1 min-w-0">
@@ -186,6 +198,35 @@ function ItemCard({ item, hasReq }: { item: SubcategoryGroup['items'][0]; hasReq
             </div>
           )}
         </div>
+
+        {/* Conditions / mismatch reason */}
+        {item.reqStatus !== 'done' && (() => {
+          const visibleConditions = (item.conditions ?? []).filter(c => c.status !== 'match')
+          const hasMismatch = !!item.changeTypeMismatchReason
+          if (!hasMismatch && visibleConditions.length === 0) return null
+          return (
+            <>
+              <div className="border-t border-[#2a2d2e]" />
+              <div className="flex flex-col gap-2">
+                {hasMismatch && (
+                  <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-[rgba(130,24,26,0.1)]">
+                    <span className="text-[13px] font-bold shrink-0 mt-0.5 text-[var(--status-red)]">✗</span>
+                    <p className="text-[13px] text-[var(--text-primary)]">{item.changeTypeMismatchReason}</p>
+                  </div>
+                )}
+                {visibleConditions.length > 0 && (
+                  <>
+                    {hasMismatch && <div className="border-t border-[#2a2d2e]" />}
+                    <p className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">Conditions</p>
+                    {visibleConditions.map(c => (
+                      <ConditionRow key={c.id} condition={c} />
+                    ))}
+                  </>
+                )}
+              </div>
+            </>
+          )
+        })()}
 
         {/* Commit button */}
       </div>

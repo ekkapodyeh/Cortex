@@ -67,6 +67,20 @@ export interface ValidationResult {
   mismatched: ValidationIssue[]
 }
 
+export interface Condition {
+  id: string
+  description: string
+}
+
+export type ConditionStatus = 'match' | 'wrong' | 'missing' | 'extra'
+
+export interface ConditionResult {
+  id: string
+  description: string
+  status: ConditionStatus
+  note?: string
+}
+
 export interface AnalysisJobPayload {
   jobId: string
   projectId: string

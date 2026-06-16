@@ -14,6 +14,7 @@ export interface SprintReqItem {
   changeType: 'add' | 'modify' | 'remove'
   category?: string
   subcategory?: string
+  conditions?: import('@/lib/types').Condition[]
 }
 
 export interface SprintRequirementDoc {

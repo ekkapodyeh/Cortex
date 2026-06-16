@@ -8,7 +8,8 @@ import { SubcategoryList } from './SubcategoryList'
 import type { SubcategoryGroup, JobCommit } from './SubcategoryList'
 import { SprintReviewRightPanel } from '../SprintReviewRightPanel'
 import { getProjectMock } from '@/lib/sprint-mocks'
-import { splitCompoundItems } from '@/lib/split-stories'
+import { compareConditions } from '@/lib/compare-conditions'
+import type { ConditionResult } from '@/lib/types'
 
 export default async function CategoryDetailPage({
   params,
@@ -52,19 +53,7 @@ export default async function CategoryDetailPage({
   })
   const activeSprintRaw = (sprintId ? sprints.find(s => s.id === sprintId) : null) ?? sprints.find(s => s.status === 'OPEN') ?? sprints[sprints.length - 1] ?? null
   const allSprintRequirements = activeSprintRaw?.requirements ?? []
-  const activeSprint = projectMock
-    ? {
-        id: activeSprintRaw?.id ?? 'mock',
-        name: activeSprintRaw?.name ?? 'Bolt 1',
-        status: (activeSprintRaw?.status ?? 'OPEN') as 'OPEN' | 'CLOSED',
-        requirements: [{
-          id: 'mock',
-          fileName: 'mock-requirements.pdf',
-          createdBy: 'mock',
-          items: projectMock.requirements,
-        }],
-      }
-    : activeSprintRaw ? {
+  const activeSprint = activeSprintRaw ? {
         id: activeSprintRaw.id,
         name: activeSprintRaw.name,
         status: activeSprintRaw.status as 'OPEN' | 'CLOSED',
@@ -109,17 +98,27 @@ export default async function CategoryDetailPage({
     subMap.get(item.subcategory)!.push(item)
   }
 
-  const allReqItems: any[] = splitCompoundItems(
-    projectMock ? projectMock.requirements : allSprintRequirements.flatMap(r => r.items as any[]),
-    allFeatures
-  )
-  const reqMap = new Map(allReqItems.map((r: any) => [r.featureId, r as any]))
+  const allReqItems: any[] = allSprintRequirements.flatMap(r => r.items as any[])
+  const reqMap = new Map<string, any>()
+  for (const r of allReqItems) {
+    reqMap.set(r.featureId, r)
+    // also map base featureId (strip -partN suffix) so diff items still match
+    const baseId = r.featureId.replace(/-part\d+$/, '')
+    if (baseId !== r.featureId && !reqMap.has(baseId)) reqMap.set(baseId, r)
+  }
   const hasReq = allReqItems.length > 0
 
   // Requirements for this category not yet implemented (not in diff) → show as pending or incorrect
   const diffFeatureIds = new Set(allItems.map(i => i.id))
   const pendingReqItems = hasReq
-    ? allReqItems.filter((r: any) => r.category === cat && !diffFeatureIds.has(r.featureId))
+    ? allReqItems.filter((r: any) => {
+        if (r.category !== cat) return false
+        if (diffFeatureIds.has(r.featureId)) return false
+        // ถ้าเป็น split item (part1) และ base featureId อยู่ใน diff แล้ว → ไม่ต้องแสดงซ้ำ
+        const baseId = r.featureId.replace(/-part\d+$/, '')
+        if (baseId !== r.featureId && diffFeatureIds.has(baseId)) return false
+        return true
+      })
     : []
 
   for (const r of pendingReqItems) {
@@ -144,60 +143,127 @@ export default async function CategoryDetailPage({
     date: latestJob.triggeredAt.toISOString(),
   } : null
 
-  const groups: SubcategoryGroup[] = Array.from(subMap.entries()).map(([sub, its]) => ({
-    sub,
-    items: its.map((i: any) => {
-      if (i._synthetic) {
-        const reqChangeType = i._reqChangeType as string
-        const reqEntry = i._reqEntry as any
+  const groups: SubcategoryGroup[] = await Promise.all(
+    Array.from(subMap.entries()).map(async ([sub, its]) => ({
+      sub,
+      items: await Promise.all(its.map(async (i: any) => {
+        if (i._synthetic) {
+          const reqEntry = i._reqEntry as any
+          // ยังไม่มีโค้ด → ทุก condition เป็น missing อัตโนมัติ
+          const rawConditions: any[] = reqEntry.conditions?.length
+            ? reqEntry.conditions
+            : [{ id: `mock-${i.id}-1`, description: reqEntry.title ?? i.feature.title }]
+          const conditions: ConditionResult[] = rawConditions.map((c: any) => ({
+            id: c.id,
+            description: c.description,
+            status: 'missing' as const,
+          }))
+          return {
+            id: i.id,
+            changeType: i.changeType,
+            oldTitle: null,
+            oldDescription: null,
+            newTitle: reqEntry.title ?? i.feature.title,
+            newDescription: reqEntry.description ?? i.feature.description ?? null,
+            impact: null,
+            reqStatus: 'pending' as const,
+            reqNote: reqEntry.title ?? null,
+            reqChangeType: (reqEntry.changeType ?? null) as 'add' | 'modify' | 'remove' | null,
+            isSynthetic: true,
+            commits: [],
+            conditions,
+          }
+        }
+
+        const req = reqMap.get(i.id)
+        const reqChangeType = req?.changeType as string | undefined
+        let reqStatus: 'done' | 'incorrect' | 'no-req' | null = null
+        let changeTypeMismatchReason: string | null = null
+        if (hasReq) {
+          if (reqChangeType === 'add' && i.changeType === 'added') {
+            reqStatus = 'done'
+          } else if (reqChangeType === 'add') {
+            reqStatus = 'incorrect'
+            const actual = i.changeType === 'modified' ? 'แก้ไขของเดิม' : i.changeType === 'removed' ? 'ลบออก' : i.changeType
+            changeTypeMismatchReason = `Req ต้องการเพิ่มฟีเจอร์ใหม่ แต่โค้ดทำการ${actual}`
+          } else {
+            reqStatus = 'no-req'
+          }
+        }
+
+        let conditions: ConditionResult[] = []
+        let conditionsCompared = false
+        if ((req as any)?.conditions?.length) {
+          try {
+            conditions = await compareConditions((req as any).conditions, i.feature.description ?? '')
+            conditionsCompared = true
+          } catch {
+            // mock: สลับ wrong/missing เพื่อแสดง UI ครบทุกเคส
+            conditions = (req as any).conditions.map((c: any, idx: number) => ({
+              id: c.id,
+              description: c.description,
+              status: idx % 2 === 0 ? ('wrong' as const) : ('missing' as const),
+              note: idx % 2 === 0 ? `โค้ดทำ: ${i.feature.description?.slice(0, 60) ?? '—'}` : undefined,
+            }))
+            conditionsCompared = true
+          }
+          // ให้ conditions เป็นตัวตัดสิน reqStatus เฉพาะเมื่อ compare สำเร็จ
+          if (conditionsCompared && reqStatus === 'done') {
+            const hasIssue = conditions.some(c => c.status === 'wrong' || c.status === 'missing')
+            if (hasIssue) reqStatus = 'incorrect'
+          }
+        }
+
         return {
           id: i.id,
           changeType: i.changeType,
           oldTitle: null,
           oldDescription: null,
-          newTitle: reqEntry.title ?? i.feature.title,
-          newDescription: reqEntry.description ?? i.feature.description ?? null,
-          impact: null,
-          reqStatus: 'pending' as const,
-          reqNote: reqEntry.title ?? null,
-          isSynthetic: true,
-          commits: [],
+          newTitle: i.feature.title,
+          newDescription: i.feature.description ?? null,
+          impact: IMPACT[i.feature.id] ?? null,
+          reqStatus,
+          reqNote: (req as any)?.title ?? null,
+          reqChangeType: (req as any)?.changeType ?? null,
+          isSynthetic: false,
+          commits: jobCommit ? [jobCommit] : [],
+          conditions,
+          changeTypeMismatchReason,
         }
-      }
+      })).then(items => items.sort((a, b) => {
+        const order = { pending: 0, 'no-req': 1, incorrect: 2, done: 3, null: 4 }
+        return (order[a.reqStatus as keyof typeof order] ?? 4) - (order[b.reqStatus as keyof typeof order] ?? 4)
+      })),
+    }))
+  )
 
-      const req = reqMap.get(i.id)
-      const reqChangeType = req?.changeType as string | undefined
-      let reqStatus: 'done' | 'incorrect' | 'no-req' | null = null
-      if (hasReq) {
-        if (!reqChangeType) {
-          reqStatus = 'no-req'
-        } else {
-          const match =
-            (reqChangeType === 'add' && i.changeType === 'added') ||
-            (reqChangeType === 'modify' && i.changeType === 'modified') ||
-            (reqChangeType === 'remove' && i.changeType === 'removed')
-          reqStatus = match ? 'done' : 'incorrect'
-        }
-      }
-      return {
-        id: i.id,
-        changeType: i.changeType,
-        oldTitle: i.oldFeature?.title ?? null,
-        oldDescription: i.oldFeature?.description ?? null,
-        newTitle: i.feature.title,
-        newDescription: i.feature.description ?? null,
-        impact: IMPACT[i.feature.id] ?? null,
-        reqStatus,
-        reqNote: (req as any)?.title ?? null,
-        reqChangeType: (req as any)?.changeType ?? null,
+  // MOCK: แสดงเคส "ไม่ถูกต้อง เพราะ conditions ไม่ตรง"
+  const mockGroup = {
+    sub: '[Mock] ตัวอย่าง: Conditions ไม่ตรง',
+    items: [
+      {
+        id: 'mock-wrong-1',
+        changeType: 'added' as const,
+        oldTitle: null,
+        oldDescription: null,
+        newTitle: 'ค้นหาสินค้าใน Inventory',
+        newDescription: 'ระบบค้นหาสินค้าด้วย keyword เดียว และแสดงผลทันที',
+        impact: null,
+        reqStatus: 'incorrect' as const,
+        reqNote: 'ผู้ใช้ค้นหาสินค้าได้หลายเงื่อนไขพร้อมกัน',
+        reqChangeType: 'add' as const,
         isSynthetic: false,
-        commits: jobCommit ? [jobCommit] : [],
-      }
-    }).sort((a, b) => {
-      const order = { pending: 0, 'no-req': 1, incorrect: 2, done: 3, null: 4 }
-      return (order[a.reqStatus as keyof typeof order] ?? 4) - (order[b.reqStatus as keyof typeof order] ?? 4)
-    }),
-  }))
+        commits: [],
+        changeTypeMismatchReason: null,
+        conditions: [
+          { id: 'mock-c1', description: 'ค้นหาได้หลายเงื่อนไขพร้อมกัน (ชื่อ + หมวดหมู่ + ราคา)', status: 'wrong' as const, note: 'โค้ดทำ: ค้นหาได้เฉพาะ keyword เดียว ยังไม่รองรับหลายเงื่อนไข' },
+          { id: 'mock-c2', description: 'แสดงผลการค้นหาแบบ real-time ขณะพิมพ์', status: 'match' as const, note: undefined },
+          { id: 'mock-c3', description: 'กรองผลลัพธ์ตามหมวดหมู่สินค้าได้', status: 'missing' as const, note: undefined },
+        ],
+      },
+    ],
+  }
+  const groupsWithMock = [mockGroup, ...groups]
 
   return (
     <div className="pt-[48px] px-[32px] pb-24 pr-[320px]">
@@ -239,7 +305,7 @@ export default async function CategoryDetailPage({
           {groups.length === 0 ? (
             <p className="text-sm text-[var(--text-muted)]">ไม่มีรายการในหมวดนี้</p>
           ) : (
-            <SubcategoryList groups={groups} hasReq={hasReq} />
+            <SubcategoryList groups={groupsWithMock} hasReq={hasReq} />
           )}
         </div>
       </div>

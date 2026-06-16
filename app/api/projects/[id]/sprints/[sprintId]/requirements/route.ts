@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { extractConditionsForItems } from '@/lib/extract-conditions'
+import { splitStoriesWithAI } from '@/lib/split-stories-ai'
 
 export async function POST(
   req: NextRequest,
@@ -15,11 +17,33 @@ export async function POST(
     return NextResponse.json({ error: 'Sprint not found' }, { status: 404 })
   }
 
+  // Split compound stories via AI
+  let splitItems = items
+  try {
+    splitItems = await splitStoriesWithAI(items)
+  } catch (e) {
+    console.error('splitStories failed, using original items:', e)
+  }
+
+  // Extract conditions via AI
+  let itemsWithConditions = splitItems
+  try {
+    const conditionsMap = await extractConditionsForItems(
+      splitItems.map((r: any) => ({ featureId: r.featureId, title: r.title, description: r.description ?? '' }))
+    )
+    itemsWithConditions = splitItems.map((r: any) => ({
+      ...r,
+      conditions: conditionsMap[r.featureId] ?? [],
+    }))
+  } catch (e) {
+    console.error('extractConditions failed, saving without conditions:', e)
+  }
+
   const requirement = await db.sprintRequirement.create({
     data: {
       sprintId,
       projectId: id,
-      items,
+      items: itemsWithConditions,
       fileName: fileName ?? null,
       createdBy: createdBy ?? 'BA',
     },

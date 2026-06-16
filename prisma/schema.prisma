@@ -7,23 +7,16 @@ datasource db {
 }
 
 model Project {
-  id            String   @id @default(cuid())
+  id            String                @id @default(cuid())
   name          String
   repoUrl       String
   platform      Platform
   webhookSecret String
-  createdAt     DateTime @default(now())
-
+  createdAt     DateTime              @default(now())
+  jobs          AnalysisJob[]
   requirements  DocumentRequirement[]
   knowledgeDocs KnowledgeDoc[]
-  jobs          AnalysisJob[]
   sprints       Sprint[]
-}
-
-enum Platform {
-  GITHUB
-  GITLAB
-  BITBUCKET
 }
 
 model DocumentRequirement {
@@ -33,58 +26,72 @@ model DocumentRequirement {
   features  Json
   createdBy String
   createdAt DateTime @default(now())
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model KnowledgeDoc {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   projectId   String
   version     Int
   features    Json
   approvedBy  String
   sourceJobId String
-  createdAt   DateTime @default(now())
-
-  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  sourceJob AnalysisJob @relation(fields: [sourceJobId], references: [id])
+  createdAt   DateTime    @default(now())
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sourceJob   AnalysisJob @relation(fields: [sourceJobId], references: [id])
 }
 
 model AnalysisJob {
-  id          String    @id @default(cuid())
-  projectId   String
-  commitSha   String
-  commitMsg   String
-  author      String
-  status      JobStatus @default(QUEUED)
-  triggeredAt DateTime  @default(now())
-
-  project          Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  updateDoc          ProjectUpdateDoc?
-  knowledgeDocs      KnowledgeDoc[]
+  id            String            @id @default(cuid())
+  projectId     String
+  commitSha     String
+  commitMsg     String
+  author        String
+  status        JobStatus         @default(QUEUED)
+  triggeredAt   DateTime          @default(now())
+  project       Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  knowledgeDocs KnowledgeDoc[]
+  updateDoc     ProjectUpdateDoc?
 }
 
 model Sprint {
-  id           String             @id @default(cuid())
+  id           String              @id @default(cuid())
   projectId    String
   name         String
-  status       SprintStatus       @default(OPEN)
-  createdAt    DateTime           @default(now())
-
-  project      Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status       SprintStatus        @default(OPEN)
+  createdAt    DateTime            @default(now())
+  project      Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
   requirements SprintRequirement[]
 }
 
 model SprintRequirement {
   id        String   @id @default(cuid())
-  sprintId  String
   projectId String
   items     Json
   fileName  String?
   createdBy String
   createdAt DateTime @default(now())
-
+  sprintId  String
   sprint    Sprint   @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+}
+
+model ProjectUpdateDoc {
+  id          String      @id @default(cuid())
+  jobId       String      @unique
+  projectId   String
+  featuresNew Json
+  diff        Json
+  validation  Json
+  status      DocStatus   @default(PENDING)
+  createdAt   DateTime    @default(now())
+  reviewedAt  DateTime?
+  job         AnalysisJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
+
+enum Platform {
+  GITHUB
+  GITLAB
+  BITBUCKET
 }
 
 enum JobStatus {
@@ -97,20 +104,6 @@ enum JobStatus {
 enum SprintStatus {
   OPEN
   CLOSED
-}
-
-model ProjectUpdateDoc {
-  id          String    @id @default(cuid())
-  jobId       String    @unique
-  projectId   String
-  featuresNew Json
-  diff        Json
-  validation  Json
-  status      DocStatus @default(PENDING)
-  reviewedAt  DateTime?
-  createdAt   DateTime  @default(now())
-
-  job AnalysisJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
 }
 
 enum DocStatus {

@@ -1,73 +1,17 @@
 export const dynamic = 'force-dynamic'
 
+import { db } from '@/lib/db'
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { CaretLeftIcon } from '@phosphor-icons/react/dist/ssr'
+import type { DiffResult, Feature } from '@/lib/types'
+import { IMPACT } from '@/lib/impact-data'
 import { SubcategoryList } from './SubcategoryList'
-import type { SubcategoryGroup } from './SubcategoryList'
+import type { SubcategoryGroup, JobCommit } from './SubcategoryList'
 import { SprintReviewRightPanel } from '../SprintReviewRightPanel'
+import { getProjectMock } from '@/lib/sprint-mocks'
+import type { ConditionResult } from '@/lib/types'
 
-const MOCK: SubcategoryGroup = {
-  sub: 'ตัวอย่างสถานะ BoltCheck',
-  items: [
-    {
-      id: 'mk-done',
-      changeType: 'added' as const,
-      oldTitle: null, oldDescription: null,
-      newTitle: 'เข้าสู่ระบบด้วย Username/Password',
-      newDescription: 'ระบบ login มาตรฐาน รองรับ remember me และ force logout session เก่า',
-      impact: null, reqStatus: 'done' as const,
-      reqNote: 'ผู้ใช้สามารถเข้าสู่ระบบด้วย Username และ Password ได้',
-      reqChangeType: 'add' as const, isSynthetic: false, commits: [], changeTypeMismatchReason: null,
-      conditions: [
-        { id: 'mk-c1', description: 'ตรวจสอบ Username และ Password กับฐานข้อมูล', status: 'match' as const },
-        { id: 'mk-c2', description: 'รองรับ Remember me เก็บ session 30 วัน', status: 'match' as const },
-        { id: 'mk-c3', description: 'Force logout session เก่าเมื่อ login ใหม่', status: 'match' as const },
-        { id: 'mk-c3x', description: 'แสดง popup แจ้งเตือนเมื่อ session หมดอายุ', status: 'extra' as const },
-      ],
-    },
-    {
-      id: 'mk-wrong',
-      changeType: 'added' as const,
-      oldTitle: null, oldDescription: null,
-      newTitle: 'ยืนยันตัวตน 2 ขั้นตอน (OTP)',
-      newDescription: 'ระบบส่ง OTP ผ่าน SMS แต่ยังไม่รองรับ OTP ผ่าน Email',
-      impact: null, reqStatus: 'incorrect' as const,
-      reqNote: 'ยืนยันตัวตนด้วย OTP ผ่าน SMS หรือ Email ได้',
-      reqChangeType: 'add' as const, isSynthetic: false, commits: [], changeTypeMismatchReason: null,
-      conditions: [
-        { id: 'mk-c4', description: 'ส่ง OTP ผ่าน SMS ได้', status: 'match' as const },
-        { id: 'mk-c5', description: 'ส่ง OTP ผ่าน Email ได้', status: 'wrong' as const, note: 'โค้ดทำ: รองรับเฉพาะ SMS ยังไม่ได้ทำ Email OTP' },
-        { id: 'mk-c6', description: 'OTP หมดอายุหลัง 5 นาที', status: 'match' as const },
-        { id: 'mk-c6x', description: 'แสดงจำนวนครั้งที่เหลือในการกรอก OTP', status: 'extra' as const },
-      ],
-    },
-    {
-      id: 'mk-pending',
-      changeType: 'added' as const,
-      oldTitle: null, oldDescription: null,
-      newTitle: 'Username ไม่สามารถกรอกภาษาไทยได้',
-      newDescription: 'Validate ให้ Username รับได้เฉพาะ a-z, 0-9 และ _ เท่านั้น',
-      impact: null, reqStatus: 'pending' as const,
-      reqNote: 'Username รองรับเฉพาะภาษาอังกฤษและตัวเลข',
-      reqChangeType: 'add' as const, isSynthetic: true, commits: [], changeTypeMismatchReason: null,
-      conditions: [
-        { id: 'mk-c7', description: 'Validate ห้ามกรอก Unicode ภาษาไทยใน Username', status: 'missing' as const },
-        { id: 'mk-c8', description: 'แสดง error message "Username ต้องเป็นภาษาอังกฤษเท่านั้น"', status: 'missing' as const },
-      ],
-    },
-    {
-      id: 'mk-noreq',
-      changeType: 'added' as const,
-      oldTitle: null, oldDescription: null,
-      newTitle: 'สามารถกดแสดงหรือซ่อนรหัสผ่านได้',
-      newDescription: 'ปุ่ม toggle แสดง/ซ่อน password ในช่อง input',
-      impact: null, reqStatus: 'no-req' as const,
-      reqNote: 'ไม่ได้ระบุใน Requirement',
-      reqChangeType: null, isSynthetic: false, commits: [], changeTypeMismatchReason: null,
-      conditions: [],
-    },
-  ],
-}
 
 export default async function CategoryDetailPage({
   params,
@@ -79,27 +23,248 @@ export default async function CategoryDetailPage({
   const { id } = await params
   const { cat, sprintId } = await searchParams
 
-  const backHref = sprintId
-    ? `/projects/${id}/sprint-review/${sprintId}`
-    : `/projects/${id}/sprint-review`
+  if (!cat) notFound()
 
-  const MOCK_CATEGORIES = [
-    'การเข้าสู่ระบบและลงทะเบียน',
-    'จัดการสินค้าในคลัง',
-    'รับและส่งสินค้า',
-    'เบิก-จ่ายสินค้า',
-    'ตรวจนับสินค้า',
-    'รายงานและสถิติ',
-    'จัดการผู้ใช้งาน',
+  const project = await db.project.findUnique({ where: { id } })
+  if (!project) notFound()
+
+  const projectMock = getProjectMock(project.name)
+  const mockRequirements = projectMock?.requirements ?? []
+
+  const latestJob = await db.analysisJob.findFirst({
+    where: { projectId: id, status: 'DONE' },
+    orderBy: { triggeredAt: 'desc' },
+    include: { updateDoc: true },
+  })
+
+  const latestDoc = await db.knowledgeDoc.findFirst({
+    where: { projectId: id },
+    orderBy: { version: 'desc' },
+  })
+  const allFeatures = (latestDoc?.features as unknown as Feature[]) ?? []
+
+  const hasPendingDiff = !!latestJob?.updateDoc && latestJob.updateDoc.status === 'PENDING'
+  const diff: DiffResult = hasPendingDiff
+    ? (latestJob!.updateDoc!.diff as unknown as DiffResult)
+    : { added: [], modified: [], removed: [] }
+
+  const sprints = await db.sprint.findMany({
+    where: { projectId: id },
+    include: { requirements: true },
+    orderBy: { createdAt: 'asc' },
+  })
+  const activeSprintRaw = (sprintId ? sprints.find(s => s.id === sprintId) : null)
+    ?? sprints.find(s => s.status === 'OPEN')
+    ?? sprints[sprints.length - 1]
+    ?? null
+  const allSprintRequirements = activeSprintRaw?.requirements ?? []
+  const activeSprint = activeSprintRaw ? {
+    id: activeSprintRaw.id,
+    name: activeSprintRaw.name,
+    status: activeSprintRaw.status as 'OPEN' | 'CLOSED',
+    requirements: activeSprintRaw.requirements.map(r => ({
+      id: r.id,
+      fileName: r.fileName ?? null,
+      createdBy: r.createdBy,
+      items: r.items as unknown as any[],
+    })),
+  } : null
+
+  type RawItem = {
+    id: string
+    changeType: 'added' | 'modified' | 'removed'
+    subcategory: string
+    feature: Feature
+    oldFeature: Feature | null
+  }
+
+  const allItems: RawItem[] = [
+    ...(diff.added ?? []).map(f => ({ id: f.id, changeType: 'added' as const, subcategory: f.subcategory ?? '', feature: f, oldFeature: null })),
+    ...(diff.modified ?? []).map(c => ({ id: c.new.id, changeType: 'modified' as const, subcategory: c.new.subcategory ?? '', feature: c.new, oldFeature: c.old })),
+    ...(diff.removed ?? []).map(f => ({ id: f.id, changeType: 'removed' as const, subcategory: f.subcategory ?? '', feature: f, oldFeature: null })),
   ]
+
+  const allReqCategories = allSprintRequirements.flatMap(r => r.items as any[]).map(r => (r.category ?? 'ทั่วไป') as string)
+  const allCategories = [...new Set([...allItems.map(i => i.feature.category ?? 'ทั่วไป'), ...allReqCategories])]
+
+  const catItems = allItems.filter(i => (i.feature.category ?? 'ทั่วไป') === cat)
+
+  const subMap = new Map<string, RawItem[]>()
+  for (const item of catItems) {
+    if (!subMap.has(item.subcategory)) subMap.set(item.subcategory, [])
+    subMap.get(item.subcategory)!.push(item)
+  }
+
+  const allReqItems: any[] = allSprintRequirements.flatMap(r => r.items as any[])
+  const reqMap = new Map<string, any>()
+  for (const r of allReqItems) {
+    reqMap.set(r.featureId, r)
+    const baseId = r.featureId.replace(/-part\d+$/, '')
+    if (baseId !== r.featureId && !reqMap.has(baseId)) reqMap.set(baseId, r)
+  }
+  const hasReq = allReqItems.length > 0
+
+  const diffFeatureIds = new Set(allItems.map(i => i.id))
+  const pendingReqItems = hasReq
+    ? allReqItems.filter((r: any) => {
+        if (r.category !== cat) return false
+        if (diffFeatureIds.has(r.featureId)) return false
+        const baseId = r.featureId.replace(/-part\d+$/, '')
+        if (baseId !== r.featureId && diffFeatureIds.has(baseId)) return false
+        return true
+      })
+    : []
+
+  for (const r of pendingReqItems) {
+    const sub: string = r.subcategory ?? ''
+    if (!subMap.has(sub)) subMap.set(sub, [])
+    subMap.get(sub)!.push({
+      id: r.featureId, changeType: r.changeType === 'remove' ? 'removed' : r.changeType === 'modify' ? 'modified' : 'added',
+      subcategory: sub,
+      feature: { id: r.featureId, title: r.title, description: r.description, category: cat, subcategory: sub } as Feature,
+      oldFeature: null, _synthetic: true, _reqChangeType: r.changeType, _reqEntry: r,
+    } as any)
+  }
+
+  const jobCommit: JobCommit | null = latestJob ? {
+    sha: latestJob.commitSha, message: latestJob.commitMsg ?? '',
+    author: latestJob.author, date: latestJob.triggeredAt.toISOString(),
+  } : null
+
+  const groups: SubcategoryGroup[] = Array.from(subMap.entries()).map(([sub, its]) => ({
+    sub,
+    items: its.map((i: any) => {
+      if (i._synthetic) {
+        const reqEntry = i._reqEntry as any
+        const rawConditions: any[] = reqEntry.conditions?.length
+          ? reqEntry.conditions
+          : [{ id: `mock-${i.id}-1`, description: reqEntry.title ?? i.feature.title }]
+        const conditions: ConditionResult[] = rawConditions.map((c: any) => ({
+          id: c.id, description: c.description, status: 'missing' as const,
+        }))
+        return {
+          id: i.id, changeType: i.changeType, oldTitle: null, oldDescription: null,
+          newTitle: reqEntry.title ?? i.feature.title,
+          newDescription: reqEntry.description ?? i.feature.description ?? null,
+          impact: null, reqStatus: 'pending' as const, reqNote: reqEntry.title ?? null,
+          reqChangeType: (reqEntry.changeType ?? null) as 'add' | 'modify' | 'remove' | null,
+          isSynthetic: true, commits: [], conditions, changeTypeMismatchReason: null,
+        }
+      }
+
+      const req = reqMap.get(i.id)
+      const reqChangeType = req?.changeType as string | undefined
+      let reqStatus: 'done' | 'incorrect' | 'no-req' | null = null
+      let changeTypeMismatchReason: string | null = null
+      if (hasReq) {
+        if (reqChangeType === 'add' && i.changeType === 'added') reqStatus = 'done'
+        else if (reqChangeType === 'add') {
+          reqStatus = 'incorrect'
+          const actual = i.changeType === 'modified' ? 'แก้ไขของเดิม' : i.changeType === 'removed' ? 'ลบออก' : i.changeType
+          changeTypeMismatchReason = `Req ต้องการเพิ่มฟีเจอร์ใหม่ แต่โค้ดทำการ${actual}`
+        } else reqStatus = 'no-req'
+      }
+
+      const reqConditions = (req as any)?.conditions?.length
+        ? (req as any).conditions
+        : req ? [{ id: `mock-${i.id}-1`, description: (req as any).title ?? i.feature.title }] : []
+
+      const conditions: ConditionResult[] = reqConditions.map((c: any, idx: number) => ({
+        id: c.id, description: c.description,
+        status: reqStatus === 'done' ? ('match' as const) : idx % 2 === 0 ? ('wrong' as const) : ('missing' as const),
+        note: reqStatus !== 'done' && idx % 2 === 0 ? `โค้ดทำ: ${i.feature.description?.slice(0, 60) ?? '—'}` : undefined,
+      }))
+
+      if (reqStatus === 'done') {
+        const hasIssue = conditions.some(c => c.status === 'wrong' || c.status === 'missing')
+        if (hasIssue) reqStatus = 'incorrect'
+      }
+
+      return {
+        id: i.id, changeType: i.changeType, oldTitle: null, oldDescription: null,
+        newTitle: i.feature.title, newDescription: i.feature.description ?? null,
+        impact: IMPACT[i.feature.id] ?? null, reqStatus, reqNote: (req as any)?.title ?? null,
+        reqChangeType: (req as any)?.changeType ?? null, isSynthetic: false,
+        commits: jobCommit ? [jobCommit] : [], conditions, changeTypeMismatchReason,
+      }
+    }).sort((a, b) => {
+      const order = { pending: 0, 'no-req': 1, incorrect: 2, done: 3, null: 4 }
+      return (order[a.reqStatus as keyof typeof order] ?? 4) - (order[b.reqStatus as keyof typeof order] ?? 4)
+    }),
+  }))
+
+  const EXAMPLE_CAT = 'ตัวอย่างข้อมูล'
+  const exampleGroups: SubcategoryGroup[] = cat === EXAMPLE_CAT ? [{
+    sub: 'การตรวจสอบสิทธิ์',
+    items: [
+      {
+        id: 'ex-done', changeType: 'added' as const, oldTitle: null, oldDescription: null,
+        newTitle: 'เข้าสู่ระบบด้วย Username/Password',
+        newDescription: 'ระบบ login มาตรฐาน รองรับ remember me และ force logout session เก่า',
+        impact: null, reqStatus: 'done' as const,
+        reqNote: 'ผู้ใช้สามารถเข้าสู่ระบบด้วย Username และ Password ได้',
+        reqChangeType: 'add' as const, isSynthetic: false, commits: [], changeTypeMismatchReason: null,
+        conditions: [
+          { id: 'ex-c1', description: 'ตรวจสอบ Username และ Password กับฐานข้อมูล', status: 'match' as const },
+          { id: 'ex-c2', description: 'รองรับ Remember me เก็บ session 30 วัน', status: 'match' as const },
+          { id: 'ex-c3', description: 'Force logout session เก่าเมื่อ login ใหม่', status: 'match' as const },
+          { id: 'ex-c3x', description: 'แสดง popup แจ้งเตือนเมื่อ session หมดอายุ', status: 'extra' as const },
+        ],
+      },
+      {
+        id: 'ex-wrong', changeType: 'added' as const, oldTitle: null, oldDescription: null,
+        newTitle: 'ยืนยันตัวตน 2 ขั้นตอน (OTP)',
+        newDescription: 'ระบบส่ง OTP ผ่าน SMS แต่ยังไม่รองรับ OTP ผ่าน Email',
+        impact: null, reqStatus: 'incorrect' as const,
+        reqNote: 'ยืนยันตัวตนด้วย OTP ผ่าน SMS หรือ Email ได้',
+        reqChangeType: 'add' as const, isSynthetic: false, commits: [], changeTypeMismatchReason: null,
+        conditions: [
+          { id: 'ex-c4', description: 'ส่ง OTP ผ่าน SMS ได้', status: 'match' as const },
+          { id: 'ex-c5', description: 'ส่ง OTP ผ่าน Email ได้', status: 'wrong' as const, note: 'โค้ดทำ: รองรับเฉพาะ SMS ยังไม่ได้ทำ Email OTP' },
+          { id: 'ex-c6', description: 'OTP หมดอายุหลัง 5 นาที', status: 'match' as const },
+          { id: 'ex-c6x', description: 'แสดงจำนวนครั้งที่เหลือในการกรอก OTP', status: 'extra' as const },
+        ],
+      },
+      {
+        id: 'ex-pending', changeType: 'added' as const, oldTitle: null, oldDescription: null,
+        newTitle: 'Username ไม่สามารถกรอกภาษาไทยได้',
+        newDescription: 'Validate ให้ Username รับได้เฉพาะ a-z, 0-9 และ _ เท่านั้น',
+        impact: null, reqStatus: 'pending' as const,
+        reqNote: 'Username รองรับเฉพาะภาษาอังกฤษและตัวเลข',
+        reqChangeType: 'add' as const, isSynthetic: true, commits: [], changeTypeMismatchReason: null,
+        conditions: [
+          { id: 'ex-c7', description: 'Validate ห้ามกรอก Unicode ภาษาไทยใน Username', status: 'missing' as const },
+          { id: 'ex-c8', description: 'แสดง error message "Username ต้องเป็นภาษาอังกฤษเท่านั้น"', status: 'missing' as const },
+        ],
+      },
+      {
+        id: 'ex-noreq', changeType: 'added' as const, oldTitle: null, oldDescription: null,
+        newTitle: 'สามารถกดแสดงหรือซ่อนรหัสผ่านได้',
+        newDescription: 'ปุ่ม toggle แสดง/ซ่อน password ในช่อง input',
+        impact: null, reqStatus: 'no-req' as const,
+        reqNote: 'ไม่ได้ระบุใน Requirement',
+        reqChangeType: null, isSynthetic: false, commits: [], changeTypeMismatchReason: null,
+        conditions: [],
+      },
+    ],
+  }] : []
 
   return (
     <div className="pt-[48px] px-[32px] pb-24 pr-[320px]">
       <div className="max-w-[1200px] mx-auto flex gap-8 items-start">
-        {/* Side nav */}
         <nav className="w-[200px] max-w-[200px] shrink-0 pt-1">
           <div className="sticky top-12 flex flex-col gap-0.5">
-            {MOCK_CATEGORIES.map(c => (
+            <Link
+              href={`/projects/${id}/sprint-review/detail?cat=${encodeURIComponent(EXAMPLE_CAT)}${sprintId ? `&sprintId=${sprintId}` : ''}`}
+              className={`text-[14px] px-3 py-2 transition-colors leading-snug ${
+                cat === EXAMPLE_CAT
+                  ? 'font-semibold text-[var(--text-primary)]'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+              }`}
+            >
+              {EXAMPLE_CAT}
+            </Link>
+{allCategories.map(c => (
               <Link
                 key={c}
                 href={`/projects/${id}/sprint-review/detail?cat=${encodeURIComponent(c)}${sprintId ? `&sprintId=${sprintId}` : ''}`}
@@ -115,36 +280,41 @@ export default async function CategoryDetailPage({
           </div>
         </nav>
 
-        {/* Main content */}
         <div className="flex-1 min-w-0 flex flex-col gap-[48px]">
           <div className="flex flex-col gap-3">
             <Link
-              href={backHref}
+              href={sprintId ? `/projects/${id}/sprint-review/${sprintId}` : `/projects/${id}/sprint-review`}
               className="flex items-center gap-1.5 text-xs text-[#757575] hover:text-[var(--text-primary)] transition-colors w-fit"
             >
               <CaretLeftIcon size={12} />
               BoltCheck
             </Link>
-            <h2 className="font-semibold text-[30px] leading-[45px] text-[var(--text-primary)]">
-              {cat ?? 'รายละเอียด'}
-            </h2>
+            <h2 className="font-semibold text-[30px] leading-[45px] text-[var(--text-primary)]">{cat}</h2>
           </div>
 
-          <SubcategoryList groups={[MOCK]} hasReq={true} />
+          <div className="flex flex-col gap-[48px]">
+            {cat === EXAMPLE_CAT ? (
+              <SubcategoryList groups={exampleGroups} hasReq={true} />
+            ) : groups.length > 0 ? (
+              <SubcategoryList groups={groups} hasReq={hasReq} />
+            ) : (
+              <p className="text-sm text-[var(--text-muted)]">ไม่มีรายการในหมวดนี้</p>
+            )}
+          </div>
         </div>
       </div>
 
       <SprintReviewRightPanel
         projectId={id}
-        jobId=""
-        commitSha=""
-        commitMsg=""
-        author=""
-        triggeredAt={new Date().toISOString()}
-        diffResult={{ added: [], modified: [], removed: [] }}
-        activeSprint={null}
-        noDiff={true}
-        mockRequirements={[]}
+        jobId={latestJob?.id ?? ''}
+        commitSha={latestJob?.commitSha ?? ''}
+        commitMsg={latestJob?.commitMsg ?? ''}
+        author={latestJob?.author ?? ''}
+        triggeredAt={(latestJob?.triggeredAt ?? new Date()).toISOString()}
+        diffResult={diff}
+        activeSprint={activeSprint}
+        noDiff={!hasPendingDiff}
+        mockRequirements={mockRequirements}
       />
     </div>
   )

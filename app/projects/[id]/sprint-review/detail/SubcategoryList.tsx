@@ -201,7 +201,7 @@ function ItemCard({ item, hasReq }: { item: SubcategoryGroup['items'][0]; hasReq
 
         {/* Conditions / mismatch reason */}
         {item.reqStatus !== 'done' && (() => {
-          const visibleConditions = (item.conditions ?? []).filter(c => c.status !== 'match')
+          const visibleConditions = item.conditions ?? []
           const hasMismatch = !!item.changeTypeMismatchReason
           if (!hasMismatch && visibleConditions.length === 0) return null
           return (

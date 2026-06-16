@@ -245,7 +245,6 @@ export default async function CategoryDetailPage({
   )
 
   const mockGroups: SubcategoryGroup[] = getMockGroups(cat)
-  const groupsWithMock: SubcategoryGroup[] = [...groups, ...mockGroups]
 
   return (
     <div className="pt-[48px] px-[32px] pb-24 pr-[320px]">
@@ -284,10 +283,17 @@ export default async function CategoryDetailPage({
           </div>
 
           {/* Content */}
-          {groupsWithMock.length === 0 ? (
+          {groups.length === 0 && mockGroups.length === 0 ? (
             <p className="text-sm text-[var(--text-muted)]">ไม่มีรายการในหมวดนี้</p>
           ) : (
-            <SubcategoryList groups={groupsWithMock} hasReq={hasReq || mockGroups.length > 0} />
+            <div className="flex flex-col gap-[48px]">
+              {groups.length > 0 && (
+                <SubcategoryList groups={groups} hasReq={hasReq} />
+              )}
+              {mockGroups.length > 0 && (
+                <SubcategoryList groups={mockGroups} hasReq={true} />
+              )}
+            </div>
           )}
         </div>
       </div>
